@@ -185,6 +185,11 @@ int sendCommand (std::string s, int nread, int wait)
 	// reply was from this command, when it really was from a previous command.
 	assignReplyStr("");
 
+	if (tci_running()) {
+		tci_send(s);
+		return 0;
+	}
+
 	if (progStatus.use_tcpip) {
 		readResponse();
 		send_to_remote(s);

@@ -457,18 +457,16 @@ int RIG_TCI_SDR::get_modeA()
 	if (--wait_on_mode > 0) return A.imode;
 
 	std::string tcicmd = slice_0.A.mod;
-
 	try {
 		size_t n = 0;
 		for (n = 0; n < TCI_modes.size(); n++) {
-			if (tcicmd.find(TCI_modes.at(n)) == 0) {
+			if (tcicmd.find(TCI_modes.at(n)) != std::string::npos) {
 				if (n != (size_t)A.imode) {
 					A.imode = n;
 					A.iBW = set_widths(n);
 				}
 				return A.imode;
 			}
-			n++;
 		}
 	} catch (const std::exception& e) {
 		std::cout << e.what() << '\n';
@@ -476,10 +474,13 @@ int RIG_TCI_SDR::get_modeA()
 	return A.imode;
 }
 
+// set modeB is identical to set modeA as the ExpertSDR2/3 does not differentiate
+// between the two
+
 void RIG_TCI_SDR::set_modeB(int mode)
 {
 	try {
-		std::string tcicmd = "MODULATION:1,";
+		std::string tcicmd = "MODULATION:0,";
 		tcicmd.append(TCI_modes.at(mode)).append(";");
 		tci_send(tcicmd);
 
@@ -501,14 +502,13 @@ int RIG_TCI_SDR::get_modeB()
 	try {
 		size_t n = 0;
 		for (n = 0; n < TCI_modes.size(); n++) {
-			if (tcicmd.find(TCI_modes.at(n)) == 0) {
-				if (n != (size_t)B.imode) {
+			if (tcicmd.find(TCI_modes.at(n)) != std::string::npos) {
+				if (n != (size_t)A.imode) {
 					B.imode = n;
 					B.iBW = set_widths(n);
 				}
 				return B.imode;
 			}
-			n++;
 		}
 	} catch (const std::exception& e) {
 		std::cout << e.what() << '\n';
@@ -589,6 +589,8 @@ int RIG_TCI_SDR::get_bwA()
 	return A.iBW;
 }
 
+// set bwB is identical to set bwA as the ExpertSDR2/3 does not differentiate
+// between the two
 void RIG_TCI_SDR::set_bwB(int val)
 {
 	tci_adjust_widths();

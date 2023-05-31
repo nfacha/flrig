@@ -2428,7 +2428,7 @@ public:
 					nuvals.imode = i;
 					nuvals.iBW = selrig->def_bandwidth(i);
 					guard_lock serial_lock(&mutex_serial);
-					serviceB(nuvals);
+					serviceA(nuvals);
 					Fl::awake(updateUI);
 					result = 1;
 					break;
@@ -2467,7 +2467,7 @@ public:
 					nuvals.imode = i;
 					nuvals.iBW = selrig->def_bandwidth(i);
 					guard_lock serial_lock(&mutex_serial);
-					serviceB(nuvals);
+					serviceA(nuvals);
 					Fl::awake(updateUI);
 					result = (nuvals.imode == selrig->get_modeA());
 					break;
