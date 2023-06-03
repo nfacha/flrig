@@ -32,13 +32,14 @@ struct TCI_VFO {
 	int freq;
 	std::string bw;  // lower, upper pair
 	std::string mod; // noun name
+	int smeter;
 };
 
 struct TCI_VALS {
 	TCI_VFO A;
 	TCI_VFO B;
 	int dds;
-	int vol, sql_level, pwr, smeter;
+	int vol, sql_level, pwr;
 	bool ptt, tune, split, sql;
 	float tx_power, tx_swr;
 };

@@ -2605,8 +2605,12 @@ void highlight_vfo(void *d)
 	if (selrig->inuse == onB) {
 		FreqDispA->SetCOLORS( norm_fg, dim_bg );
 		FreqDispB->SetCOLORS( norm_fg, norm_bg );
-		btnA->value(0);
-		btnB->value(1);
+		if (selrig->name_ == rig_tci_sundx.name_ || selrig->name_ == rig_tci_sunpro.name_) {
+			btnA->value(1);
+		} else {
+			btnA->value(0);
+			btnB->value(1);
+		}
 		FreqDispB->activate();
 		if (selrig->can_change_alt_vfo)
 			FreqDispA->activate();
@@ -2615,8 +2619,12 @@ void highlight_vfo(void *d)
 	} else {
 		FreqDispA->SetCOLORS( norm_fg, norm_bg );
 		FreqDispB->SetCOLORS( norm_fg, dim_bg);
-		btnA->value(1);
-		btnB->value(0);
+		if (selrig->name_ == rig_tci_sundx.name_ || selrig->name_ == rig_tci_sunpro.name_) {
+			btnA->value(0);
+		} else {
+			btnA->value(1);
+			btnB->value(0);
+		}
 		FreqDispA->activate();
 		if (selrig->can_change_alt_vfo)
 			FreqDispB->activate();

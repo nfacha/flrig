@@ -2351,6 +2351,52 @@ void TRACED(init_elecraft_xcvrs)
 	}
 }
 
+void cb_sdr2_A(Fl_Light_Button * b, void *)
+{
+	guard_lock A(&mutex_serial);
+	if (b->value()) {
+		selrig->selectB();
+		btnA->label("ch B");
+		btnA->redraw();
+	}
+	else {
+		selrig->selectA();
+		btnA->label("ch A");
+		btnA->redraw();
+	}
+	updateUI((void *)0);
+}
+
+void cb_sdr2_B(Fl_Light_Button * b, void *)
+{
+	guard_lock B(&mutex_serial);
+	if (b->value()) {
+		btnB->label("Rx 2");
+		if (selrig->name_ == rig_tci_sundx.name_)
+			rig_tci_sundx.set_slice(1);
+		else
+			rig_tci_sunpro.set_slice(1);
+	}
+	else {
+		btnB->label("Rx 1");
+		if (selrig->name_ == rig_tci_sundx.name_)
+			rig_tci_sundx.set_slice(0);
+		else
+			rig_tci_sunpro.set_slice(0);
+	}
+	btnB->redraw_label();
+	updateUI((void *)0);
+}
+
+void TRACED(init_sdr2)
+	btnA->label("ch A");
+	btnA->redraw_label();
+	btnA->callback((Fl_Callback *)cb_sdr2_A);
+	btnB->label("Rx 0");
+	btnB->redraw_label();
+	btnB->callback((Fl_Callback *)cb_sdr2_B);
+}
+
 extern void read_menus();
 
 void TRACED(initRig)
@@ -2520,12 +2566,12 @@ Press 'Init' button."));
 
 		init_CIV();
 
-//		init_xcvr();
-
 		selrig->post_initialize();
 
 		init_TS990_special();
 		init_elecraft_xcvrs();
+		if (selrig->name_ == rig_tci_sundx.name_ || selrig->name_ == rig_tci_sunpro.name_ )
+			init_sdr2();
 
 		if (selrig->has_power_control) {
 			if (progStatus.use_rig_data)

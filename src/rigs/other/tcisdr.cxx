@@ -305,9 +305,9 @@ RIG_TCI_SDR::RIG_TCI_SDR() {
 	A.imode = TCI_CW;
 	A.iBW   = 6;
 
-	B.freq  = 14070000ULL;
-	B.imode = TCI_USB;
-	B.iBW   = 10;
+	B.freq  = A.freq + 500;
+	B.imode = B.imode;
+	B.iBW   = A.iBW;
 
 	can_change_alt_vfo = true;
 
@@ -342,6 +342,8 @@ RIG_TCI_SDR::RIG_TCI_SDR() {
 	preamp_level = atten_level = 0;
 
 	sdrtype = UNK;
+
+	slice = 0;
 }
 
 const char * RIG_TCI_SDR::get_bwname_(int n, int md)
@@ -367,28 +369,42 @@ const char * RIG_TCI_SDR::get_bwname_(int n, int md)
 	return "UNKNOWN";
 }
 
-// SM cmd 0 ... 100 (rig values 0 ... 15)
+// responds in dBm, +10; -115
+// S units:         80+; S0-
+// s0 == -127 .... 0
+// S6 == -90  .... 
+// S9 == -73  .... 50
+// +60 == -14 .... 100
+
 int RIG_TCI_SDR::get_smeter()
 {
-	std::string tcicmd = "rx_smeter:0,0;";
+	std::string tcicmd = "rx_smeter:";
+	int mtr = 0;
+	tcicmd.append( slice ? "1," : "0,");
+	tcicmd.append( (inuse == onA)   ? "0;" : "1;");
 	tci_send(tcicmd);
 	MilliSleep(10);
-// responds in dBm, +80; -125
-//                  100, 0
-	int mtr = slice_0.smeter;
-	mtr += 150; mtr *= 100; mtr /= 160;
+	if (slice)
+		mtr = (inuse == onA) ? slice_1.A.smeter : slice_1.B.smeter;
+	else
+		mtr = (inuse == onA) ? slice_0.A.smeter : slice_0.B.smeter;
+	mtr += 127;
+	mtr *= 100;
+	mtr /= 113;
+	if (mtr < 0) mtr = 0;
+	if (mtr > 100) mtr = 100;
 	return mtr;
 }
 
 int RIG_TCI_SDR::get_power_out()
 {
-	int mtr = slice_0.tx_power;
+	int mtr = slice ? slice_1.tx_power : slice_0.tx_power;
 	return mtr;
 }
 
 int RIG_TCI_SDR::get_swr()
 {
-	int mtr = slice_0.tx_swr;
+	int mtr = slice ? slice_1.tx_swr : slice_0.tx_swr;
 	return (mtr - 1) * 25;
 }
 
@@ -438,7 +454,7 @@ int wait_on_mode = 0;
 void RIG_TCI_SDR::set_modeA(int mode)
 {
 	try {
-		std::string tcicmd = "modulation:0,";
+		std::string tcicmd = slice ? "modulation:1," : "modulation:0,";
 		tcicmd.append(TCI_modes.at(mode)).append(";");
 		tci_send(tcicmd);
 
@@ -456,7 +472,7 @@ int RIG_TCI_SDR::get_modeA()
 {
 	if (--wait_on_mode > 0) return A.imode;
 
-	std::string tcicmd = slice_0.A.mod;
+	std::string tcicmd = slice ? slice_1.A.mod : slice_0.A.mod;
 	try {
 		size_t n = 0;
 		for (n = 0; n < TCI_modes.size(); n++) {
@@ -480,7 +496,7 @@ int RIG_TCI_SDR::get_modeA()
 void RIG_TCI_SDR::set_modeB(int mode)
 {
 	try {
-		std::string tcicmd = "MODULATION:0,";
+		std::string tcicmd = slice ? "MODULATION:1," : "MODULATION:0,";
 		tcicmd.append(TCI_modes.at(mode)).append(";");
 		tci_send(tcicmd);
 
@@ -498,7 +514,7 @@ int RIG_TCI_SDR::get_modeB()
 {
 	if (--wait_on_mode > 0) return B.imode;
 
-	std::string tcicmd = slice_0.B.mod;
+	std::string tcicmd = slice ? slice_1.B.mod : slice_0.B.mod;
 	try {
 		size_t n = 0;
 		for (n = 0; n < TCI_modes.size(); n++) {
@@ -524,7 +540,7 @@ int RIG_TCI_SDR::get_modetype(int n)
 void RIG_TCI_SDR::set_bwA(int val)
 {
 	tci_adjust_widths();
-	std::string tcicmd = "rx_filter_band:0,";
+	std::string tcicmd = slice ? "rx_filter_band:1," : "rx_filter_band:0,";
 	std::string pairs;
 
 	switch (A.imode) {
@@ -544,7 +560,10 @@ void RIG_TCI_SDR::set_bwA(int val)
 
 	tcicmd.append(pairs);
 	A.iBW = val;
-	slice_0.A.bw = pairs;
+	if (slice)
+		slice_1.A.bw = pairs;
+	else
+		slice_0.A.bw = pairs;
 
 	tci_send(tcicmd);
 
@@ -557,7 +576,7 @@ void RIG_TCI_SDR::set_bwA(int val)
 int RIG_TCI_SDR::get_bwA()
 {
 	std::string *tbl = TCI_USBpairs;
-	std::string sbw = slice_0.A.bw;
+	std::string sbw = slice ? slice_1.A.bw : slice_0.A.bw;
 	switch (A.imode) {
 		case TCI_AM:   tbl = TCI_AMpairs;	break;
 		case TCI_SAM:  tbl = TCI_AMpairs;	break;
@@ -594,7 +613,7 @@ int RIG_TCI_SDR::get_bwA()
 void RIG_TCI_SDR::set_bwB(int val)
 {
 	tci_adjust_widths();
-	std::string tcicmd = "rx_filter_band:0,";
+	std::string tcicmd = slice ? "rx_filter_band:1," : "rx_filter_band:0,";
 	std::string pairs;
 	switch (B.imode) {
 		case TCI_AM:   pairs = TCI_AMpairs[val < tci_nbr_am ? val : tci_def_am];		break;
@@ -612,7 +631,10 @@ void RIG_TCI_SDR::set_bwB(int val)
 	}
 	tcicmd.append(pairs);
 	B.iBW = val;
-	slice_0.B.bw = pairs;
+	if (slice)
+		slice_1.B.bw = pairs;
+	else
+		slice_0.B.bw = pairs;
 	tci_send(tcicmd);
 
 	FilterInner_B = atoi(pairs.c_str());
@@ -624,7 +646,7 @@ void RIG_TCI_SDR::set_bwB(int val)
 int RIG_TCI_SDR::get_bwB()
 {
 	std::string *tbl = TCI_USBpairs;
-	std::string sbw = slice_0.B.bw;
+	std::string sbw = slice ? slice_1.B.bw : slice_0.B.bw;
 	switch (B.imode) {
 		case TCI_AM:   tbl = TCI_AMpairs; break;
 		case TCI_SAM:  tbl = TCI_AMpairs; break;
@@ -684,13 +706,13 @@ void RIG_TCI_SDR::set_pbt(int inner, int outer)
 {
 	char cmdstr[50];
 	snprintf(cmdstr, sizeof(cmdstr), "rx_filter_band:%c,%d,%d;",
-		onA ? '0' : '1', inner, outer);
+		(inuse == onA) ? '0' : '1', inner, outer);
 	tci_send(cmdstr);
 }
 
 int RIG_TCI_SDR::get_pbt_inner()
 {
-	if (onA)
+	if ((inuse == onA))
 		return FilterInner_A;
 	else
 		return FilterInner_B;
@@ -698,7 +720,7 @@ int RIG_TCI_SDR::get_pbt_inner()
 
 int RIG_TCI_SDR::get_pbt_outer()
 {
-	if (onA)
+	if ((inuse == onA))
 		return FilterOuter_A;
 	else
 		return FilterOuter_B;
@@ -777,17 +799,20 @@ int RIG_TCI_SDR::get_noise()
 void RIG_TCI_SDR::set_PTT_control(int val)
 {
 	std::string tcicmd;
-	if (val) {
-		tcicmd = "TRX:0,true;";
-	} else
-		tcicmd = "TRX:0,false;";
-	tci_send(tcicmd);
-	ptt_ = slice_0.ptt = val;
+	char cmd[30];
+	snprintf(cmd, sizeof(cmd), "TRX:%d,%s;",
+		slice, val ? "TRUE" : "FALSE");
+	tci_send(cmd);
+	ptt_ = val;
+	if (slice)
+		slice_1.ptt = val;
+	else
+		slice_0.ptt = val;
 }
 
 int RIG_TCI_SDR::get_PTT()
 {
-	ptt_ = slice_0.ptt;
+	ptt_ = slice ? slice_1.ptt : slice_0.ptt;
 	return ptt_;
 }
 
@@ -808,19 +833,41 @@ void RIG_TCI_SDR::get_rf_min_max_step(int &min, int &max, int &step)
 void RIG_TCI_SDR::selectA()
 {
 	inuse = onA;
+	char cmd[30];
+	snprintf(cmd, sizeof(cmd), "RX_CHANNEL_ENABLE:%d,1,FALSE;", slice);
+	tci_send(cmd);
 }
 
 void RIG_TCI_SDR::selectB()
 {
 	inuse = onB;
+	char cmd[30];
+	snprintf(cmd, sizeof(cmd), "RX_CHANNEL_ENABLE:%d,1,TRUE;", slice);
+	tci_send(cmd);
+}
+
+int  RIG_TCI_SDR::get_vfoAorB()
+{
+	return inuse;
+}
+
+void RIG_TCI_SDR::set_slice(int val)
+{
+	slice = val;
+	return;
+}
+
+int  RIG_TCI_SDR::get_slice()
+{
+	return slice;
 }
 
 void RIG_TCI_SDR::set_split(bool val)
 {
-	std::string tcicmd =  "split_enable:0,";
-	if (val) tcicmd.append("true;");
-	else     tcicmd.append("false;");
-	tci_send(tcicmd);
+	char cmd[30];
+	snprintf(cmd, sizeof(cmd), "split_enable:%d,%s;",
+		slice, val ? "true;" : "false;");
+	tci_send(cmd);
 }
 
 bool RIG_TCI_SDR::can_split()
@@ -830,34 +877,42 @@ bool RIG_TCI_SDR::can_split()
 
 int RIG_TCI_SDR::get_split()
 {
-	return slice_0.split;
+	return slice ? slice_1.split : slice_0.split;
 }
 
 unsigned long long RIG_TCI_SDR::get_vfoA ()
 {
-	A.freq = slice_0.A.freq;
+	A.freq = slice ? slice_1.A.freq : slice_0.A.freq;
 	return A.freq;
 }
 
 void RIG_TCI_SDR::set_vfoA (unsigned long long freq)
 {
-	A.freq = slice_0.A.freq = freq;
+	A.freq = freq;
+	if (slice)
+		slice_1.A.freq = freq;
+	else
+		slice_0.A.freq = freq;
 	char vfostr[20];
-	snprintf(vfostr, sizeof(vfostr), "vfo:0,0,%llu;", freq);
+	snprintf(vfostr, sizeof(vfostr), "vfo:%d,0,%llu;", slice, freq);
 	tci_send(vfostr);
 }
 
 unsigned long long RIG_TCI_SDR::get_vfoB ()
 {
-	B.freq = slice_0.B.freq;
+	B.freq = slice ? slice_1.B.freq : slice_0.B.freq;
 	return B.freq;
 }
 
 void RIG_TCI_SDR::set_vfoB (unsigned long long freq)
 {
-	B.freq = slice_0.B.freq = freq;
-	char vfostr[20];
-	snprintf(vfostr, sizeof(vfostr), "vfo:0,1,%llu;", freq);
+	B.freq = freq;
+	if (slice)
+		slice_1.B.freq = freq;
+	else
+		slice_0.B.freq = freq;
+	char vfostr[30];
+	snprintf(vfostr, sizeof(vfostr), "vfo:%d,1,%llu;", slice, freq);
 	tci_send(vfostr);
 }
 
@@ -915,12 +970,15 @@ void RIG_TCI_SDR::set_volume_control(int val)
 	val = ((val * 60)/100) - 60;
 	snprintf(szcmd, sizeof(szcmd), "volume:%d;", val);
 	tci_send(szcmd);
-	slice_0.vol = val;
+	if (slice)
+		slice_1.vol = val;
+	else
+		slice_0.vol = val;
 }
 
 int RIG_TCI_SDR::get_volume_control()
 {
-	int vol = (slice_0.vol + 60) * 100 / 60;
+	int vol = ((slice ? slice_1.vol : slice_0.vol) + 60) * 100 / 60;
 	return vol;
 }
 
@@ -940,12 +998,15 @@ void RIG_TCI_SDR::set_power_control(double val)
 		val *= 5;
 	snprintf(szcmd, sizeof(szcmd), "drive:%d;", (int)(val));
 	tci_send(szcmd);
-	slice_0.pwr = val;
+	if (slice) 
+		slice_1.pwr = val;
+	else
+		slice_0.pwr = val;
 }
 
 double RIG_TCI_SDR::get_power_control()
 {
-	double pwr = slice_0.pwr;
+	double pwr = slice ? slice_1.pwr : slice_0.pwr;
 	if (sdrtype == PRO) pwr *= 0.2;
 	return pwr;
 }
@@ -955,7 +1016,7 @@ void RIG_TCI_SDR::tune_rig()
 {
 	tune_on = !tune_on;
 	char szcmd[20];
-	snprintf(szcmd, sizeof(szcmd), "tune:0,%s;",
+	snprintf(szcmd, sizeof(szcmd), "tune:%d,%s;", slice,
 		(tune_on ? "true" : "false"));
 	tci_send(szcmd);
 }

@@ -49,6 +49,8 @@ private:
 	int FilterInner_B;
 	int FilterOuter_B;
 
+	int slice;
+
 public:
 	RIG_TCI_SDR();
 	~RIG_TCI_SDR(){}
@@ -76,6 +78,10 @@ public:
 
 	void selectA();
 	void selectB();
+	int  get_vfoAorB();
+
+	void set_slice(int val);
+	int  get_slice();
 
 	void set_split(bool val);
 	bool can_split();

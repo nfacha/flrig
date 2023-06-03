@@ -33,7 +33,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define TCI_DEBUG
+//#define TCI_DEBUG
 
 #if 0
 #include <time.h>
@@ -79,8 +79,8 @@ TCI_VALS slice_0, slice_1;
 
 void print_vals(TCI_VALS &slice)
 {
-	std::cout << "A: " << slice.A.freq << ", " << slice.A.bw << ", " << slice.A.mod << std::endl;
-	std::cout << "B: " << slice.B.freq << ", " << slice.B.bw << ", " << slice.B.mod << std::endl;
+	std::cout << "A: " << slice.A.freq << ", " << slice.A.bw << ", " << slice.A.mod << ", " << slice.A.smeter << std::endl;
+	std::cout << "B: " << slice.B.freq << ", " << slice.B.bw << ", " << slice.B.mod << ", " << slice.B.smeter << std::endl;
 	std::cout << "Volume: " << slice.vol << std::endl;
 	std::cout << "PTT: " << slice.ptt << std::endl;
 	std::cout << "Power: " << slice.pwr << std::endl;
@@ -100,10 +100,18 @@ void handle_message(const std::string & message)
 	for (size_t n = 0; n < rx.length(); n++)
 		rx[n] = toupper(rx[n] & 0xFF);
 
+#ifdef TCI_DEBUG
+std::cout << "R: " << rx << std::endl;
+#endif
+
 	if ((p = rx.find("RX_SMETER:")) != std::string::npos) { // smeter reading
 		sscanf(rx.substr(p).c_str(), "RX_SMETER:%d,%d,%d;", &rxnbr, &vfo, &ival);
 		if (rxnbr == 0) {
-			if (vfo == 0) slice_0.smeter = ival;
+			if (vfo == 0) slice_0.A.smeter = ival;
+			else          slice_0.B.smeter = ival;
+		} else {
+			if (vfo == 0) slice_1.A.smeter = ival;
+			else          slice_1.B.smeter = ival;
 		}
 	}
 	else {
