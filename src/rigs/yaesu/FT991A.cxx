@@ -1614,7 +1614,7 @@ int RIG_FT991A::incr_agc()
 {
 static const char ch[] = {'0', '1', '2', '3', '4'};
 	agcval++;
-	if (agcval > 3) agcval = 0;
+	if (agcval > 4) agcval = 0;
 	cmd = "GT00;";
 	cmd[3] = ch[agcval];
 
