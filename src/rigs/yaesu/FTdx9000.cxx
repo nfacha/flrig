@@ -43,8 +43,8 @@ static const char FTdx9000name_[] = "FTdx9000";
 static std::vector<std::string>FTdx9000modes_;
 static const char *vFTdx9000modes_[] = {
 "LSB", "USB", "CW", "FM", "AM", 
-"RTTY-L", "CW-R", "PSK-L", "RTTY-U", "PKT-FM",
-"FM-N", "PSK-U", "AM-N"};
+"RTTY-L", "CW-R", "PKT-L", "RTTY-U", "PKT-FM",
+"FM-N", "PKT-U", "AM-N"};
 
 static const int FTdx9000_def_bw[] = {
 20, 20, 9, 0, 0, 

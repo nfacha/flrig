@@ -45,8 +45,8 @@ static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static std::vector<std::string>FTdx3000modes_;
 static const char *vFTdx3000modes_[] = {
 "LSB", "USB", "CW", "FM", "AM", 
-"RTTY-L", "CW-R", "PSK-L", "RTTY-U", "PKT-FM",
-"FM-N", "PSK-U", "AM-N"};
+"RTTY-L", "CW-R", "PKT-L", "RTTY-U", "PKT-FM",
+"FM-N", "PKT-U", "AM-N"};
 
 static const int FTdx3000_def_bw[] = {
 20, 20, 9, 0, 0, 
