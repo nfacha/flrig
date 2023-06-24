@@ -57,6 +57,19 @@ using namespace XmlRpc;
 
 XmlRpcServer rig_server;
 
+
+void connection_OFF(void*) {
+	box_fldigi_connect->color(FL_LIGHT1);
+	box_fldigi_connect->redraw();
+}
+
+void connection_ON(void *) {
+	box_fldigi_connect->color(FL_GREEN);
+	box_fldigi_connect->redraw();
+	Fl::remove_timeout(connection_OFF);
+	Fl::add_timeout(1.0, connection_OFF);
+}
+
 //------------------------------------------------------------------------------
 // Request for program version
 //------------------------------------------------------------------------------
@@ -64,7 +77,8 @@ class main_get_version : public XmlRpcServerMethod {
 public:
 	main_get_version(XmlRpcServer* s) : XmlRpcServerMethod("main.get_version", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+	void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
 		result = FLRIG_VERSION;
 	}
 
@@ -79,7 +93,9 @@ class rig_get_xcvr : public XmlRpcServerMethod {
 public:
 	rig_get_xcvr(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_xcvr", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value())
 			result = "";
 		else
@@ -200,7 +216,9 @@ class rig_get_info : public XmlRpcServerMethod {
 public:
 	rig_get_info(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_info", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		std::string info = "";
 
 		if (!xcvr_online || disable_xmlrpc->value()) {
@@ -231,7 +249,9 @@ class rig_get_update : public XmlRpcServerMethod {
 public:
 	rig_get_update(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_update", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		std::string info;  info.clear();
 		std::string temp;  temp.clear();
 
@@ -281,7 +301,9 @@ class rig_get_ptt : public XmlRpcServerMethod {
 public:
 	rig_get_ptt(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_ptt", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = int(PTT);
 	}
 
@@ -315,7 +337,9 @@ class rig_get_split : public XmlRpcServerMethod {
 public:
 	rig_get_split(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_split", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		guard_lock serial(&mutex_serial);
 
@@ -336,7 +360,9 @@ class rig_get_vfo : public XmlRpcServerMethod {
 public:
 	rig_get_vfo(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_vfo", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = "14070000";
 			return;
@@ -376,7 +402,9 @@ class rig_get_vfoA : public XmlRpcServerMethod {
 public:
 	rig_get_vfoA(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_vfoA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = "14070000";
 			return;
@@ -407,7 +435,9 @@ class rig_get_vfoB : public XmlRpcServerMethod {
 public:
 	rig_get_vfoB(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_vfoB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = "14070000";
 			return;
@@ -437,7 +467,9 @@ class rig_get_AB : public XmlRpcServerMethod {
 public:
 	rig_get_AB(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_AB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = "A";
 			return;
@@ -464,7 +496,9 @@ class rig_get_notch : public XmlRpcServerMethod {
 public:
 	rig_get_notch(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_notch", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -488,7 +522,9 @@ class rig_set_notch : public XmlRpcServerMethod {
 public:
 	rig_set_notch(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_notch", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -516,7 +552,9 @@ class rig_set_verify_notch : public XmlRpcServerMethod {
 public:
 	rig_set_verify_notch(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_notch", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -549,7 +587,9 @@ class rig_get_rfgain : public XmlRpcServerMethod {
 public:
 	rig_get_rfgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_rfgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -574,7 +614,9 @@ class rig_set_rfgain : public XmlRpcServerMethod {
 public:
 	rig_set_rfgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_rfgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -598,7 +640,9 @@ class rig_set_verify_rfgain : public XmlRpcServerMethod {
 public:
 	rig_set_verify_rfgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_rfgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -625,7 +669,9 @@ class rig_mod_rfg : public XmlRpcServerMethod {
 public:
 	rig_mod_rfg(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_rfg", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -658,7 +704,9 @@ class rig_get_micgain : public XmlRpcServerMethod {
 public:
 	rig_get_micgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_micgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -683,7 +731,9 @@ class rig_set_micgain : public XmlRpcServerMethod {
 public:
 	rig_set_micgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_micgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -707,7 +757,9 @@ class rig_set_verify_micgain : public XmlRpcServerMethod {
 public:
 	rig_set_verify_micgain(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_micgain", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -739,7 +791,9 @@ class rig_get_volume : public XmlRpcServerMethod {
 public:
 	rig_get_volume(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_volume", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -764,7 +818,9 @@ class rig_set_volume : public XmlRpcServerMethod {
 public:
 	rig_set_volume(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_volume", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -788,7 +844,9 @@ class rig_set_verify_volume : public XmlRpcServerMethod {
 public:
 	rig_set_verify_volume(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_volume", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -815,7 +873,9 @@ class rig_mod_vol : public XmlRpcServerMethod {
 public:
 	rig_mod_vol(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_vol", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -846,7 +906,9 @@ class rig_get_modes : public XmlRpcServerMethod {
 public :
 	rig_get_modes(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_modes", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		XmlRpcValue modes;
 
 		if (!xcvr_online) {
@@ -889,7 +951,9 @@ class rig_get_sideband : public XmlRpcServerMethod {
 public:
 	rig_get_sideband(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_sideband", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = "U";
@@ -922,7 +986,9 @@ class rig_get_mode : public XmlRpcServerMethod {
 public:
 	rig_get_mode(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_mode", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online) {
 			result = "USB";
 			return;
@@ -957,7 +1023,9 @@ class rig_get_modeA : public XmlRpcServerMethod {
 public:
 	rig_get_modeA(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_modeA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online) {
 			result = "USB";
 			return;
@@ -993,7 +1061,9 @@ class rig_get_modeB : public XmlRpcServerMethod {
 public:
 	rig_get_modeB(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_modeB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online) {
 			result = "USB";
 			return;
@@ -1029,7 +1099,9 @@ class rig_get_bws : public XmlRpcServerMethod {
 public :
 	rig_get_bws(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_bws", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		if (!xcvr_online) {
 			XmlRpcValue bws;
@@ -1097,7 +1169,9 @@ class rig_get_bw : public XmlRpcServerMethod {
 public:
 	rig_get_bw(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_bw", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -1147,7 +1221,9 @@ class rig_get_bwA : public XmlRpcServerMethod {
 public:
 	rig_get_bwA(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_bwA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -1198,7 +1274,9 @@ class rig_get_bwB : public XmlRpcServerMethod {
 public:
 	rig_get_bwB(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_bwB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -1244,7 +1322,9 @@ class rig_get_smeter : public XmlRpcServerMethod {
 public:
 	rig_get_smeter(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_smeter", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_smeter)
 			result = "0";
 		else {
@@ -1266,7 +1346,9 @@ class rig_get_DBM : public XmlRpcServerMethod {
 public:
 	rig_get_DBM(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_DBM", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_smeter)
 			result = "0";
 		else {
@@ -1290,7 +1372,9 @@ class rig_get_Sunits : public XmlRpcServerMethod {
 public:
 	rig_get_Sunits(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_Sunits", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_smeter)
 			result = "0";
 		else {
@@ -1318,7 +1402,9 @@ class rig_get_pwrmeter_scale : public XmlRpcServerMethod {
 public:
 	rig_get_pwrmeter_scale(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pwrmeter_scale", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_power_out)
 			result = (int)(0);
 		else {
@@ -1335,7 +1421,9 @@ class rig_get_maxpwr : public XmlRpcServerMethod {
 public:
 	rig_get_maxpwr(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_maxpwr", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = (int)(selrig->power_max());
 	}
 } rig_get_maxpwr(&rig_server);
@@ -1345,7 +1433,9 @@ class rig_get_pwrmeter : public XmlRpcServerMethod {
 public:
 	rig_get_pwrmeter(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pwrmeter", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_power_out)
 			result = "0";
 		else {
@@ -1367,7 +1457,9 @@ class rig_get_swrmeter : public XmlRpcServerMethod {
 public:
 	rig_get_swrmeter(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_swrmeter", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_swr_control)
 			result = "0";
 		else {
@@ -1413,7 +1505,9 @@ class rig_set_power : public XmlRpcServerMethod {
 public:
 	rig_set_power(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_power", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1434,7 +1528,9 @@ class rig_set_verify_power : public XmlRpcServerMethod {
 public:
 	rig_set_verify_power(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_power", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1457,7 +1553,9 @@ class rig_get_power : public XmlRpcServerMethod {
 public:
 	rig_get_power(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_power", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = (int)(progStatus.power_level);
 	}
 
@@ -1469,7 +1567,9 @@ class rig_mod_power : public XmlRpcServerMethod {
 public:
 	rig_mod_power(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_pwr", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1499,7 +1599,9 @@ class rig_tune : public XmlRpcServerMethod {
 public:
 	rig_tune(XmlRpcServer* s) : XmlRpcServerMethod("rig.tune", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1523,7 +1625,9 @@ class rig_set_verify_ptt : public XmlRpcServerMethod {
 public:
 	rig_set_verify_ptt(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_ptt", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1559,7 +1663,9 @@ class rig_set_ptt : public XmlRpcServerMethod {
 public:
 	rig_set_ptt(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_ptt", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1594,7 +1700,9 @@ class rig_set_ptt_fast : public XmlRpcServerMethod {
 public:
 	rig_set_ptt_fast(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_ptt_fast", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1624,7 +1732,9 @@ class rig_swap : public XmlRpcServerMethod {
 public:
 	rig_swap(XmlRpcServer* s) : XmlRpcServerMethod("rig.swap", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1648,7 +1758,9 @@ class rig_set_swap : public XmlRpcServerMethod {
 public:
 	rig_set_swap(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_swap", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1672,7 +1784,9 @@ class rig_set_verify_swap : public XmlRpcServerMethod {
 public:
 	rig_set_verify_swap(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_swap", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1700,7 +1814,9 @@ class rig_set_split : public XmlRpcServerMethod {
 public:
 	rig_set_split(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_split", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1730,7 +1846,9 @@ class rig_set_verify_split : public XmlRpcServerMethod {
 public:
 	rig_set_verify_split(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_split", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1775,7 +1893,9 @@ class rig_set_AB : public XmlRpcServerMethod {
 public:
 	rig_set_AB(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_AB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1810,7 +1930,9 @@ class rig_set_verify_AB : public XmlRpcServerMethod {
 public:
 	rig_set_verify_AB(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_AB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1849,7 +1971,9 @@ class rig_set_vfoA : public XmlRpcServerMethod {
 public:
 	rig_set_vfoA(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_vfoA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1879,7 +2003,9 @@ class rig_set_verify_vfoA : public XmlRpcServerMethod {
 public:
 	rig_set_verify_vfoA(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_vfoA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1908,7 +2034,9 @@ class rig_set_vfoA_fast : public XmlRpcServerMethod {
 public:
 	rig_set_vfoA_fast(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_vfoA_fast", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1937,7 +2065,9 @@ class rig_mod_vfoA : public XmlRpcServerMethod {
 public:
 	rig_mod_vfoA(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_vfoA", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -1971,7 +2101,9 @@ class rig_set_vfoB : public XmlRpcServerMethod {
 public:
 	rig_set_vfoB(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_vfoB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2000,7 +2132,9 @@ class rig_set_verify_vfoB : public XmlRpcServerMethod {
 public:
 	rig_set_verify_vfoB(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_vfoB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2029,7 +2163,9 @@ class rig_set_vfoB_fast : public XmlRpcServerMethod {
 public:
 	rig_set_vfoB_fast(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_vfoB_fast", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2058,7 +2194,9 @@ class rig_mod_vfoB : public XmlRpcServerMethod {
 public:
 	rig_mod_vfoB(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_vfoB", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2092,7 +2230,9 @@ class rig_vfoA2B : public XmlRpcServerMethod {
 public:
 	rig_vfoA2B (XmlRpcServer* s) : XmlRpcServerMethod("rig.vfoA2B", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2121,7 +2261,9 @@ class rig_freqA2B : public XmlRpcServerMethod {
 public:
 	rig_freqA2B (XmlRpcServer* s) : XmlRpcServerMethod("rig.freqA2B", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2148,7 +2290,9 @@ class rig_modeA2B : public XmlRpcServerMethod {
 public:
 	rig_modeA2B (XmlRpcServer* s) : XmlRpcServerMethod("rig.modeA2B", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2173,7 +2317,9 @@ class rig_set_vfo : public XmlRpcServerMethod {
 public:
 	rig_set_vfo(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_vfo", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2200,7 +2346,9 @@ class rig_set_verify_vfo : public XmlRpcServerMethod {
 public:
 	rig_set_verify_vfo(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_vfo", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2228,7 +2376,9 @@ class main_set_frequency : public XmlRpcServerMethod {
 public:
 	main_set_frequency(XmlRpcServer* s) : XmlRpcServerMethod("main.set_frequency", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2255,7 +2405,9 @@ class rig_set_frequency : public XmlRpcServerMethod {
 public:
 	rig_set_frequency(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_frequency", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2283,7 +2435,9 @@ class rig_set_verify_frequency : public XmlRpcServerMethod {
 public:
 	rig_set_verify_frequency(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_frequency", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2587,7 +2741,9 @@ class rig_set_bandwidth : public XmlRpcServerMethod {
 public:
 	rig_set_bandwidth(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_bandwidth", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2632,7 +2788,9 @@ class rig_set_verify_bandwidth : public XmlRpcServerMethod {
 public:
 	rig_set_verify_bandwidth(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_bandwidth", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2682,7 +2840,9 @@ class rig_set_bw : public XmlRpcServerMethod {
 public:
 	rig_set_bw(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_bw", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2729,7 +2889,9 @@ class rig_set_verify_bw : public XmlRpcServerMethod {
 public:
 	rig_set_verify_bw(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_bw", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2780,7 +2942,9 @@ class rig_set_BW : public XmlRpcServerMethod {
 public:
 	rig_set_BW(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_BW", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2828,7 +2992,9 @@ class rig_set_verify_BW : public XmlRpcServerMethod {
 public:
 	rig_set_verify_BW(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_verify_BW", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2881,7 +3047,9 @@ class rig_mod_bw: public XmlRpcServerMethod {
 public:
 	rig_mod_bw(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_bw", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -2945,7 +3113,9 @@ class rig_get_pbt : public XmlRpcServerMethod {
 public:
 	rig_get_pbt(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pbt", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -2976,7 +3146,9 @@ class rig_get_pbt_inner : public XmlRpcServerMethod {
 public:
 	rig_get_pbt_inner(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pbt_inner", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -3004,7 +3176,9 @@ class rig_get_pbt_outer : public XmlRpcServerMethod {
 public:
 	rig_get_pbt_outer(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pbt_outer", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 
 		result[0] = "NONE";
 		result[1] = "";
@@ -3032,7 +3206,9 @@ class rig_set_pbt : public XmlRpcServerMethod {
 public:
 	rig_set_pbt(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_pbt", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()  || !selrig->has_pbt_controls) {
 			result = 0;
 			return;
@@ -3057,7 +3233,9 @@ class rig_set_pbt_inner : public XmlRpcServerMethod {
 public:
 	rig_set_pbt_inner(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_pbt_inner", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()  || !selrig->has_pbt_controls) {
 			result = 0;
 			return;
@@ -3080,7 +3258,9 @@ class rig_set_pbt_outer : public XmlRpcServerMethod {
 public:
 	rig_set_pbt_outer(XmlRpcServer* s) : XmlRpcServerMethod("rig.set_pbt_outer", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()  || !selrig->has_pbt_controls) {
 			result = 0;
 			return;
@@ -3106,7 +3286,9 @@ class rig_cat_string : public XmlRpcServerMethod {
 public:
 	rig_cat_string(XmlRpcServer* s) : XmlRpcServerMethod("rig.cat_string", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = 0;
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
@@ -3156,7 +3338,9 @@ class rig_cat_priority : public XmlRpcServerMethod {
 public:
 	rig_cat_priority(XmlRpcServer* s) : XmlRpcServerMethod("rig.cat_priority", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = 0;
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
@@ -3207,7 +3391,9 @@ class rig_cwio_set_wpm : public XmlRpcServerMethod {
 public:
 	rig_cwio_set_wpm(XmlRpcServer* s) : XmlRpcServerMethod("rig.cwio_set_wpm", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		cwio_wpm = int(params[0]);
 		Fl::awake(set_cwio_wpm);
 	}
@@ -3220,7 +3406,9 @@ class rig_cwio_get_wpm : public XmlRpcServerMethod {
 public:
 	rig_cwio_get_wpm(XmlRpcServer* s) : XmlRpcServerMethod("rig.cwio_get_wpm", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		result = int(progStatus.cwioWPM);
 	}
 
@@ -3232,7 +3420,9 @@ class rig_cwio_mod_wpm : public XmlRpcServerMethod {
 public:
 	rig_cwio_mod_wpm(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_cwio_wpm", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		int change = int(params[0]);
 		cwio_wpm += change;
 		Fl::awake(set_cwio_wpm);
@@ -3250,7 +3440,9 @@ class rig_cwio_text : public XmlRpcServerMethod {
 public:
 	rig_cwio_text(XmlRpcServer* s) : XmlRpcServerMethod("rig.cwio_text", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		std::string s = (std::string)params[0];
 		guard_lock lck(&cwio_text_mutex);
 		add_cwio(s);
@@ -3271,7 +3463,9 @@ class rig_fskio_text : public XmlRpcServerMethod {
 public:
 	rig_fskio_text(XmlRpcServer* s) : XmlRpcServerMethod("rig.fskio_text", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		std::string s = (std::string)params[0];
 		if (s.find(']') != std::string::npos) ptt_pending = true;
 		FSK_add(s);
@@ -3301,7 +3495,9 @@ class rig_set_verify_cwio_send : public XmlRpcServerMethod {
 public:
 	rig_set_verify_cwio_send(XmlRpcServer* s) : XmlRpcServerMethod("rig.cwio_send", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		int send_state = int(params[0]);
 		send_text(send_state);
 		Fl::awake(set_cwio_send_button, reinterpret_cast<void *>(send_state));
@@ -3323,7 +3519,9 @@ class rig_shutdown : public XmlRpcServerMethod {
 public:
 	rig_shutdown(XmlRpcServer* s) : XmlRpcServerMethod("rig.shutdown", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -3351,7 +3549,9 @@ class rig_cmd : public XmlRpcServerMethod {
 public:
 	rig_cmd (XmlRpcServer* s) : XmlRpcServerMethod("rig.cmd", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			result = 0;
 			return;
@@ -3484,7 +3684,9 @@ class rig_list_methods : public XmlRpcServerMethod {
 public:
 	rig_list_methods(XmlRpcServer *s) : XmlRpcServerMethod("rig.list_methods", s) {}
 
-	void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
 		std::vector<XmlRpcValue> methods;
 		for (size_t n = 0; n < sizeof(mlist) / sizeof(*mlist); ++n) {
 			XmlRpcValue::ValueStruct item;
