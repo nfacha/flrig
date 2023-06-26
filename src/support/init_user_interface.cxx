@@ -1342,8 +1342,7 @@ void TRACED(init_dsp_controls)
 		btnFILT->hide();
 		opBW->show();
 		if (selrig->name_ == rig_tci_sundx.name_ ||
-			selrig->name_ == rig_tci_sunpro.name_ ||
-			selrig->name_ == rig_FLEX1500.name_ ) {
+			selrig->name_ == rig_tci_sunpro.name_ ) {
 			opCENTER->clear();
 			for (int i = 0; i < tci_nbr_centers; i++)
 				opCENTER->add(TCI_centers[i].c_str());
