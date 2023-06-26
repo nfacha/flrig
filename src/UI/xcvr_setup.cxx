@@ -1154,45 +1154,44 @@ Fl_Group *createXCVR(int X, int Y, int W, int H, const char *label)
 
 	btnOneStopBit = new Fl_Check_Button(
 		mnuBaudrate->x(), mnuBaudrate->y() + 26,
-		22, 22, _("1"));
+		100, 22, _("1 Stop Bit"));
 	btnOneStopBit->tooltip(_("One Stop Bit"));
 	btnOneStopBit->down_box(FL_DOWN_BOX);
 	btnOneStopBit->callback((Fl_Callback*)cb_btnOneStopBit);
-	btnOneStopBit->align(Fl_Align(FL_ALIGN_RIGHT));
 	btnOneStopBit->value(progStatus.stopbits == 1);
 
 	btnTwoStopBit = new Fl_Check_Button(
 		btnOneStopBit->x() + 120, btnOneStopBit->y(),
-		22, 22, _("2 -StopBits"));
+		100, 22, _("2 Stop Bits"));
 	btnTwoStopBit->down_box(FL_DOWN_BOX);
 	btnTwoStopBit->callback((Fl_Callback*)cb_btnTwoStopBit);
-	btnTwoStopBit->align(Fl_Align(FL_ALIGN_RIGHT));
 	btnTwoStopBit->value(progStatus.stopbits == 2);
 
 	btnRigCatEcho = new Fl_Check_Button(
 		btnOneStopBit->x(), btnOneStopBit->y() + 25,
-		22, 22, _("Echo "));
+		100, 22, _("Echo "));
 	btnRigCatEcho->down_box(FL_DOWN_BOX);
 	btnRigCatEcho->callback((Fl_Callback*)cb_btnRigCatEcho);
-	btnRigCatEcho->align(Fl_Align(FL_ALIGN_RIGHT));
 	btnRigCatEcho->value(progStatus.serial_echo);
 
 	chkrtscts = new Fl_Check_Button(
 		btnTwoStopBit->x(), btnRigCatEcho->y(),
-		22, 22, _("RTS/CTS"));
+		100, 22, _("RTS/CTS"));
 	chkrtscts->tooltip(_("Xcvr uses RTS/CTS handshake"));
 	chkrtscts->down_box(FL_DOWN_BOX);
 	chkrtscts->callback((Fl_Callback*)cb_chkrtscts);
 	chkrtscts->value(progStatus.serial_rtscts);
 
 	btnrtsplus1 = new Fl_Check_Button(
-		btnRigCatEcho->x(), btnRigCatEcho->y() + 25, 22, 22, _("RTS +12 v"));
+		btnRigCatEcho->x(), btnRigCatEcho->y() + 25,
+		100, 22, _("RTS +12 v"));
 	btnrtsplus1->tooltip(_("Initial state of RTS"));
 	btnrtsplus1->callback((Fl_Callback*)cb_btnrtsplus);
 	btnrtsplus1->value(progStatus.serial_rtsplus);
 
 	btndtrplus1 = new Fl_Check_Button(
-		chkrtscts->x(), btnrtsplus1->y(), 22, 22, _("DTR +12 v"));
+		chkrtscts->x(), btnrtsplus1->y(),
+		100, 22, _("DTR +12 v"));
 	btndtrplus1->tooltip(_("Initial state of DTR"));
 	btndtrplus1->callback((Fl_Callback*)cb_btndtrplus);
 	btndtrplus1->value(progStatus.serial_dtrplus);
