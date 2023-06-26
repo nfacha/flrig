@@ -127,6 +127,7 @@
 #include "other/trusdx.h"
 #include "qrp_labs/QCXplus.h"
 #include "qrp_labs/QDX.h"
+#include "qrp_labs/QMX.h"
 
 extern rigbase			rig_null;		// 0
 extern RIG_FDMDUO		rig_FDMDUO;		// 1
@@ -236,5 +237,6 @@ extern RIG_TCI_SUNPRO	rig_tci_sunpro;	// 104
 extern RIG_TRUSDX		rig_trusdx;		// 105
 extern RIG_QDX			rig_qdx;		// 106
 extern RIG_FT710		rig_FT710;		// 107
+extern RIG_QMX			rig_qmx;		// 108
 
 #endif

@@ -184,6 +184,7 @@ flrig_SOURCES += \
 	rigs/other/TMD710.cxx \
 	rigs/qrp_labs/QCXplus.cxx \
 	rigs/qrp_labs/QDX.cxx \
+	rigs/qrp_labs/QMX.cxx \
 	rigs/tentec/TT516.cxx \
 	rigs/tentec/DELTA-II.cxx \
 	rigs/tentec/TT538.cxx \
@@ -382,6 +383,7 @@ EXTRA_DIST = \
 	include/ptt.h \
 	include/qrp_labs/QCXplus.h \
 	include/qrp_labs/QDX.h \
+	include/qrp_labs/QMX.h \
 	include/rig.h \
 	include/rigs.h \
 	include/rigbase.h \

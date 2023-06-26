@@ -136,6 +136,7 @@ RIG_TCI_SUNDX	rig_tci_sundx;
 RIG_TCI_SUNPRO	rig_tci_sunpro;
 RIG_TRUSDX		rig_trusdx;
 RIG_QDX			rig_qdx;
+RIG_QMX			rig_qmx;
 
 rigbase *rigs[] = {
 	&rig_null,		// 0
@@ -246,6 +247,7 @@ rigbase *rigs[] = {
 	&rig_trusdx,	// 105
 	&rig_qdx,		// 106
 	&rig_FT710,		// 107
+	&rig_qmx,		// 108
 	NULL
 
 };
