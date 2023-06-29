@@ -96,6 +96,7 @@ RIG_ICR71		rig_ICR71;
 RIG_K2			rig_K2;
 RIG_K3			rig_K3;
 RIG_KX3			rig_KX3;
+RIG_KX2			rig_KX2;
 RIG_K4			rig_K4;
 RIG_PCR1000		rig_PCR1000;
 RIG_RAY152		rig_RAY152;
@@ -206,48 +207,49 @@ rigbase *rigs[] = {
 	&rig_K2,		// 64
 	&rig_K3,		// 65
 	&rig_KX3,		// 66
-	&rig_K4,		// 67
-	&rig_PCR1000,	// 68
-	&rig_RAY152,	// 69
-	&rig_TMD710,	// 70
-	&rig_TS140,		// 71
-	&rig_TS440,		// 72
-	&rig_TS450S,	// 73
-	&rig_TS480HX,	// 74
-	&rig_TS480SAT,	// 75
-	&rig_TS570,		// 76
-	&rig_TS590S,	// 77
-	&rig_TS590SG,	// 78
-	&rig_TS790,		// 79
-	&rig_TS850,		// 80
-	&rig_TS870S,	// 81
-	&rig_TS890S,	// 82
-	&rig_TS940S,	// 83
-	&rig_TS950,		// 84
-	&rig_TS990,		// 85
-	&rig_TS2000,	// 86
-	&rig_TT516,		// 87
-	&rig_TT535,		// 88
-	&rig_TT538,		// 89
-	&rig_TT550,		// 90
-	&rig_TT563,		// 91
-	&rig_TT566,		// 92
-	&rig_TT588,		// 93
-	&rig_TT599,		// 94
-	&rig_AOR5K,		// 95
-	&rig_XI5105,	// 96
-	&rig_XIG90,		// 97
-	&rig_X6100,		// 98
-	&rig_PowerSDR,	// 99
-	&rig_FLEX1500,	// 100
-	&rig_TX500,		// 101
-	&rig_QCXP,		// 102
-	&rig_qdx,		// 103
-	&rig_qmx,		// 104
-	&rig_sdr2,		// 105
-	&rig_tci_sundx,	// 106
-	&rig_tci_sunpro,// 107
-	&rig_trusdx,	// 108
+	&rig_KX2,		// 67
+	&rig_K4,		// 68
+	&rig_PCR1000,	// 69
+	&rig_RAY152,	// 70
+	&rig_TMD710,	// 71
+	&rig_TS140,		// 72
+	&rig_TS440,		// 73
+	&rig_TS450S,	// 74
+	&rig_TS480HX,	// 75
+	&rig_TS480SAT,	// 76
+	&rig_TS570,		// 77
+	&rig_TS590S,	// 78
+	&rig_TS590SG,	// 79
+	&rig_TS790,		// 80
+	&rig_TS850,		// 81
+	&rig_TS870S,	// 82
+	&rig_TS890S,	// 83
+	&rig_TS940S,	// 84
+	&rig_TS950,		// 85
+	&rig_TS990,		// 86
+	&rig_TS2000,	// 87
+	&rig_TT516,		// 88
+	&rig_TT535,		// 89
+	&rig_TT538,		// 90
+	&rig_TT550,		// 91
+	&rig_TT563,		// 92
+	&rig_TT566,		// 93
+	&rig_TT588,		// 94
+	&rig_TT599,		// 95
+	&rig_AOR5K,		// 96
+	&rig_XI5105,	// 97
+	&rig_XIG90,		// 98
+	&rig_X6100,		// 99
+	&rig_PowerSDR,	// 100
+	&rig_FLEX1500,	// 101
+	&rig_TX500,		// 102
+	&rig_QCXP,		// 103
+	&rig_qdx,		// 104
+	&rig_qmx,		// 105
+	&rig_sdr2,		// 106
+	&rig_tci_sundx,	// 107
+	&rig_tci_sunpro,// 108
+	&rig_trusdx,	// 109
 	NULL
 
 };

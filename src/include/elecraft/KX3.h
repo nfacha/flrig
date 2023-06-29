@@ -118,4 +118,10 @@ private:
 	void get_options();
 };
 
+class RIG_KX2 : public RIG_KX3 {
+public:
+	RIG_KX2();
+	~RIG_KX2() {}
+};
+
 #endif
