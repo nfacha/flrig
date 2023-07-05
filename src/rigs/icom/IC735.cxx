@@ -52,7 +52,7 @@ RIG_IC735::RIG_IC735() {
 	bwA = 0;
 
 	has_mode_control = true;
-	has_bandwidth_control = true;
+	has_bandwidth_control = false;
 
 	defaultCIV = 0x04;
 	adjustCIV(defaultCIV);
