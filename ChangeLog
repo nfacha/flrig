@@ -1,6 +1,18 @@
-2023-05-30  dave-w1hkj  <w1hkj@bellsouth.net>
+2023-07-06  dave-w1hkj  <w1hkj@bellsouth.net>
 
-	d5a5e169: Version 2.0.01
+	10e32473: Version 2.0.02
+	972d38a1: ic735 bw
+	0cc40653: KX2
+	1b3cef6e: ui controls
+	085a13da: flex 1500
+	be06a1a9: rigs array
+	3d78e4bc: QMX
+	f9a83621: xmlrpc alert
+	b92e1973: FTdx3000/9000
+	02a5de9c: FT991A agc
+	38ab95ef: sdr2 select
+	97cb3b83: tci interface
+	ea4735f6: Version 2.0.01
 	a397e321: DSP-L/DSP-H bws
 	019f3e5e: K3, KX3, K4 controls
 	3d35f1e2: QDX has bandwidth
