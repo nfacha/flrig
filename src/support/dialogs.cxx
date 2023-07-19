@@ -79,6 +79,7 @@ void clear_combos()
 	selectAuxPort->clear();
 	selectSepPTTPort->clear();
 	selectCommPort->add("NONE");
+	selectCommPort->add("xml_client");
 	selectAuxPort->add("NONE");
 	selectSepPTTPort->add("NONE");
 	select_cwioPORT->add("NONE");
@@ -547,6 +548,11 @@ void open_other_tab()
 void open_server_tab()
 {
 	select_tab(_("Server"));
+}
+
+void open_client_tab()
+{
+	select_tab(_("Client"));
 }
 
 void createXcvrDialog()
@@ -1795,7 +1801,10 @@ extern std::string print_all();
 void cb_send_command(std::string command, Fl_Output *resp)
 {
 	if (command == "PRINT") {
+		fl_alert2("%s", print_all().c_str());
+#ifndef __WIN32__
 		std::cout << print_all();
+#endif
 		return;
 	}
 	if (command.empty()) return;

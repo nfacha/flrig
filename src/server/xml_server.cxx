@@ -3041,8 +3041,6 @@ public:
 
 } rig_set_verify_BW(&rig_server);
 
-static std::string retstr = "";
-
 class rig_mod_bw: public XmlRpcServerMethod {
 public:
 	rig_mod_bw(XmlRpcServer* s) : XmlRpcServerMethod("rig.mod_bw", s) {}
@@ -3089,7 +3087,7 @@ public:
 
 			nuvals.iBW = i;
 		} catch (const std::exception& e) {
-			std::cout << e.what() << '\n';
+//			std::cout << e.what() << '\n';
 		}
 
 		if (selrig->inuse == onB) {
@@ -3282,6 +3280,55 @@ public:
 
 //----------------------------------------------------------------------
 
+class rig_client_string : public XmlRpcServerMethod {
+public:
+	rig_client_string(XmlRpcServer* s) : XmlRpcServerMethod("rig.client_string", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		result = (std::string)("");
+		std::string command = std::string(params[0]);
+		bool usehex = false;
+
+		if (!progStatus.xmlrpc_rig && (!xcvr_online || disable_xmlrpc->value())) {
+			return;
+		}
+
+		if (command.empty()) return;
+
+		std::string cmd = "";
+
+		if (command.find("x") != std::string::npos) { // hex std::strings
+			size_t p = 0;
+			unsigned int val;
+			usehex = true;
+			while (( p = command.find("x", p)) != std::string::npos) {
+				sscanf(&command[p+1], "%x", &val);
+				cmd += (unsigned char) val;
+				p += 3;
+			}
+		} else
+			cmd = command;
+
+		guard_lock serial_lock(&mutex_serial, "rig_client_string");
+
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+		waitResponse(10);
+
+		if (usehex)
+			result = to_hex(respstr);
+		else
+			result = respstr;
+
+		xml_trace(2, "xmlrpc command:", command.c_str());
+	}
+
+	std::string help() { return std::string("sends xmlrpc CAT std::string to flrig_server"); }
+
+} rig_client_string(&rig_server);
+
+//----------------------------------------------------------------------
 class rig_cat_string : public XmlRpcServerMethod {
 public:
 	rig_cat_string(XmlRpcServer* s) : XmlRpcServerMethod("rig.cat_string", s) {}
@@ -3316,13 +3363,11 @@ public:
 
 			RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 
-			retstr.clear();
 			waitResponse(10);//(100);
 			if (!respstr.empty()) {
-				retstr = usehex ?
+				result = usehex ?
 					str2hex(respstr.c_str(), respstr.length()) :
 					respstr;
-				result = retstr;
 			} else
 				result = std::string("No response: ").append(selrig->name_);
 		}

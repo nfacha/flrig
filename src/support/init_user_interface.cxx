@@ -21,6 +21,7 @@
 
 #include "support.h"
 #include "ptt.h"
+#include "xmlrpc_rig.h"
 
 extern bool testmode;
 
@@ -2636,6 +2637,7 @@ void TRACED(init_title)
 	title = PACKAGE;
 	title += " ";
 	title.append(selrig->name_);
+	if (progStatus.xmlrpc_rig) title.append(" CLIENT");
 	mainwindow->label(title.c_str());
 }
 
@@ -2736,15 +2738,26 @@ void TRACED(initStatusConfigDialog)
 	if (progStatus.use_tcpip) {
 		box_xcvr_connect->color(FL_BACKGROUND2_COLOR);
 		box_xcvr_connect->redraw();
+	} else if (progStatus.xcvr_serial_port == "xml_client") {
+			if (connect_to_client()) {
+				progStatus.xmlrpc_rig = true;
+				box_xcvr_connect->color(FL_GREEN);
+				box_xcvr_connect->redraw();
+			} else {
+				fl_alert2("Cannot connect to remote flrig");
+				LOG_WARN("Cannot connect to remote flrig");
+				progStatus.xmlrpc_rig = false;
+				exit(0);
+			}
 	} else {
 		if (startXcvrSerial()) {
 			selectCommPort->value(progStatus.xcvr_serial_port.c_str());
 			box_xcvr_connect->color(FL_GREEN);
 			box_xcvr_connect->redraw();
 		} else {
-			if (progStatus.xcvr_serial_port.compare("NONE") == 0) {
+			if (progStatus.xcvr_serial_port == "NONE") {
 				LOG_WARN("No comm port ... test mode");
-			} else {
+			} else if (!progStatus.xmlrpc_rig) {
 				fl_alert2("\
 Cannot open %s!\n\n\
 Check serial (COM) port connection\n\

@@ -396,6 +396,7 @@ bool  Cserial::IOselect ()
 int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::string find2)
 {
 	if (fd < 0) {
+std::cout << "ReadBuffer(...) fd < 0" << std::endl;
 		ser_trace(1, "ReadBuffer(...) fd < 0");
 		return 0;
 	}

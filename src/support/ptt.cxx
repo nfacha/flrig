@@ -62,8 +62,15 @@ static void fake_split(int on)
 
 // add fake rit to this function and to set_vfoA ??
 
+extern void xmlrpc_ptt(int);
+
 void rigPTT(bool on)
 {
+	if (progStatus.xmlrpc_rig) {
+		xmlrpc_ptt(on);
+		return;
+	}
+
 	if (!on && progStatus.split && !selrig->can_split())
 		fake_split(on);
 
@@ -90,8 +97,13 @@ void rigPTT(bool on)
 		LOG_DEBUG("No PTT i/o connected");
 }
 
+extern bool xml_ptt_state();
+
 bool ptt_state()
 {
+	if (progStatus.xmlrpc_rig)
+		return xml_ptt_state();
+
 	if (progStatus.serial_catptt == PTT_BOTH || progStatus.serial_catptt == PTT_GET)		return selrig->get_PTT();
 	else if (progStatus.serial_dtrptt == PTT_BOTH || progStatus.serial_dtrptt == PTT_GET)	return selrig->get_PTT();
 	else if (progStatus.serial_rtsptt == PTT_BOTH || progStatus.serial_rtsptt == PTT_GET)	return selrig->get_PTT();

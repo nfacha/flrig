@@ -76,6 +76,8 @@
 #include "util.h"
 #include "gettext.h"
 #include "xml_server.h"
+#include "xmlrpc_rig.h"
+
 //#include "xml_io.h"
 #include "serial.h"
 #include "ui.h"
@@ -695,7 +697,7 @@ void cb_xml_help(Fl_Menu_*, void*)
 bool PRIORITY = false;
 int parse_args(int argc, char **argv, int& idx)
 {
-	std::string helpstr =
+	static std::string helpstr =
 "Usage: \n\
   --help this help text\n\
   --version {-v}\n\
@@ -719,9 +721,13 @@ int parse_args(int argc, char **argv, int& idx)
 		exit(0);
 	}
 	if (!strcasecmp(argv[idx], "--version") || !strcasecmp(argv[idx], "-v")) {
-		std::string ver = "Version: ";
-		ver.append(VERSION).append("\n");
-		std::cout << ver;
+		static std::string ver = "Version: ";
+		ver.append(VERSION);
+#ifdef __WIN32__
+		fl_alert2("%s", ver.c_str());
+#else
+		std::cout << ver << std::endl;
+#endif
 		exit (0);
 	}
 	if (strcasecmp("--trace", argv[idx]) == 0) {
@@ -739,7 +745,11 @@ int parse_args(int argc, char **argv, int& idx)
 	}
 	if (strcasecmp("--xml-help", argv[idx]) == 0) {
 		std::string help = print_xmlhelp();
+#ifdef __WIN32__
+		fl_alert2("%s", help.c_str());
+#else
 		std::cout << help;
+#endif
 		exit(0);
 	}
 	if (strcasecmp("--test", argv[idx]) == 0) {

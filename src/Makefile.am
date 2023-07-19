@@ -266,6 +266,7 @@ flrig_SOURCES += \
 	widgets/hspinner.cxx \
 	support/tod_clock.cxx \
 	server/xml_server.cxx \
+	server/xmlrpc_rig.cxx \
 	cwio/cwio.cxx \
 	cwio/morse.cxx \
 	cwio/cwioUI.cxx \
@@ -337,6 +338,7 @@ EXTRA_DIST = \
 	include/hidapi.h \
 	include/hid_mac.h \
 	include/hid_win.h \
+	include/xmlrpc_rig.h \
 	include/elad/FDMDUO.h \
 	include/icom/ICbase.h \
 	include/icom/IC703.h \

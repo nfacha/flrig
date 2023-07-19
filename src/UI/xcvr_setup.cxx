@@ -28,6 +28,7 @@
 #include "trace.h"
 #include "xml_server.h"
 
+#include "xmlrpc_rig.h"
 #include "XmlRpc.h"
 
 Fl_Group *tabXCVR = (Fl_Group *)0;
@@ -91,6 +92,11 @@ Fl_Group *tabOTHER = (Fl_Group *)0;
 
 	Fl_Counter *cnt_power_limit = (Fl_Counter *)0;
 	Fl_Check_Button *btn_enable_power_limit = (Fl_Check_Button *)0;
+
+Fl_Group *tabCLIENT = (Fl_Group *)0;
+	Fl_Box *client_text = (Fl_Box *)0;
+	Fl_Input2 *inp_client_addr = (Fl_Input2 *)0;
+	Fl_Input2 *inp_client_port = (Fl_Input2 *)0;
 
 Fl_Group *tabSERVER = (Fl_Group *)0;
 	Fl_Box *server_text = (Fl_Box *)0;
@@ -621,6 +627,14 @@ static void cb_server_port(Fl_Input2* o, void*) {
 	set_server_port(::xmlport);
 }
 
+static void cb_client_addr(Fl_Input2* o, void*) {
+	progStatus.xmlrig_addr = o->value();
+}
+
+static void cb_client_port(Fl_Input2* o, void*) {
+	progStatus.xmlrig_port = o->value();
+}
+
 static void cb_poll_smeter(Fl_Check_Button* o, void*) {
 	progStatus.poll_smeter = o->value();
 }
@@ -941,7 +955,7 @@ static void cb_init_ser_port(Fl_Return_Button*, void*) {
 	std::string p2 = selectAuxPort->value();
 	std::string p3 = selectSepPTTPort->value();
 
-	if ( (p1.compare("NONE") != 0) && (p1 == p2 || p1 == p3) ) {
+	if ( (p1 == "NONE") && (p1 == p2 || p1 == p3) ) {
 		fl_message("Select separate ports");
 		return;
 	}
@@ -959,40 +973,49 @@ static void cb_init_ser_port(Fl_Return_Button*, void*) {
 	{ guard_lock gl_serial(&mutex_serial);
 		bypass_serial_thread_loop = true;
 trace(1, "close serial port");
-		RigSerial->ClosePort();
+		progStatus.xcvr_serial_port = p1;
+		if (p1 == "xml_client") {
+			if (connect_to_client())
+				progStatus.xmlrpc_rig = true;
+			else
+				progStatus.xmlrpc_rig = false;;
+		} else {
+			RigSerial->ClosePort();
+
+			progStatus.serial_baudrate = mnuBaudrate->index();
+			progStatus.stopbits = btnOneStopBit->value() ? 1 : 2;
+			progStatus.serial_retries = (int)cntRigCatRetries->value();
+			progStatus.serial_timeout = (int)cntRigCatTimeout->value();
+			progStatus.serial_post_write_delay = (int)cntPostWriteDelay->value();
+			progStatus.serial_echo = btnRigCatEcho->value();
+
+			progStatus.serial_rtsptt = lbox_rtsptt->index();
+			progStatus.serial_catptt = lbox_catptt->index();
+			progStatus.serial_dtrptt = lbox_dtrptt->index();
+
+			progStatus.serial_rtscts = chkrtscts->value();
+			progStatus.serial_rtsplus = btnrtsplus1->value();
+			progStatus.serial_dtrplus = btndtrplus1->value();
+		}
 	}
+
 trace(1, "clear frequency list");
 	clearList();
 	saveFreqList();
 	selrig = (rigbase *)(selectRig->data());
 	xcvr_name = selrig->name_;
 
-	progStatus.xcvr_serial_port = selectCommPort->value();
-
-	progStatus.serial_baudrate = mnuBaudrate->index();
-	progStatus.stopbits = btnOneStopBit->value() ? 1 : 2;
-	progStatus.serial_retries = (int)cntRigCatRetries->value();
-	progStatus.serial_timeout = (int)cntRigCatTimeout->value();
-	progStatus.serial_post_write_delay = (int)cntPostWriteDelay->value();
-	progStatus.serial_echo = btnRigCatEcho->value();
-
-	progStatus.serial_rtsptt = lbox_rtsptt->index();
-	progStatus.serial_catptt = lbox_catptt->index();
-	progStatus.serial_dtrptt = lbox_dtrptt->index();
-
-	progStatus.serial_rtscts = chkrtscts->value();
-	progStatus.serial_rtsplus = btnrtsplus1->value();
-	progStatus.serial_dtrplus = btndtrplus1->value();
-
 	progStatus.imode_B  = progStatus.imode_A  = selrig->def_mode;
 	progStatus.iBW_B    = progStatus.iBW_A    = selrig->def_bw;
 	progStatus.freq_B   = progStatus.freq_A   = selrig->def_freq;
+
 trace(1, "initialize title bar");
 	init_title();
 trace(1, "start tranceiver serial port");
+
 	if (!startXcvrSerial()) {
 trace(1, "FAILED");
-		if (progStatus.xcvr_serial_port.compare("NONE") == 0) {
+		if (progStatus.xcvr_serial_port == "NONE") {
 			LOG_WARN("No comm port ... test mode");
 		} else {
 //			progStatus.xcvr_serial_port = "NONE";
@@ -1693,6 +1716,40 @@ fldigi configuration item for xmlrpc server port."));
 	tabSERVER->end();
 
 	return tabSERVER;
+}
+
+Fl_Group *createCLIENT(int X, int Y, int W, int H, const char *label)
+{
+	Fl_Group * tabCLIENT = new Fl_Group(X, Y, W, H, label);
+	tabCLIENT->hide();
+
+	client_text = new Fl_Box(X + 30, Y + 10, W - 60, 70,
+_("\
+This address / port is the server flrig to which this client\n\
+flrig will connect.  Address may any valid http port: localhost,\n\
+LAN or WAN."));
+	client_text->box(FL_FLAT_BOX);
+	client_text->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+
+	inp_client_addr = new Fl_Input2(
+		X + 130, Y + 90, 180, 22, 
+		_("Xmlrpc addr:"));
+	inp_client_addr->tooltip(_("Socket address for xmlrpc server"));
+	inp_client_addr->callback((Fl_Callback*)cb_client_addr);
+	inp_client_addr->value(progStatus.xmlrig_addr.c_str());
+	inp_client_addr->when(FL_ENTER);
+
+	inp_client_port = new Fl_Input2(
+		X + 130, Y + 120, 100, 22, 
+		_("Xmlrpc port:"));
+	inp_client_port->tooltip(_("Socket port for xmlrpc server"));
+	inp_client_port->callback((Fl_Callback*)cb_client_port);
+	inp_client_port->value(progStatus.xmlrig_port.c_str());
+	inp_client_port->when(FL_ENTER);
+
+	tabCLIENT->end();
+
+	return tabCLIENT;
 }
 
 Fl_Group *createPOLLING(int X, int Y, int W, int H, const char *label)
@@ -2698,6 +2755,7 @@ Fl_Double_Window* XcvrDialog() {
 	tabTCPIP    = createTCPIP(xtabs, ytree, wtabs, htree, _("TCPIP & TCI"));
 	tabOTHER      = createAUX(xtabs, ytree, wtabs, htree, _("Other"));
 	tabSERVER   = createSERVER(xtabs, ytree, wtabs, htree, _("Server"));
+	tabCLIENT   = createCLIENT(xtabs, ytree, wtabs, htree, _("Client"));
 	tabPOLLING  = createPOLLING(xtabs, ytree, wtabs, htree, _("Poll"));
 	tabRESTORE  = createRestore(xtabs, ytree, wtabs, htree, _("Restore"));
 	tabCOMMANDS = createCOMMANDS(xtabs, ytree, wtabs, htree, _("Commands"));
@@ -2715,6 +2773,7 @@ Fl_Double_Window* XcvrDialog() {
 	add_tree_item(tabTCPIP);
 	add_tree_item(tabOTHER);
 	add_tree_item(tabSERVER);
+	add_tree_item(tabCLIENT);
 	add_tree_item(tabPOLLING);
 	add_tree_item(tabRESTORE);
 	add_tree_item(tabCOMMANDS);

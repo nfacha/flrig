@@ -473,6 +473,10 @@ status progStatus = {
 //	"7362",		// std::string server_port
 //	"127.0.0.1",// std::string server_address
 
+	"127.0.0.1", // std::string xmlrig_addr;
+	"12345",	// std::string xmlrig_port;
+	false,		// bool	xmlrpg_rig;
+
 	"4001",		// std::string tcpip_port
 	"127.0.0.1",// std::string tcpip_address
 	50,			// int tcpip_ping_delay
@@ -1088,6 +1092,9 @@ void status::saveLastState()
 
 //	spref.set("server_port", server_port.c_str());
 //	spref.set("server_addr", server_addr.c_str());
+
+	spref.set("xmlrig_port", xmlrig_port.c_str());
+	spref.set("xmlrig_addr", xmlrig_addr.c_str());
 
 	spref.set("tcpip_port", tcpip_port.c_str());
 	spref.set("tcpip_addr", tcpip_addr.c_str());
@@ -1854,6 +1861,11 @@ bool status::loadXcvrState(std::string xcvr)
 //		server_port = defbuffer;
 //		spref.get("server_addr", defbuffer, "127.0.0.1", MAX_DEFBUFFER_SIZE);
 //		server_addr = defbuffer;
+
+		spref.get("xmlrig_port", defbuffer, "12345", MAX_DEFBUFFER_SIZE);
+		xmlrig_port = defbuffer;
+		spref.get("xmlrig_addr", defbuffer, "127.0.0.1", MAX_DEFBUFFER_SIZE);
+		xmlrig_addr = defbuffer;
 
 		spref.get("tcpip_port", defbuffer, "4001", MAX_DEFBUFFER_SIZE);
 		tcpip_port = defbuffer;

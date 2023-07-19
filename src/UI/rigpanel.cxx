@@ -574,6 +574,10 @@ static void cb_mnuSERVER(Fl_Menu_*, void*) {
 	open_server_tab();
 }
 
+static void cb_mnuCLIENT(Fl_Menu_*, void*) {
+	open_client_tab();
+}
+
 static void cb_mnuOnLineHelp(Fl_Menu_*, void*) {
 	visit_URL((void *)("http://www.w1hkj.com/flrig-help/index.html"));
 }

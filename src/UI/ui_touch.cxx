@@ -43,6 +43,7 @@ Fl_Menu_Item touch_menu[] = {
  {_("Other"), 0, (Fl_Callback*)cb_mnuOTHER, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {_("TMATE-2"), 0, (Fl_Callback*)cb_mnuTMATE2, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Server"), 0, (Fl_Callback*)cb_mnuSERVER, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Client"), 0, (Fl_Callback*)cb_mnuCLIENT, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Polling"), 0, (Fl_Callback*)cb_Polling, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Commands"), 0, (Fl_Callback*)cb_mnuCommands, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Send command"), 0, (Fl_Callback*)cb_Send, 0, 128, FL_NORMAL_LABEL, 0, 14, 0},

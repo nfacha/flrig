@@ -59,4 +59,7 @@ extern std::string respstr;
 
 extern void showresp(int level, int how, std::string s, std::string tx, std::string rx);
 
+extern std::string to_hex(std::string);
+extern std::string fm_hex(std::string);
+
 #endif

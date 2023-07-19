@@ -31,6 +31,8 @@
 #include "serial.h"
 #include "support.h"
 
+#include "xmlrpc_rig.h"
+
 pthread_mutex_t command_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //=============================================================================
@@ -59,6 +61,12 @@ void RIG_ICOM::checkresponse()
 bool RIG_ICOM::sendICcommand(std::string cmd, int nbr)
 {
 	guard_lock reply_lock(&mutex_replystr);
+
+	if (progStatus.xmlrpc_rig) {
+		respstr = xml_cat_string(cmd);
+//std::cout << "respstr: " << str2hex(respstr.c_str(), respstr.length()) << std::endl;
+		return respstr.length();
+	}
 
 	int ret = sendCommand(cmd);
 
@@ -118,6 +126,11 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 	int retnbr = 0;
 
 	replystr.clear();
+
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+		return replystr.length();
+	}
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);

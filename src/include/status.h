@@ -464,6 +464,10 @@ struct status {
 //	std::string	server_port;
 //	std::string	server_addr;
 
+	std::string xmlrig_addr;
+	std::string xmlrig_port;
+	bool	xmlrpc_rig;
+
 	std::string	tcpip_port;
 	std::string	tcpip_addr;
 	int		tcpip_ping_delay;

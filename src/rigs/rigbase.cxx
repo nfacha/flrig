@@ -30,6 +30,7 @@
 #include "serial.h"
 
 #include "rigs.h"
+#include "xmlrpc_rig.h"
 
 const char *szNORIG = "NONE";
 
@@ -414,6 +415,12 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 
 	replystr.clear();
 
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
+
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
 		MilliSleep(progStatus.tcpip_ping_delay);
@@ -473,6 +480,12 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 	wait_str[0] = ch;
 
 	int retnbr = 0;
+
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
 
 	replystr.clear();
 
@@ -538,6 +551,12 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 	char crlf[3] = "\r\n";
 
 	int retnbr = 0;
+
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
 
 	replystr.clear();
 
@@ -610,6 +629,12 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 // retry - number of retries, default
 bool rigbase::id_OK(std::string ID, int wait)
 {
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
+
 	guard_lock reply_lock(&mutex_replystr);
 
 	std::string buff;
@@ -646,6 +671,11 @@ bool rigbase::id_OK(std::string ID, int wait)
 
 void rigbase::sendOK(std::string cmd)
 {
+	if (progStatus.xmlrpc_rig) {
+		xml_cat_string(cmd);
+		return;
+	}
+
 	if (IDstr.empty()) {
 		sendCommand(cmd);
 		return;

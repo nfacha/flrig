@@ -36,6 +36,7 @@
 #include "tod_clock.h"
 
 #include "socket_io.h"
+#include "xmlrpc_rig.h"
 
 extern bool test;
 
@@ -55,15 +56,16 @@ int BaudRate(int n)
 
 bool startXcvrSerial()
 {
+	if (progStatus.xcvr_serial_port == "NONE" ||
+		progStatus.xcvr_serial_port == "xml_client") {
+		return true;
+	}
+
 	debug::level_e level = debug::level;
 	debug::level = debug::DEBUG_LEVEL;
 
 	bypass_serial_thread_loop = true;
 // setup commands for serial port
-	if (progStatus.xcvr_serial_port == "NONE") {
-//		bypass_serial_thread_loop = false;
-		return false;
-	}
 
 	RigSerial->Device(progStatus.xcvr_serial_port);
 	RigSerial->Baud(BaudRate(progStatus.serial_baudrate));
@@ -166,11 +168,16 @@ int readResponse(std::string req1, std::string req2)
 {
 	int numread = 0;
 	respstr.clear();
+
 	if (progStatus.use_tcpip)
 		numread = read_from_remote(respstr);
 	else {
 		numread = RigSerial->ReadBuffer(respstr, RXBUFFSIZE, req1, req2);
 	}
+//std::cout << "readResponse:" << std::endl;
+//std::cout << "req1: " << str2hex(req1.c_str(), req1.length()) << ", req2: " << str2hex(req2.c_str(), req2.length()) << std::endl;
+//std::cout << "resp: " << numread << ", " << str2hex(respstr.c_str(), respstr.length()) << std::endl;
+
 	LOG_DEBUG("rsp:%3d, %s", numread, str2hex(respstr.c_str(), respstr.length()));
 	return numread;
 }
@@ -184,6 +191,12 @@ int sendCommand (std::string s, int nread, int wait)
 	// Clear command before sending, to keep the logs sensical.  Otherwise it looks like 
 	// reply was from this command, when it really was from a previous command.
 	assignReplyStr("");
+
+	if (progStatus.xmlrpc_rig) {
+		respstr = xml_cat_string(s);
+//std::cout << "respstr: " << respstr << std::endl;
+		return respstr.length();
+	}
 
 	if (tci_running()) {
 		tci_send(s);
@@ -253,6 +266,11 @@ bool waitCommand(
 	int numwrite = (int)command.length();
 	if (nread == 0)
 		LOG_DEBUG("cmd:%3d, %s", numwrite, how == ASC ? command.c_str() : str2hex(command.data(), numwrite));
+
+	if (progStatus.xmlrpc_rig) {
+		respstr = xml_cat_string(command);
+		return respstr.length();
+	}
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(command);
@@ -325,7 +343,8 @@ bool waitCommand(
 int waitResponse(int timeout)
 {
 	int n = 0;
-	if (!progStatus.use_tcpip && RigSerial->IsOpen() == false)
+
+	if (!progStatus.xmlrpc_rig && !progStatus.use_tcpip && !RigSerial->IsOpen())
 		return 0;
 
 	MilliSleep(10);
@@ -380,3 +399,34 @@ void showresp(int level, int how, std::string s, std::string tx, std::string rx)
 		break;
 	}
 }
+
+std::string to_hex(std::string fm)
+{
+	static std::string to;
+	to.clear();
+	char szHEX[8];
+	for (size_t n = 0; n < fm.length(); n++) {
+		snprintf(szHEX, sizeof(szHEX), "x%02X ", (fm[n] & 0xFF));
+		to.append(szHEX);
+	}
+	to.erase(to.length() - 1);
+	return to;
+}
+
+std::string fm_hex(std::string fm)
+{
+	static std::string to;
+	to.clear();
+
+	if (fm.find("x") != std::string::npos) {
+		size_t p = 0;
+		unsigned int val;
+		while (( p = fm.find("x", p)) != std::string::npos) {
+			sscanf(&fm[p+1], "%X", &val);
+			to += (unsigned char) val;
+			p += 3;
+		}
+	}
+	return to;
+}
+
