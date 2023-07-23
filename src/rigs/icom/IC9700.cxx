@@ -266,9 +266,9 @@ RIG_IC9700::RIG_IC9700() {
 
 	has_band_selection = true;
 
-        // JBA - these two lines broke sat mode when setting the mode of the sub R.
-        // I'm not quite sure what they actually do but they are used in support.cxx and xml_server
-        // A toggle added in get_sat_mode to correct this.
+				// JBA - these two lines broke sat mode when setting the mode of the sub R.
+				// I'm not quite sure what they actually do but they are used in support.cxx and xml_server
+				// A toggle added in get_sat_mode to correct this.
 	can_change_alt_vfo = true;
 	has_a2b = true;
 
@@ -346,48 +346,48 @@ void RIG_IC9700::set_xcvr_auto_off()
 
 void RIG_IC9700::selectA()
 {
-  // JBA - select Main Band if rig is in sat mode and VFO A if it is not
-  // This is a change from version 1.4.5
+	// JBA - select Main Band if rig is in sat mode and VFO A if it is not
+	// This is a change from version 1.4.5
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-  
-  cmd = pre_to;
-  cmd += '\x07';
-  if( sat_mode )
-    cmd += '\xD0';          // Select Main band
-  else
-    cmd += '\x00';          // Select VFO A
-  cmd.append(post);
-  waitFB("select A");
-  set_trace(2, "selectA()", str2hex(replystr.c_str(), replystr.length()));
-  inuse = onA;
+	
+	cmd = pre_to;
+	cmd += '\x07';
+	if( sat_mode )
+		cmd += '\xD0';          // Select Main band
+	else
+		cmd += '\x00';          // Select VFO A
+	cmd.append(post);
+	waitFB("select A");
+	set_trace(2, "selectA()", str2hex(replystr.c_str(), replystr.length()));
+	inuse = onA;
 
 }
 
 void RIG_IC9700::selectB()
 {
-  // JBA - select Sub Band if rig is in sat mode and VFO B if it is not
-  // This is a change from version 1.4.5
+	// JBA - select Sub Band if rig is in sat mode and VFO B if it is not
+	// This is a change from version 1.4.5
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-  
-  cmd = pre_to;
-  cmd += '\x07';
-  if( sat_mode )
-    cmd += '\xD1';          // Select Sub band
-  else
-    cmd += '\x01';          // Select VFO A 
-  cmd.append(post);
-  waitFB("select B");
-  set_trace(2, "selectB()", str2hex(replystr.c_str(), replystr.length()));
-  inuse = onB;
-  
+	
+	cmd = pre_to;
+	cmd += '\x07';
+	if( sat_mode )
+		cmd += '\xD1';          // Select Sub band
+	else
+		cmd += '\x01';          // Select VFO A 
+	cmd.append(post);
+	waitFB("select B");
+	set_trace(2, "selectB()", str2hex(replystr.c_str(), replystr.length()));
+	inuse = onB;
+	
 }
 
 bool RIG_IC9700::check ()
@@ -407,37 +407,37 @@ static int ret = 0;
 unsigned long long RIG_IC9700::get_vfoA ()
 {
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-  
-  if( sat_mode ){
-      
-      // Rig is in satellite mode - command 0x25 doesn't work in sat mode
-      // See pg 23 of IC9700 CIV manual
-      if (inuse == onB)
-        return A.freq;
-      std::string resp = pre_fm;
-      resp += '\x03';
-      cmd = pre_to;
-      cmd += '\x03';
-      cmd.append( post );
-      if (waitFOR(11, "get vfo A")) {
-        size_t p = replystr.rfind(resp);
-        if (p != std::string::npos) {
-          if (replystr[p+5] == -1)
-            A.freq = 0;
-          else
-            A.freq = fm_bcd_be(replystr.substr(p+5), 10);
+	
+	if( sat_mode ){
+			
+			// Rig is in satellite mode - command 0x25 doesn't work in sat mode
+			// See pg 23 of IC9700 CIV manual
+			if (inuse == onB)
+				return A.freq;
+			std::string resp = pre_fm;
+			resp += '\x03';
+			cmd = pre_to;
+			cmd += '\x03';
+			cmd.append( post );
+			if (waitFOR(11, "get vfo A")) {
+				size_t p = replystr.rfind(resp);
+				if (p != std::string::npos) {
+					if (replystr[p+5] == -1)
+						A.freq = 0;
+					else
+						A.freq = fm_bcd_be(replystr.substr(p+5), 10);
 	}
-      }
-      get_trace(2, "get_vfoA()", str2hex(replystr.c_str(), replystr.length()));
-        
-  } else {
-    
-      // Rig is not in satellite mode
-      // The 0x25 command only affects the Main Band VFOs
+			}
+			get_trace(2, "get_vfoA()", str2hex(replystr.c_str(), replystr.length()));
+				
+	} else {
+		
+			// Rig is not in satellite mode
+			// The 0x25 command only affects the Main Band VFOs
 	std::string resp;
 
 	cmd.assign(pre_to).append("\x25");
@@ -467,34 +467,34 @@ unsigned long long RIG_IC9700::get_vfoA ()
 		}
 	}
 
-  }
+	}
 
 	return A.freq;
 }
 
 void RIG_IC9700::set_vfoA (unsigned long long freq)
 {
-  A.freq = freq;
+	A.freq = freq;
 
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-    
-  if( sat_mode ){
-      
-      // Rig is in satellite mode - command 0x25 doesn't work in sat mode
-      cmd = pre_to;
-      cmd += '\x05';
-      cmd.append( to_bcd_be( freq, 10 ) );
-      cmd.append( post );
-      waitFB("set vfo A");
-      set_trace(2, "set_vfoA()", str2hex(replystr.c_str(), replystr.length()));
-        
-  } else {
-    
-      // Rig is not in satellite mode 
+		
+	if( sat_mode ){
+			
+			// Rig is in satellite mode - command 0x25 doesn't work in sat mode
+			cmd = pre_to;
+			cmd += '\x05';
+			cmd.append( to_bcd_be( freq, 10 ) );
+			cmd.append( post );
+			waitFB("set vfo A");
+			set_trace(2, "set_vfoA()", str2hex(replystr.c_str(), replystr.length()));
+				
+	} else {
+		
+			// Rig is not in satellite mode 
 	cmd.assign(pre_to).append("\x25");
 	if (inuse == onB) cmd += '\x01';
 	else      cmd += '\x00';
@@ -505,41 +505,41 @@ void RIG_IC9700::set_vfoA (unsigned long long freq)
 	set_trace(1, "set_vfoA");
 	waitFB("set vfo A");
 	seth();
-      
-  }
+			
+	}
 }
 
 unsigned long long RIG_IC9700::get_vfoB ()
 {
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-    
-  if( sat_mode ){
-      
-      // Rig is in satellite mode - command 0x25 doesn't work in sat mode
-      if (inuse != onB) return B.freq;
-      std::string resp = pre_fm;
-      resp += '\x03';
-      cmd = pre_to;
-      cmd += '\x03';
-      cmd.append( post );
-      if (waitFOR(11, "get vfo B")) {
-        size_t p = replystr.rfind(resp);
-        if (p != std::string::npos) {
-          if (replystr[p+5] == -1)
-            A.freq = 0;
-          else
-            B.freq = fm_bcd_be(replystr.substr(p+5), 10);
+		
+	if( sat_mode ){
+			
+			// Rig is in satellite mode - command 0x25 doesn't work in sat mode
+			if (inuse != onB) return B.freq;
+			std::string resp = pre_fm;
+			resp += '\x03';
+			cmd = pre_to;
+			cmd += '\x03';
+			cmd.append( post );
+			if (waitFOR(11, "get vfo B")) {
+				size_t p = replystr.rfind(resp);
+				if (p != std::string::npos) {
+					if (replystr[p+5] == -1)
+						A.freq = 0;
+					else
+						B.freq = fm_bcd_be(replystr.substr(p+5), 10);
 	}
-      }
-      get_trace(2, "get_vfoB()", str2hex(replystr.c_str(), replystr.length()));
-        
-  } else {
+			}
+			get_trace(2, "get_vfoB()", str2hex(replystr.c_str(), replystr.length()));
+				
+	} else {
 
-      // Rig is not in satellite mode 
+			// Rig is not in satellite mode 
 	std::string resp;
 
 	cmd.assign(pre_to).append("\x25");
@@ -569,34 +569,34 @@ unsigned long long RIG_IC9700::get_vfoB ()
 		}
 	}
 
-  }
+	}
 
 	return B.freq;
 }
 
 void RIG_IC9700::set_vfoB (unsigned long long freq)
 {
-  B.freq = freq;
+	B.freq = freq;
 
 #ifdef DUALWATCH_SUB_AS_B
-  int sat_mode = get_sat_mode() + get_dualwatch();
+	int sat_mode = get_sat_mode() + get_dualwatch();
 #else
-  int sat_mode = get_sat_mode();
+	int sat_mode = get_sat_mode();
 #endif
-    
-  if( sat_mode ){
-    
-      // Rig is in satellite mode - command 0x25 doesn't work in sat mode
-      cmd = pre_to;
-      cmd += '\x05';
-      cmd.append( to_bcd_be( freq, 10 ) );
-      cmd.append( post );
-      waitFB("set vfo B");
-      set_trace(2, "set_vfoB()", str2hex(replystr.c_str(), replystr.length()));
-        
-  } else {
+		
+	if( sat_mode ){
+		
+			// Rig is in satellite mode - command 0x25 doesn't work in sat mode
+			cmd = pre_to;
+			cmd += '\x05';
+			cmd.append( to_bcd_be( freq, 10 ) );
+			cmd.append( post );
+			waitFB("set vfo B");
+			set_trace(2, "set_vfoB()", str2hex(replystr.c_str(), replystr.length()));
+				
+	} else {
 
-      // Rig is not in satellite mode 
+			// Rig is not in satellite mode 
 	cmd.assign(pre_to).append("\x25");
 	if (inuse == onB) cmd += '\x00';
 	else      cmd += '\x01';
@@ -608,8 +608,8 @@ void RIG_IC9700::set_vfoB (unsigned long long freq)
 	waitFB("set vfo B");
 	seth();
 
-  }
-  
+	}
+	
 }
 
 void RIG_IC9700::set_modeA(int val)
@@ -1999,32 +1999,32 @@ void RIG_IC9700::set_band_selection(int v)
 // the variable cmd is common to all of these routines.
 int RIG_IC9700::get_sat_mode()
 {
-  int ret;
-  int iret=-1;
-  std::string resp;
+	int ret;
+	int iret = 0;
+	std::string resp;
 
-  // Read sat mode
-  cmd = pre_to;
-  cmd.append("\x16\x5a");
-  cmd.append(post);
-  resp = pre_fm;
-  resp.append("\x16\x5a");
-  ret = waitFOR(8, "get_sat_mode");
-  get_trace(2, "get_sat_mode()", str2hex(replystr.c_str(), replystr.length()));
+	// Read sat mode
+	cmd = pre_to;
+	cmd.append("\x16\x5a");
+	cmd.append(post);
+	resp = pre_fm;
+	resp.append("\x16\x5a");
+	ret = waitFOR(8, "get_sat_mode");
+	get_trace(2, "get_sat_mode()", str2hex(replystr.c_str(), replystr.length()));
 
-  if (ret) {
-    size_t p = replystr.rfind(resp);
-    iret = fm_bcd(replystr.substr(p+6), 2);
-  }
+	if (ret) {
+		size_t p = replystr.rfind(resp);
+		iret = replystr[p+6];
+	}
 
-  // These two flags are used elsewhere and broke sat mode - only allow them to
-  // be set if not in sat mode
-  if( iret ) 
-    can_change_alt_vfo = has_a2b = false;
-  else 
-    can_change_alt_vfo = has_a2b = true;
+	// These two flags are used elsewhere and broke sat mode - only allow them to
+	// be set if not in sat mode
+	if( iret ) 
+		can_change_alt_vfo = has_a2b = false;
+	else 
+		can_change_alt_vfo = has_a2b = true;
 
-  return iret;
+	return iret;
 }
 
 
@@ -2034,25 +2034,25 @@ int RIG_IC9700::get_sat_mode()
 // the variable cmd is common to all of these routines.
 int RIG_IC9700::get_dualwatch()
 {
-  int ret;
-  int iret=-1;
-  std::string resp;
+	int ret;
+	int iret = 0;
+	std::string resp;
 
-  // Read sat mode
-  cmd = pre_to;
-  cmd.append("\x16\x59");
-  cmd.append(post);
-  resp = pre_fm;
-  resp.append("\x16\x59");
-  ret = waitFOR(8, "get_dualwatch");
-  get_trace(2, "get_dualwatch()", str2hex(replystr.c_str(), replystr.length()));
+	// Read sat mode
+	cmd = pre_to;
+	cmd.append("\x16\x59");
+	cmd.append(post);
+	resp = pre_fm;
+	resp.append("\x16\x59");
+	ret = waitFOR(8, "get_dualwatch");
+	get_trace(2, "get_dualwatch()", str2hex(replystr.c_str(), replystr.length()));
 
-  if (ret) {
-    size_t p = replystr.rfind(resp);
-    iret = fm_bcd(replystr.substr(p+6), 2);
-  }
+	if (ret) {
+		size_t p = replystr.rfind(resp);
+		iret = replystr[p+6];
+	}
 
-  return iret;
+	return iret;
 }
 
 
