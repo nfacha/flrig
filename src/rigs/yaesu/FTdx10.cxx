@@ -245,6 +245,8 @@ RIG_FTdx10::RIG_FTdx10() {
 	has_smeter =
 	has_swr_control =
 	has_alc_control =
+	has_idd_control =
+	has_voltmeter =
 	has_power_out =
 	has_power_control =
 	has_volume_control =
@@ -611,6 +613,69 @@ int RIG_FTdx10::get_alc()
 	int mtr = atoi(replystr.substr(p + 3, 3).c_str());
 
 	return (int)ceil(mtr / 2.56);
+}
+
+struct mtrpair {int mtr; float val;};
+
+double RIG_FTdx10::get_idd()
+{
+	static mtrpair iddtbl[] = {
+		{ 52, 5.0 },
+		{ 70, 7.0 },
+		{ 96, 10.0 },
+		{ 116, 12.0 },
+		{ 125, 13.0 },
+		{ 134, 14.0 },
+		{ 143, 15.0 },
+		{ 152, 16.0 },
+		{ 161, 17.0 },
+		{ 171, 18.0 },
+		{ 191, 20.0 }
+	};
+
+	cmd = rsp = "RM7";
+	cmd += ';';
+	wait_char(';',10, 100, "get alc", ASC);
+	gett("get_idd");
+
+	int mtr = 0, dmy = 0;
+	double idd = 0;
+	size_t p = replystr.rfind("RM7");
+	if (p != std::string::npos) {
+		sscanf(&replystr[p], "RM7%3d%3d", &mtr, &dmy);
+		size_t i = 0;
+		for (i = 0; i < sizeof(iddtbl) / sizeof(mtrpair) - 1; i++)
+			if (mtr >= iddtbl[i].mtr && mtr < iddtbl[i+1].mtr)
+				break;
+		if (mtr < 0) mtr = 0;
+		if (mtr > 191) mtr = 191;
+		idd = iddtbl[i].val +
+			  (iddtbl[i+1].val - iddtbl[i].val)*(mtr - iddtbl[i].mtr) / (iddtbl[i+1].mtr - iddtbl[i].mtr);
+		if (idd > 25) idd = 25;
+	}
+	return idd;
+}
+
+double RIG_FTdx10::get_voltmeter()
+{
+	cmd = "RM8;";
+	std::string resp = "RM";
+
+	get_trace(1, "get_voltmeter()");
+	wait_char(';',10, 100, "get vdd", ASC);
+	gett("get_voltmeter");
+
+	int mtr = 0, dmy = 0;
+	double val = 0;
+
+	size_t p = replystr.rfind("RM8");
+	if (p != std::string::npos) {
+		sscanf(&replystr[p], "RM8%3d%3d", &mtr, &dmy);
+		val = 13.8 * mtr / 190;
+		return val;
+	}
+
+	return -1;
 }
 
 // Transceiver power level
