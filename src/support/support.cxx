@@ -1188,7 +1188,12 @@ void set_ptt(void *d)
 		scaleSmeter->hide();
 		sldrSWR->show();
 		sldrSWR->redraw();
-		btnALC_IDD_SWR->image(meter_image == SWR_IMAGE ? image_swr : image_alc);
+        if (selrig->name_ == rig_PowerSDR.name_) {
+		    btnALC_IDD_SWR->image(meter_image == SWR_IMAGE ? image_swr : image_alc40db);
+        }
+        else {
+		    btnALC_IDD_SWR->image(meter_image == SWR_IMAGE ? image_swr : image_alc);
+        }
 		btnALC_IDD_SWR->redraw();
 		btnALC_IDD_SWR->show();
 	}
@@ -4036,7 +4041,12 @@ void cbALC_IDD_SWR()
 		case SWR_IMAGE:
 		default:
 			if (selrig->has_alc_control) {
-				btnALC_IDD_SWR->image(image_alc);
+                if (selrig->name_ == rig_PowerSDR.name_) {
+					btnALC_IDD_SWR->image(image_alc40db);
+                }
+                else {
+					btnALC_IDD_SWR->image(image_alc);
+                }
 				meter_image = ALC_IMAGE;
 				sldrALC->show();
 				{

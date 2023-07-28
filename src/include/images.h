@@ -42,5 +42,5 @@ extern Fl_Bitmap image_idd50;
 extern Fl_Bitmap image_smeter;
 extern Fl_Bitmap image_swr;
 extern Fl_Bitmap image_alc;
-
+extern Fl_Bitmap image_alc40db;
 #endif

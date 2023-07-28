@@ -120,7 +120,12 @@ Fl_Double_Window* win_meters() {
 
 	mtr_ALC = new Fl_Box(2, sigbar_SWR->y() + sigbar_SWR->h() + 2, 206, 20);
 	mtr_ALC->box(FL_FLAT_BOX);
-	mtr_ALC->image(image_alc);
+    if (selrig->name_ == rig_PowerSDR.name_) {
+        mtr_ALC->image(image_alc40db);
+    }
+    else {
+	    mtr_ALC->image(image_alc);
+    }
 	mtr_ALC->color(bgclr);
 	mtr_ALC->labelcolor(fgclr);
 

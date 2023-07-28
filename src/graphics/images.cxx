@@ -45,6 +45,7 @@
 #include "images/S60.xbm"
 #include "images/SWR.xbm"
 #include "images/alc.xbm"
+#include "images/alc40db.xbm"
 
 Fl_Bitmap image_p5(P5_bits, P5_width, P5_height);
 Fl_Bitmap image_p10(P10_bits, P10_width, P10_height);
@@ -64,6 +65,7 @@ Fl_Bitmap image_idd50(idd50_bits, idd50_width, idd50_height);
 Fl_Bitmap image_smeter(S60_bits, S60_width, S60_height);
 Fl_Bitmap image_swr(SWR_bits, SWR_width, SWR_height);
 Fl_Bitmap image_alc(alc_bits, alc_width, alc_height);
+Fl_Bitmap image_alc40db(alc40db_bits, alc40db_width, alc40db_height);
 
 
 

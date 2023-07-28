@@ -469,6 +469,7 @@ EXTRA_DIST = \
 	include/yaesu/FTdx9000.h \
 	include/combo.h \
 	images/alc.xbm \
+	images/alc40db.xbm \
 	images/P5.xbm \
 	images/P10.xbm \
 	images/P15.xbm \

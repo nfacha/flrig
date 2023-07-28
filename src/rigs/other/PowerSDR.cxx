@@ -393,8 +393,9 @@ int RIG_PowerSDR::get_alc()
     gett("alc");
 	showresp(WARN, ASC, "get alc", cmd, replystr);
 	if (sscanf(&replystr[0], "ZZRM4%lf", &alc) != 1) alc=0;
-    alc=fabs(alc)*2;
-    if (alc > 50) alc = 50;
+    alc=(alc)*(100.0/40.0); // 0-40dB scale
+    if (alc < 0) alc = 0;
+    else if (alc > 100) alc = 100;
 	return alc;
 }
 
