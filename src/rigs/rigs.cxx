@@ -138,6 +138,7 @@ RIG_SDR2_PRO	rig_sdr2;
 RIG_TCI_SUNDX	rig_tci_sundx;
 RIG_TCI_SUNPRO	rig_tci_sunpro;
 RIG_TRUSDX		rig_trusdx;
+RIG_SmartSDR    rig_smartsdr;
 
 rigbase *rigs[] = {
 	&rig_null,		// 0
@@ -250,6 +251,7 @@ rigbase *rigs[] = {
 	&rig_tci_sundx,	// 107
 	&rig_tci_sunpro,// 108
 	&rig_trusdx,	// 109
+	&rig_smartsdr,  // 110
 	NULL
 
 };

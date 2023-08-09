@@ -430,19 +430,17 @@ void read_mode()
 	}
 
 	int nu_mode;
-	int nu_BW;
-
 	if (selrig->inuse == onA) {
 		rig_trace(2, "read_mode", "vfoA active");
 		nu_mode = selrig->get_modeA();
+char resp[50];
+snprintf(resp, sizeof(resp), "read: %d", nu_mode);
+rig_trace(1, resp);
 		if (nu_mode != opMODE->index()) {
 			vfoA.imode = vfo->imode = nu_mode;
 			selrig->adjust_bandwidth(vfo->imode);
 			Fl::awake(setModeControl);
-		}
-		nu_BW = selrig->get_bwA();
-		if (vfoA.iBW != nu_BW) {
-			vfoA.iBW = vfo->iBW = nu_BW;
+			vfoA.iBW = vfo->iBW = selrig->get_bwA();
 			Fl::awake(updateBandwidthControl);
 		}
 
@@ -463,10 +461,7 @@ void read_mode()
 			vfoB.imode = vfo->imode = nu_mode;
 			selrig->adjust_bandwidth(vfo->imode);
 			Fl::awake(setModeControl);
-		}
-		nu_BW = selrig->get_bwB();
-		if (vfoB.iBW != nu_BW) {
-			vfoB.iBW = vfo->iBW = nu_BW;
+			vfoB.iBW = vfo->iBW = selrig->get_bwB();
 			Fl::awake(updateBandwidthControl);
 		}
 		Fl::awake(updateTCI);
@@ -558,14 +553,13 @@ void TRACED(read_bandwidth)
 	if (selrig->inuse == onA) {
 		s << "get_bwA(): ";
 		vfoA.iBW = vfo->iBW = selrig->get_bwA();
-		Fl::awake(setBWControl);
 	} else {
 		s << "get_bwB(): ";
 		vfoB.iBW = vfo->iBW = selrig->get_bwB();
-		Fl::awake(setBWControl);
 	}
 	s << vfo->iBW;
 	trace(1, s.str().c_str());
+	Fl::awake(setBWControl);
 	Fl::awake(updateTCI);
 	Fl::awake(updateFLEX1500);
 }

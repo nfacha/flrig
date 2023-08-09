@@ -178,6 +178,7 @@ flrig_SOURCES += \
 	rigs/other/PCR1000.cxx \
 	rigs/other/PowerSDR.cxx \
 	rigs/other/RAY152.cxx \
+	rigs/other/SmartSDR.cxx \
 	rigs/other/sunsdr2.cxx \
 	rigs/other/tcisdr.cxx \
 	rigs/other/trusdx.cxx \
@@ -380,6 +381,7 @@ EXTRA_DIST = \
 	include/other/PCR1000.h \
 	include/other/RAY152.h \
 	include/other/PowerSDR.h \
+	include/other/SmartSDR.h \
 	include/other/TMD710.h \
 	include/pl_tones.h \
 	include/ptt.h \

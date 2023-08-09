@@ -79,6 +79,7 @@
 #include "other/TMD710.h"
 #include "other/FLEX1500.h"
 #include "other/PowerSDR.h"
+#include "other/SmartSDR.h"
 #include "tentec/TT516.h"
 #include "tentec/DELTA-II.h"
 #include "tentec/TT538.h"
@@ -239,5 +240,6 @@ extern RIG_SDR2_PRO		rig_sdr2;		// 106
 extern RIG_TCI_SUNDX	rig_tci_sundx;	// 107
 extern RIG_TCI_SUNPRO	rig_tci_sunpro;	// 108
 extern RIG_TRUSDX		rig_trusdx;		// 109
+extern RIG_SmartSDR     rig_smartsdr;   // 110
 
 #endif
