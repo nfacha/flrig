@@ -1,6 +1,18 @@
-2023-07-06  dave-w1hkj  <w1hkj@bellsouth.net>
+2023-08-25  dave-w1hkj  <w1hkj@bellsouth.net>
 
-	10e32473: Version 2.0.02
+	f1bcf0b8: Version 2.02.03
+	9e1797b7: SmartSDR
+
+2023-07-28  Black Michael  <mdblack98@yahoo.com>
+
+	b6b09633: ALC image
+
+2023-07-27  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	f0f216b7: FTdx10 metering
+	19b93172: IC9700
+	3907800f: xmlrpc_rig
+	72a5a4ba: Version 2.0.02
 	972d38a1: ic735 bw
 	0cc40653: KX2
 	1b3cef6e: ui controls
