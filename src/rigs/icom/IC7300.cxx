@@ -193,8 +193,8 @@ RIG_IC7300::RIG_IC7300() {
 	serial_baudrate = BR115200;
 	stopbits = 1;
 	serial_retries = 2;
-//	serial_write_delay = 0;
-//	serial_post_write_delay = 0;
+	serial_write_delay = 0;
+	serial_post_write_delay = 0;
 	serial_timeout = 50;
 	serial_echo = true;
 	serial_rtscts = false;

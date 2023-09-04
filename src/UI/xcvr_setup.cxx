@@ -44,7 +44,6 @@ Fl_Group *tabXCVR = (Fl_Group *)0;
 	Fl_ComboBox *mnuBaudrate = (Fl_ComboBox *)0;
 	Fl_Check_Button *btnTwoStopBit = (Fl_Check_Button *)0;
 	Fl_Check_Button *btnOneStopBit = (Fl_Check_Button *)0;
-	Fl_Check_Button *btnRigCatEcho = (Fl_Check_Button *)0;
 
 	Fl_ListBox *lbox_catptt = (Fl_ListBox *)0;
 	Fl_ListBox *lbox_rtsptt = (Fl_ListBox *)0;
@@ -431,14 +430,6 @@ static void cb_btnOneStopBit(Fl_Check_Button* o, void*) {
 		progStatus.stopbits = 1;
 	} else
 		o->value(true);
-	btn_init_ser_port->labelcolor(FL_RED);
-	btn_init_ser_port->redraw_label();
-
-	btn2_init_ser_port->labelcolor(FL_RED);
-	btn2_init_ser_port->redraw_label();
-}
-
-static void cb_btnRigCatEcho(Fl_Check_Button*, void*) {
 	btn_init_ser_port->labelcolor(FL_RED);
 	btn_init_ser_port->redraw_label();
 
@@ -987,7 +978,6 @@ trace(1, "close serial port");
 			progStatus.serial_retries = (int)cntRigCatRetries->value();
 			progStatus.serial_timeout = (int)cntRigCatTimeout->value();
 			progStatus.serial_post_write_delay = (int)cntPostWriteDelay->value();
-			progStatus.serial_echo = btnRigCatEcho->value();
 
 			progStatus.serial_rtsptt = lbox_rtsptt->index();
 			progStatus.serial_catptt = lbox_catptt->index();
@@ -1190,15 +1180,8 @@ Fl_Group *createXCVR(int X, int Y, int W, int H, const char *label)
 	btnTwoStopBit->callback((Fl_Callback*)cb_btnTwoStopBit);
 	btnTwoStopBit->value(progStatus.stopbits == 2);
 
-	btnRigCatEcho = new Fl_Check_Button(
-		btnOneStopBit->x(), btnOneStopBit->y() + 25,
-		100, 22, _("Echo "));
-	btnRigCatEcho->down_box(FL_DOWN_BOX);
-	btnRigCatEcho->callback((Fl_Callback*)cb_btnRigCatEcho);
-	btnRigCatEcho->value(progStatus.serial_echo);
-
 	chkrtscts = new Fl_Check_Button(
-		btnTwoStopBit->x(), btnRigCatEcho->y(),
+		btnTwoStopBit->x(), btnTwoStopBit->y() + 25,
 		100, 22, _("RTS/CTS"));
 	chkrtscts->tooltip(_("Xcvr uses RTS/CTS handshake"));
 	chkrtscts->down_box(FL_DOWN_BOX);
@@ -1206,7 +1189,7 @@ Fl_Group *createXCVR(int X, int Y, int W, int H, const char *label)
 	chkrtscts->value(progStatus.serial_rtscts);
 
 	btnrtsplus1 = new Fl_Check_Button(
-		btnRigCatEcho->x(), btnRigCatEcho->y() + 25,
+		btnOneStopBit->x(), btnOneStopBit->y() + 50,
 		100, 22, _("RTS +12 v"));
 	btnrtsplus1->tooltip(_("Initial state of RTS"));
 	btnrtsplus1->callback((Fl_Callback*)cb_btnrtsplus);
@@ -1215,7 +1198,7 @@ Fl_Group *createXCVR(int X, int Y, int W, int H, const char *label)
 	btndtrplus1 = new Fl_Check_Button(
 		chkrtscts->x(), btnrtsplus1->y(),
 		100, 22, _("DTR +12 v"));
-	btndtrplus1->tooltip(_("Initial state of DTR"));
+	btndtrplus1->tooltip(_("Initia state of DTR"));
 	btndtrplus1->callback((Fl_Callback*)cb_btndtrplus);
 	btndtrplus1->value(progStatus.serial_dtrplus);
 

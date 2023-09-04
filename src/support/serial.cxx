@@ -32,7 +32,7 @@
 
 LOG_FILE_SOURCE(debug::LOG_RIGCONTROL);
 
-char traceinfo[500];
+char traceinfo[1000];
 
 bool SERIALDEBUG = false;
 
@@ -433,13 +433,14 @@ std::cout << "ReadBuffer(...) fd < 0" << std::endl;
 	bool  find_one = (!find1.empty() && find2.empty());
 
 	if (find_two)
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d, %s, %s)", nchars, s1.c_str(), s2.c_str());
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s  |  %s", s1.c_str(), s2.c_str());
 	else if (find_one)
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d, %s)", nchars, s1.c_str());
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s", s1.c_str());
 	else
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d)", nchars);
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %d chars", nchars);
 
-	if (SERIALDEBUG)
+	LOG_DEBUG("%s", traceinfo);
+	if (progStatus.serialtrace || SERIALDEBUG)
 		ser_trace(1, traceinfo);
 
 	int retnum = 0;
@@ -493,50 +494,6 @@ std::cout << "ReadBuffer(...) fd < 0" << std::endl;
 					p2 != std::string::npos &&
 					p2 > p1) {
 					
-					if (progStatus.serialtrace || SERIALDEBUG) {
-					char traceinfo[100];
-						std::string srx = buf;
-						size_t p = srx.find("\r\n");
-						if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-						p = srx.find('\r');
-						if (p != std::string::npos) srx.replace(p,1,"<cr>");
-						p = srx.find('\n');
-						if (p != std::string::npos) srx.replace(p,1,"<lf>");
-						bool hex = check_hex(buf.c_str(), buf.length());
-						snprintf(traceinfo, sizeof(traceinfo), "READBUFFER TWO [%0.3f msec]: %s",
-							(zusec() - start) * 1e-3,
-							(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-						ser_trace(1, traceinfo);
-					}
-				}
-				return nread;
-			}
-
-			else if (find_one) {
-				p1 = buf.rfind(find1);
-				if (p1 != std::string::npos) {
-
-					if (progStatus.serialtrace || SERIALDEBUG) {
-						char traceinfo[100];
-						std::string srx = buf;
-						size_t p = srx.find("\r\n");
-						if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-						p = srx.find('\r');
-						if (p != std::string::npos) srx.replace(p,1,"<cr>");
-						p = srx.find('\n');
-						if (p != std::string::npos) srx.replace(p,1,"<lf>");
-						bool hex = check_hex(buf.c_str(), buf.length());
-						snprintf(traceinfo, sizeof(traceinfo), "READBUFFER ONE [%0.3f msec]: %s",
-							(zusec() - start) * 1e-3,
-							(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-						ser_trace(1, traceinfo);
-					}
-					return nread;
-				}
-			}
-
-			else if ( nread >= nchars ) {
-				if (progStatus.serialtrace || SERIALDEBUG) {
 					char traceinfo[100];
 					std::string srx = buf;
 					size_t p = srx.find("\r\n");
@@ -546,11 +503,54 @@ std::cout << "ReadBuffer(...) fd < 0" << std::endl;
 					p = srx.find('\n');
 					if (p != std::string::npos) srx.replace(p,1,"<lf>");
 					bool hex = check_hex(buf.c_str(), buf.length());
-					snprintf(traceinfo, sizeof(traceinfo), "READBUFFER NCHARS [%0.3f msec]: %s",
+					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
 						(zusec() - start) * 1e-3,
 						(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-					ser_trace(1, traceinfo);
+					LOG_DEBUG("%s", traceinfo);
+					if (progStatus.serialtrace || SERIALDEBUG)
+						ser_trace(1, traceinfo);
+					return nread;
 				}
+			}
+
+			if (find_one) {
+				p1 = buf.rfind(find1);
+				if (p1 != std::string::npos) {
+					char traceinfo[100];
+					std::string srx = buf;
+					size_t p = srx.find("\r\n");
+					if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
+					p = srx.find('\r');
+					if (p != std::string::npos) srx.replace(p,1,"<cr>");
+					p = srx.find('\n');
+					if (p != std::string::npos) srx.replace(p,1,"<lf>");
+					bool hex = check_hex(buf.c_str(), buf.length());
+					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
+						(zusec() - start) * 1e-3,
+						(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
+					LOG_DEBUG("%s", traceinfo);
+					if (progStatus.serialtrace || SERIALDEBUG)
+						ser_trace(1, traceinfo);
+					return nread;
+				}
+			}
+
+			if ( nread >= nchars ) {
+				char traceinfo[100];
+				std::string srx = buf;
+				size_t p = srx.find("\r\n");
+				if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
+				p = srx.find('\r');
+				if (p != std::string::npos) srx.replace(p,1,"<cr>");
+				p = srx.find('\n');
+				if (p != std::string::npos) srx.replace(p,1,"<lf>");
+				bool hex = check_hex(buf.c_str(), buf.length());
+				snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
+					(zusec() - start) * 1e-3,
+					(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
+				LOG_DEBUG("%s", traceinfo);
+				if (progStatus.serialtrace || SERIALDEBUG)
+					ser_trace(1, traceinfo);
 				return nread;
 			}
 
@@ -598,30 +598,17 @@ int Cserial::WriteBuffer(const char *buff, int n)
 		size_t p = sw.rfind("\r\n");
 		if (p == (sw.length() - 2) ) {
 			sw.replace(p, 2, "<cr><lf>");
-			ser_trace(2, "WRITE BUFFER: ", sw.c_str());
+			ser_trace(2, "WriteBuffer: ", sw.c_str());
 		} else  {
 			bool hex = check_hex(sw.c_str(), sw.length());
-			ser_trace(2, "WRITE BUFFER: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
+			ser_trace(2, "WriteBuffer: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
 		}
 	}
 
-	int ret = 0;
-	if (progStatus.serial_write_delay) {
-		for (int j = 0; j < n; j++) {
-			ret = write (fd, &buff[j], 1);
-			MilliSleep(progStatus.serial_write_delay);
-			if (!ret) break;
-		}
-	} else
-		ret = write (fd, buff, n);
+	int ret = write (fd, buff, n);
 
-	int timeout = progStatus.serial_post_write_delay;
-	while (timeout > 0) {
-		if (timeout > 10) MilliSleep(10);
-		else MilliSleep(timeout);
-		timeout -= 10;
-		Fl::awake();
-	}
+	if (progStatus.serial_post_write_delay)
+		MilliSleep(progStatus.serial_post_write_delay);
 
 	return ret;
 }
@@ -708,26 +695,23 @@ bool Cserial::OpenPort()
 			  0);
 
 	if (hComm == INVALID_HANDLE_VALUE) {
-		LOG_ERROR("Open Comm port %s ; hComm = %u", 
+		snprintf(traceinfo, sizeof(traceinfo),
+			"INVALID_HANDLE_VALUE: Open Comm port %s ; hComm = %llu\n",
 			COMportname.c_str(),
 			(unsigned long long)hComm);
+		LOG_ERROR("%s", traceinfo); 
 
-		if (progStatus.serialtrace || SERIALDEBUG) {
-			snprintf(traceinfo, sizeof(traceinfo),
-				"INVALID_HANDLE_VALUE: Open Comm port %s ; hComm = %u\n",
-				COMportname.c_str(),
-				(unsigned long long)hComm);
-			ser_trace(1, traceinfo);
-		}
+		if (progStatus.serialtrace) ser_trace(1, traceinfo);
 
 		return false;
 	}
 
 	if (progStatus.serialtrace || SERIALDEBUG) {
 		snprintf(traceinfo, sizeof(traceinfo),
-			"Open Comm port %s ; hComm = %u\n",
+			"Open Comm port %s ; hComm = %llu\n",
 			COMportname.c_str(),
 			(unsigned long long)hComm);
+		LOG_INFO("%s", traceinfo);
 		ser_trace(1, traceinfo);
 		}
 
@@ -811,10 +795,10 @@ static  DWORD dwBytesTxD=0;
 int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::string find2)
 {
 	if (hComm == INVALID_HANDLE_VALUE) {
-		if (progStatus.serialtrace || SERIALDEBUG) {
-			snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer, invalid handle\n");
+		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer, invalid handle\n");
+		LOG_ERROR("%s", traceinfo);
+		if (progStatus.serialtrace || SERIALDEBUG)
 			ser_trace(1, traceinfo);
-		}
 		return 0;
 	}
 
@@ -849,100 +833,62 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	bool  find_two = (!find1.empty() && !find2.empty());
 	bool  find_one = (!find1.empty() && find2.empty());
 
+	size_t tnow = zmsec();
+	size_t start = tnow;
+
 	if (find_two)
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d, %s, %s)", nchars, s1.c_str(), s2.c_str());
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s  |  %s", s1.c_str(), s2.c_str());
 	else if (find_one)
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d, %s)", nchars, s1.c_str());
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s", s1.c_str());
 	else
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer(... %d)", nchars);
+		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %d chars", nchars);
+
+	LOG_DEBUG("%s", traceinfo);
+	if (progStatus.serialtrace || SERIALDEBUG)
+		ser_trace(1, traceinfo);
+
+	long unsigned int thisread = 0;
+	bool     retval = 0;
+	int      maxchars = nchars + nBytesWritten;
+	unsigned char uctemp[maxchars + 1];
+
+    buf.clear();
+    while (1) {
+        retval = ReadFile (hComm, uctemp, nchars - buf.length(), &thisread, NULL);
+        if (!retval || !thisread) break;
+        for (size_t i = 0; i < thisread; ++i) buf += uctemp[i];
+    }
+    if ((buf[3] & 0xFF) == 0xE0) { // test for echo string
+		while (1) {
+			retval = ReadFile (hComm, uctemp, maxchars - buf.length(), &thisread, NULL);
+			if (!retval || !thisread) break;
+			for (size_t i = 0; i < thisread; i++) buf += uctemp[i];
+		}
+	}
+
+	int nread = (int)buf.length();
+
+	size_t readtime = zmsec() - start;
+
+	snprintf(traceinfo, sizeof(traceinfo), 
+		"ReadBuffer [%u msec]: %s",
+		readtime,
+		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
+
+	LOG_DEBUG("%s", traceinfo);
+	if (progStatus.serialtrace || SERIALDEBUG)
+		ser_trace(1, traceinfo);
+
+	if (nread >= nchars) return nread;
+
+	snprintf(traceinfo, sizeof(traceinfo), 
+		"ReadBuffer FAILED [%u msec]",
+		zmsec() - start);
+	LOG_ERROR("%s", traceinfo);
 
 	if (progStatus.serialtrace || SERIALDEBUG)
 		ser_trace(1, traceinfo);
 
-	DWORD dwRead = 0;
-	int   nread = 0;
-	BOOL  retval = 0;
-	unsigned char uctemp[nchars + 1];
-
-	size_t tnow = zusec();
-	size_t start = tnow;
-
-	do {
-
-		memset(uctemp, 0, nchars + 1);
-		retval = ReadFile(hComm, uctemp, nchars - nread, &dwRead, NULL);
-
-		if (progStatus.serialtrace || SERIALDEBUG) {
-			int hex = check_hex(buf.c_str(), buf.length());
-			snprintf(traceinfo, sizeof(traceinfo), 
-				"ReadFile retval: %d, dwRead: %ld, %s",
-				retval,
-				dwRead,
-				(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()) );
-			ser_trace(1, traceinfo);
-		}
-
-		if (retval == 0) {
-			goto doloop;
-		}
-
-		if (dwRead == 0) {
-			goto doloop;
-		}
-
-		for (int nc = 0; nc < (int)dwRead; nc++)
-			buf += uctemp[nc];
-
-		nread += (int)dwRead;
-
-		if (find_two) {
-			size_t p1 = buf.rfind(find1);
-			size_t p2 = buf.rfind(find2);
-			if (p1 != std::string::npos &&
-				p2 != std::string::npos &&
-				p2 > p1) {
-				if (progStatus.serialtrace || SERIALDEBUG) {
-					hex = check_hex(buf.c_str(), buf.length());
-					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer TWO [%0.3f msec]: %s", (zusec() - start) * 1e-3,
-						(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
-					ser_trace(1, traceinfo);
-				}
-				return nread;
-			}
-		}
-
-		else if (find_one) {
-			if (buf.rfind(find1) != std::string::npos) {
-				if (progStatus.serialtrace || SERIALDEBUG) {
-					hex = check_hex(buf.c_str(), buf.length());
-					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer ONE [%0.3f msec]: %s", (zusec() - start) * 1e-3,
-						(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()) );
-					ser_trace(1, traceinfo);
-				}
-				return nread;
-			}
-		}
-
-		else if ( nread >= nchars ) {
-			if (progStatus.serialtrace || SERIALDEBUG) {
-				hex = check_hex(buf.c_str(), buf.length());
-				snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer NCHARS [%0.3f msec]: %s", (zusec() - start) * 1e-3,
-					(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()) );
-				ser_trace(1, traceinfo);
-			}
-			return nread;
-		}
-		tnow = zusec();
-doloop:
-		MilliSleep(1);
-	} while ( (zusec() - tnow) < (size_t)(progStatus.serial_timeout * 1000L));
-
-	if (progStatus.serialtrace || SERIALDEBUG) {
-		hex = check_hex(buf.c_str(), buf.length());
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer TIMED OUT [%0.3f msec]: %s", (zmsec() - start) * 1e-3,
-			(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()) );
-		ser_trace(1, traceinfo);
-	}
 	return nread;
 }
 
@@ -987,34 +933,19 @@ int Cserial::WriteBuffer(const char *buff, int n)
 		size_t p = sw.rfind("\r\n");
 		if (p == (sw.length() - 2) ) {
 			sw.replace(p, 2, "<cr><lf>");
-			ser_trace(2, "WRITE BUFFER: ", sw.c_str());
+			ser_trace(2, "WriteBuffer: ", sw.c_str());
 		} else  {
 			bool hex = check_hex(sw.c_str(), sw.length());
-			ser_trace(2, "WRITE BUFFER: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
+			ser_trace(2, "WriteBuffer: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
 		}
 	}
 
-	int ret = 0;
-	if (progStatus.serial_write_delay) {
-		for (int j = 0; j < n; j++) {
-			WriteFile (hComm, &buff[j], 1, &nBytesWritten, NULL);
-			MilliSleep(progStatus.serial_write_delay);
-			ret += nBytesWritten;
-		}
-	} else {
-		WriteFile (hComm, buff, n, &nBytesWritten, NULL);
-		ret = nBytesWritten;
-	}
+	WriteFile (hComm, buff, n,  &nBytesWritten, NULL);
+	
+	if (progStatus.serial_post_write_delay)
+		MilliSleep(progStatus.serial_post_write_delay);
 
-	int timeout = progStatus.serial_post_write_delay;
-	while (timeout > 0) {
-		if (timeout > 10) MilliSleep(10);
-		else MilliSleep(timeout);
-		timeout -= 10;
-		Fl::awake();
-	}
-
-	return ret;
+	return nBytesWritten;
 }
 
 
@@ -1029,41 +960,15 @@ int Cserial::WriteBuffer(const char *buff, int n)
 // Argument		 : DWORD WriteTotalTimeoutConstant
 ///////////////////////////////////////////////////////
 bool Cserial::SetCommunicationTimeouts(
-	DWORD ReadIntervalTimeout, // msec
+	DWORD ReadIntervalTimeout,
 	DWORD ReadTotalTimeoutMultiplier,
 	DWORD ReadTotalTimeoutConstant,
 	DWORD WriteTotalTimeoutMultiplier,
 	DWORD WriteTotalTimeoutConstant
 )
 {
-	if((bPortReady = GetCommTimeouts (hComm, &CommTimeoutsSaved))==0)   {
+	if((bPortReady = GetCommTimeouts (hComm, &CommTimeoutsSaved)) == 0)   {
 		return false;
-	}
-	LOG_ERROR("\n\
-Read Interval Timeout............... %ld\n\
-Read Total Timeout Multiplier....... %ld\n\
-Read Total Timeout Constant Timeout. %ld\n\
-Write Total Timeout Constant........ %ld\n\
-Write Total Timeout Multiplier...... %ld",
-	CommTimeoutsSaved.ReadIntervalTimeout,
-	CommTimeoutsSaved.ReadTotalTimeoutMultiplier,
-	CommTimeoutsSaved.ReadTotalTimeoutConstant,
-	CommTimeoutsSaved.WriteTotalTimeoutConstant,
-	CommTimeoutsSaved.WriteTotalTimeoutMultiplier);
-
-	if (progStatus.serialtrace || SERIALDEBUG) {
-		snprintf(traceinfo, sizeof(traceinfo), "\
-Read Interval Timeout............... %ld\n\
-Read Total Timeout Multiplier....... %ld\n\
-Read Total Timeout Constant Timeout. %ld\n\
-Write Total Timeout Constant........ %ld\n\
-Write Total Timeout Multiplier...... %ld\n",
-		CommTimeoutsSaved.ReadIntervalTimeout,
-		CommTimeoutsSaved.ReadTotalTimeoutMultiplier,
-		CommTimeoutsSaved.ReadTotalTimeoutConstant,
-		CommTimeoutsSaved.WriteTotalTimeoutConstant,
-		CommTimeoutsSaved.WriteTotalTimeoutMultiplier);
-		ser_trace(1, traceinfo);
 	}
 
 	CommTimeouts.ReadIntervalTimeout = ReadIntervalTimeout;
@@ -1074,7 +979,36 @@ Write Total Timeout Multiplier...... %ld\n",
 
 	bPortReady = SetCommTimeouts (hComm, &CommTimeouts);
 
-	if(bPortReady ==0) {
+	snprintf(traceinfo, sizeof(traceinfo), "\n\
+============     COMM TIMEOUTS     ================\n\
+Saved Read Interval Timeout............... %ld\n\
+Saved Read Total Timeout Multiplier....... %ld\n\
+Saved Read Total Timeout Constant Timeout. %ld\n\
+Saved Write Total Timeout Constant........ %ld\n\
+Saved Write Total Timeout Multiplier...... %ld\n\
+===================================================\n\
+Set Read Interval Timeout................. %ld\n\
+Set Read Total Timeout Multiplier......... %ld\n\
+Set Read Total Timeout Constant Timeout... %ld\n\
+Set Write Total Timeout Constant.......... %ld\n\
+Set Write Total Timeout Multiplier........ %ld\n\
+===================================================",
+	CommTimeoutsSaved.ReadIntervalTimeout,
+	CommTimeoutsSaved.ReadTotalTimeoutMultiplier,
+	CommTimeoutsSaved.ReadTotalTimeoutConstant,
+	CommTimeoutsSaved.WriteTotalTimeoutConstant,
+	CommTimeoutsSaved.WriteTotalTimeoutMultiplier,
+	CommTimeouts.ReadIntervalTimeout,
+	CommTimeouts.ReadTotalTimeoutMultiplier,
+	CommTimeouts.ReadTotalTimeoutConstant,
+	CommTimeouts.WriteTotalTimeoutConstant,
+	CommTimeouts.WriteTotalTimeoutMultiplier);
+
+	LOG_INFO("%s", traceinfo);
+
+	if (progStatus.serialtrace) ser_trace(1, traceinfo);
+	
+	if (bPortReady == 0) {
 		CloseHandle(hComm);
 		return false;
 	}
@@ -1153,18 +1087,17 @@ Write Total Timeout Multiplier...... %ld\n",
 
 bool Cserial::SetCommTimeout() {
 	return SetCommunicationTimeouts (
-		0,		// Read Interval Timeout
-		0,		// Read Total Timeout Multiplier
-		50,		// Read Total Timeout Constant
-		50,		// Write Total Timeout Constant
-		0		// Write Total Timeout Multiplier
-		);
-//	CommTimeouts.ReadIntervalTimeout = 50;
-//	CommTimeouts.ReadTotalTimeoutConstant = 50;
-//	CommTimeouts.ReadTotalTimeoutMultiplier=10;
-//	CommTimeouts.WriteTotalTimeoutMultiplier=10;
-//	CommTimeouts.WriteTotalTimeoutConstant = 50;
-
+	// Read Interval Timeout
+		MAXDWORD,
+	// Read Total Timeout Multiplier
+		MAXDWORD,
+	// Read Total Timeout Constant
+		1, // progStatus.serial_timeout ? progStatus.serial_timeout : 5,
+	// Write Total Timeout Constant
+		0,
+	// Write Total Timeout Multiplier
+		0
+	);
 }
 
 ///////////////////////////////////////////////////////
@@ -1236,6 +1169,11 @@ bool Cserial::ConfigurePort(
 	}
 
 	if (progStatus.serialtrace || SERIALDEBUG) {
+		ser_trace(1, traceinfo);
+	}
+
+	bPortReady = SetCommState(hComm, &dcb);
+
 	snprintf(traceinfo, sizeof(traceinfo), "\
 \n\
 Set Comm State:\n\
@@ -1257,41 +1195,40 @@ DCB.XoffChar        %d\n\
 DCB.fAbortOnError   %d\n\
 DCB.fOutxCtsFlow    %d\n\
 DCB.fOutxDsrFlow    %d\n",
-	(int)dcb.DCBlength,
-	(int)dcb.BaudRate,
-	(int)dcb.ByteSize,
-	(int)dcb.Parity,
-	(int)dcb.StopBits,
-	(int)dcb.fBinary,
-	(int)dcb.fDtrControl,
-	(int)dcb.fRtsControl,
-	(int)dcb.fDsrSensitivity,
-	(int)dcb.fParity,
-	(int)dcb.fOutX,
-	(int)dcb.fInX,
-	(int)dcb.fNull,
-	(int)dcb.XonChar,
-	(int)dcb.XoffChar,
-	(int)dcb.fAbortOnError,
-	(int)dcb.fOutxCtsFlow,
-	(int)dcb.fOutxDsrFlow);
-		ser_trace(1, traceinfo);
-	}
+		(int)dcb.DCBlength,
+		(int)dcb.BaudRate,
+		(int)dcb.ByteSize,
+		(int)dcb.Parity,
+		(int)dcb.StopBits,
+		(int)dcb.fBinary,
+		(int)dcb.fDtrControl,
+		(int)dcb.fRtsControl,
+		(int)dcb.fDsrSensitivity,
+		(int)dcb.fParity,
+		(int)dcb.fOutX,
+		(int)dcb.fInX,
+		(int)dcb.fNull,
+		(int)dcb.XonChar,
+		(int)dcb.XoffChar,
+		(int)dcb.fAbortOnError,
+		(int)dcb.fOutxCtsFlow,
+		(int)dcb.fOutxDsrFlow);
 
-	bPortReady = SetCommState(hComm, &dcb);
+	LOG_INFO("%s", traceinfo);
 
-	if (progStatus.serialtrace || SERIALDEBUG) {
-		long err = GetLastError();
-		snprintf(traceinfo, sizeof(traceinfo),
-			"SetCommState handle %u, returned %d, error = %d\n",
-			(unsigned long long)hComm, bPortReady, (int)err);
-		ser_trace(1, traceinfo);
-	}
+	if (progStatus.serialtrace) ser_trace(1, traceinfo);
 
 	if (bPortReady == 0) {
+		long err = GetLastError();
+		snprintf(traceinfo, sizeof(traceinfo),
+			"SetCommState handle %llu, returned %d, error = %d\n",
+			(unsigned long long)hComm, bPortReady, (int)err);
+		LOG_ERROR("%s", traceinfo);
+		ser_trace(1, traceinfo);
 		CloseHandle(hComm);
 		return false;
 	}
+
 	return SetCommTimeout();
 }
 

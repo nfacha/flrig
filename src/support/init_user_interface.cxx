@@ -2657,9 +2657,6 @@ void TRACED(initConfigDialog)
 		cntWriteDelay->value( srig->serial_write_delay );
 		query_interval->value( srig->serloop_timing );
 
-		btnRigCatEcho->value( srig->serial_echo );
-
-
 		lbox_catptt->index( srig->serial_catptt );
 		lbox_rtsptt->index( srig->serial_rtsptt );
 		lbox_dtrptt->index( srig->serial_dtrptt );
@@ -2715,7 +2712,6 @@ void TRACED(initStatusConfigDialog)
 	cntRigCatRetries->value( progStatus.serial_retries );
 	cntRigCatTimeout->value( progStatus.serial_timeout );
 	cntPostWriteDelay->value( progStatus.serial_post_write_delay );
-	btnRigCatEcho->value( progStatus.serial_echo );
 	query_interval->value( progStatus.serloop_timing );
 	cntWriteDelay->value( progStatus.serial_write_delay );
 

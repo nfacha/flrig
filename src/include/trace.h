@@ -46,6 +46,9 @@ extern void rpc_trace(int n, ...); // trace transceiver class methods
 extern void deb_trace(int n, ...); // trace debug statements
 extern void tci_trace(int n, ...);
 
+extern bool activate_lock_trace;
+extern void lock_trace(int n, ...); // trace lock/unlock statements
+
 extern void make_trace_window();
 
 #define getr(s)  get_trace(1, s);

@@ -68,15 +68,17 @@ guard_lock::guard_lock(pthread_mutex_t* m, std::string h) : mutex(m) {
 		how = h;
 		std::string szlock;
 		szlock.assign("lock ").append(name(mutex)).append(" : ").append(how);
-		trace(1, szlock.c_str());
+		start_time = zmsec();
+//		trace(1, szlock.c_str());
+		lock_trace(1, szlock.c_str());
 	}
 }
 
 guard_lock::~guard_lock(void) {
 	if (!how.empty()) {
-		std::string szlock;
-		szlock.assign("unlock ").append(name(mutex)).append(" : ").append(how);
-		trace(1, szlock.c_str());
+		char szlock[200];
+		snprintf(szlock, sizeof(szlock), "%s, %s locked for %u msec", how.c_str(), name(mutex), zmsec() - start_time);
+		lock_trace(1, szlock);
 	}
 	pthread_mutex_unlock(mutex);
 }

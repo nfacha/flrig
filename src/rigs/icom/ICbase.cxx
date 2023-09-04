@@ -132,6 +132,11 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 		return replystr.length();
 	}
 
+	size_t tstart = 0;
+	size_t tout = 0;
+	size_t pcheck = 0;
+	size_t peor = 0;
+
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
 		MilliSleep(progStatus.tcpip_ping_delay);
@@ -145,10 +150,10 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 		RigSerial->FlushBuffer();
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 
-		size_t tstart = zmsec();
-		size_t tout = tstart + timeout;
-		size_t pcheck = std::string::npos;
-		size_t peor = std::string::npos;
+		tstart = zmsec();
+		tout = tstart + timeout;
+		pcheck = std::string::npos;
+		peor = std::string::npos;
 
 		std::string tempstr;
 		int nret;
@@ -157,26 +162,37 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 			tempstr.clear();
 			nret = RigSerial->ReadBuffer(
 				tempstr, 
-				n + (progStatus.serial_echo ? cmd.length() : 0), 
+				n,
 				check, 
 				eor);
 			replystr.append(tempstr);
 			retnbr += nret;
 
-			if (replystr.rfind(bad) != std::string::npos)
+			if (replystr.rfind(bad) != std::string::npos) {
+				LOG_ERROR("%s: BAD response; %s", sz, str2hex(replystr.c_str(), replystr.length()));
 				return false;
+			}
 			pcheck = replystr.rfind(check);
 			peor = replystr.rfind(eor);
 
 			if ((pcheck != std::string::npos) && 
 				(peor != std::string::npos) &&
-				(peor > pcheck) )
+				(peor > pcheck) ) {
+				LOG_DEBUG("%s: read %d bytes in %ld msec, %s", 
+						sz,
+						retnbr,
+						zmsec() - tstart, 
+						str2hex(replystr.c_str(), replystr.length()));
 				return true;
+			}
 			MilliSleep(1);
 		}
 
 	}
-
+	LOG_ERROR("%s: FAILED in %ld msec; %s", 
+			sz,
+			zmsec() - tstart,
+			str2hex(replystr.c_str(), replystr.length()));
 	return false;
 }
 

@@ -59,8 +59,6 @@ struct status {
 	int		serial_post_write_delay;
 	int		serial_timeout;
 
-	bool	serial_echo;
-
 	int		serial_catptt;
 	int		serial_rtsptt;
 	int		serial_dtrptt;

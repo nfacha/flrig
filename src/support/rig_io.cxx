@@ -207,8 +207,7 @@ int sendCommand (std::string s, int nread, int wait)
 		readResponse();
 		send_to_remote(s);
 		int timeout = 
-			progStatus.tcpip_ping_delay +
-			(int)((nread + progStatus.serial_echo ? numwrite : 0)*11000.0/RigSerial->Baud() );
+			progStatus.tcpip_ping_delay + nread * 2;
 		while (timeout > 0) {
 			if (timeout > 10) MilliSleep(10);
 			else MilliSleep(timeout);
@@ -295,7 +294,7 @@ bool waitCommand(
 	int tod_start = zmsec();
 
 // minimimum time to wait for a response
-	int timeout = (int)((nread + progStatus.serial_echo ? numwrite : 0)*11000.0/RigSerial->Baud()
+	int timeout = (int)((nread * 2)*11000.0/RigSerial->Baud()
 		+ progStatus.use_tcpip ? progStatus.tcpip_ping_delay : 0);
 	while (timeout > 0) {
 		if (timeout > 10) MilliSleep(10);

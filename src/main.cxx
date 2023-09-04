@@ -410,6 +410,9 @@ int main (int argc, char *argv[])
 {
 	std::set_terminate(flrig_terminate);
 
+// enable next statement if you need to trace the state of mutex locking
+//	activate_lock_trace = true;
+
 	int arg_idx;
 	HomeDir.clear();
 	RigHomeDir.clear();
@@ -456,6 +459,8 @@ int main (int argc, char *argv[])
 		}
 
 #endif
+
+	make_trace_window();
 	checkdirectories();
 
 #if SERIAL_DEBUG

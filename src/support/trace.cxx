@@ -410,3 +410,26 @@ void tci_trace(int n, ...) // all args of type const char *
 	tracestring.append(s.str());
 	write_tracetext();
 }
+
+bool activate_lock_trace = false;
+
+void lock_trace(int n, ...) // all args of type const char *
+{
+	if (!n || !activate_lock_trace) return;
+	if (!tracewindow) make_trace_window();
+
+	std::stringstream s;
+	va_list vl;
+	va_start(vl, n);
+	s << ztime() << " : " << va_arg(vl, const char *);
+	for (int i = 1; i < n; i++)
+		s << " " << va_arg(vl, const char *);
+	va_end(vl);
+	s << "\n";
+
+	write_trace_file(s.str());
+
+	guard_lock tt(&mutex_trace);
+	tracestring.append(s.str());
+	write_tracetext();
+}

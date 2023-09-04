@@ -72,8 +72,6 @@ status progStatus = {
 	0,			// int serial_post_write_delay
 	50,			// int serial_timeout;
 
-	false,		// bool serial_echo;
-
 	0,			// bool serial_catptt;
 	0,			// bool serial_rtsptt;
 	0,			// bool serial_dtrptt;
@@ -668,7 +666,6 @@ void status::saveLastState()
 	spref.set("serial_timeout", serial_timeout);
 	spref.set("serloop_timing", serloop_timing);
 
-	spref.set("serial_echo", serial_echo);
 	spref.set("ptt_via_cat", serial_catptt);
 	spref.set("ptt_via_rts", serial_rtsptt);
 	spref.set("ptt_via_dtr", serial_dtrptt);
@@ -1331,7 +1328,6 @@ bool status::loadXcvrState(std::string xcvr)
 		spref.get("serloop_timing", serloop_timing, serloop_timing);
 		if (serloop_timing < 10) serloop_timing = 10; // minimum loop delay of 10 msec
 
-		if (spref.get("serial_echo", i, i)) serial_echo = i;
 		if (spref.get("ptt_via_cat", i, i)) serial_catptt = i;
 		if (spref.get("ptt_via_rts", i, i)) serial_rtsptt = i;
 		if (spref.get("ptt_via_dtr", i, i)) serial_dtrptt = i;
@@ -2284,7 +2280,6 @@ std::string status::info()
 	info << "timeout            : " << serial_timeout << "\n";
 	info << "query interval:    : " << serloop_timing << "\n";
 	info << "\n";
-	info << "serial_echo          : " << serial_echo << "\n";
 	info << "ptt_via_cat        : " << serial_catptt << "\n";
 	info << "ptt_via_rts        : " << serial_rtsptt << "\n";
 	info << "ptt_via_dtr        : " << serial_dtrptt << "\n";
