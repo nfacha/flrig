@@ -322,14 +322,8 @@ unsigned long long RIG_IC7851::get_vfoA ()
 	cmd.assign(pre_to).append("\x25");
 	resp.assign(pre_fm).append("\x25");
 
-	if (inuse == onA) {
-		cmd  += '\x00';
-		resp += '\x00';
-	} else {
-		cmd  += '\x01';
-		resp += '\x01';
-	}
-
+	cmd  += '\x00';
+	resp += '\x00';
 	cmd.append(post);
 
 	get_trace(1, "get_vfoA()");
@@ -372,13 +366,8 @@ unsigned long long RIG_IC7851::get_vfoB ()
 	cmd.assign(pre_to).append("\x25");
 	resp.assign(pre_fm).append("\x25");
 
-	if (inuse == onA) {
-		cmd  += '\x01';
-		resp += '\x01';
-	} else {
-		cmd  += '\x00';
-		resp += '\x00';
-	}
+    cmd  += '\x01';
+    resp += '\x01';
 
 	cmd.append(post);
 
@@ -455,22 +444,45 @@ void RIG_IC7851::set_modeA(int val)
 	cmd.assign(pre_to);
 	cmd += '\x26';
 
-	if (inuse == onA) {
-		cmd  += '\x00';
-	} else {
-		cmd  += '\x01';
-	}
+	cmd  += '\x00';
 
 	cmd += IC7851_mode_nbr[A.imode];	// operating mode
-	if (A.imode >= LSBD3_7851)
-		cmd += '\x03';					// data mode D1
-	else if (A.imode >= LSBD2_7851)
-		cmd += '\x02';					// data mode D2
+	if (A.imode >= USBD3_7851)
+    {
+        set_trace(1, "USB D3 ");
+        cmd += '\x03';
+    }
+	else if (A.imode >= USBD2_7851)
+    {
+        set_trace(1, "USB D2 ");
+        cmd += '\x02';
+    }
+	else if (A.imode >= USBD1_7851)
+    {
+        set_trace(1, "USB D1 ");
+        cmd += '\x01';
+    }
 	else if (A.imode >= LSBD3_7851)
+    {
+        set_trace(1, "LSB D3 ");
+		cmd += '\x03';					// data mode D3
+    }
+	else if (A.imode >= LSBD2_7851)
+    {
+        set_trace(1, "LSB D2 ");
+		cmd += '\x02';					// data mode D2
+    }
+	else if (A.imode >= LSBD1_7851)
+    {
+        set_trace(1, "LSB D1 ");
 		cmd += '\x01';					// data mode D1
+    }
 	else
+    {
 		cmd += '\x00';
-	cmd += mode_filterA[A.imode];		// filter
+        A.filter = 0;
+    }
+    cmd += A.filter;
 	cmd.append( post );
 	waitFB("set mode A");
 
@@ -506,40 +518,43 @@ int RIG_IC7851::get_modeA()
 	resp.assign(pre_fm).append("\x26");
 
 	cmd.assign(pre_to).append("\x26");
-	if (inuse == onA) {
-		cmd  += '\x00';
-		resp += '\x00';
-	} else {
-		cmd  += '\x01';
-		resp += '\x01';
-	}
+	cmd  += '\x00';
+	resp += '\x00';
 	cmd.append(post);
 
 	if (waitFOR(10, "get mode A")) {
 		p = replystr.rfind(resp);
 		if (p == std::string::npos)
 			goto end_wait_modeA;
-
-		if (replystr[p+6] == -1) { A.imode = A.filter = 0; return A.imode; }
-
+        // fe fe e0 8e 26 00 01 01 03 fd  - USB D1 FIL3
+        //  0  1  2  3  4  5  6  7  8  9
+        //                AB MD DM FL
+        // fe fe e0 8e 26 00 00 03 01 fda - LSB D3 FIL1
 		for (md = 0; md < LSBD1_7851; md++) {
 			if (replystr[p+6] == IC7851_mode_nbr[md]) {
 				A.imode = md;
-				if (replystr[p+7] == 0x01 && A.imode < 4)
-					A.imode += 10;
-				if (replystr[p+7] == 0x02 && A.imode < 4)
-					A.imode += 14;
-				if (replystr[p+7] == 0x03 && A.imode < 4)
-					A.imode += 18;
-				if (A.imode > 21)
+                char traceinfo[256];
+                snprintf(traceinfo, sizeof(traceinfo), "MDB1 A.imode=%d, p+6=%d, p+7=%d\n",  A.imode,  replystr[p+6], replystr[p+7]);
+                get_trace(1, traceinfo);
+                if (replystr[p+7] != 0)
+                {
+                    if (replystr[p+6]==0) A.imode += 9 + replystr[p+7];
+                    else A.imode += 11 + replystr[p+7];
+                    snprintf(traceinfo, sizeof(traceinfo), "MDB2 A.imode=%d, p+6=%d, p+7=%d\n",  A.imode,  replystr[p+6], replystr[p+7]);
+                }
+                get_trace(1, traceinfo);
+				if (A.imode > 16)
 					A.imode = 1;
 				break;
+			    A.filter = replystr[p+8];
 			}
-			A.filter = replystr[p+8];
 		}
 	}
 
 end_wait_modeA:
+    char traceinfo[256];
+    snprintf(traceinfo, sizeof(traceinfo), "A.imode=%d", A.imode);
+    get_trace(1, traceinfo);
 	get_trace(4, 
 		"get mode A[",
 		IC7851modes_[A.imode].c_str(), 
@@ -557,22 +572,46 @@ void RIG_IC7851::set_modeB(int val)
 
 	cmd.assign(pre_to);
 	cmd += '\x26';
-	if (inuse == onA) {
-		cmd  += '\x01';
-	} else {
-		cmd  += '\x00';
-	}
+
+	cmd  += '\x00';
 
 	cmd += IC7851_mode_nbr[B.imode];	// operating mode
-	if (B.imode >= LSBD3_7851)
-		cmd += '\x03';					// data mode D1
-	else if (B.imode >= LSBD2_7851)
-		cmd += '\x02';					// data mode D2
+	if (B.imode >= USBD3_7851)
+    {
+        set_trace(1, "USB D3 ");
+        cmd += '\x03';
+    }
+	else if (B.imode >= USBD2_7851)
+    {
+        set_trace(1, "USB D2 ");
+        cmd += '\x02';
+    }
+	else if (B.imode >= USBD1_7851)
+    {
+        set_trace(1, "USB D1 ");
+        cmd += '\x01';
+    }
 	else if (B.imode >= LSBD3_7851)
+    {
+        set_trace(1, "LSB D3 ");
+		cmd += '\x03';					// data mode D3
+    }
+	else if (B.imode >= LSBD2_7851)
+    {
+        set_trace(1, "LSB D2 ");
+		cmd += '\x02';					// data mode D2
+    }
+	else if (B.imode >= LSBD1_7851)
+    {
+        set_trace(1, "LSB D1 ");
 		cmd += '\x01';					// data mode D1
+    }
 	else
+    {
 		cmd += '\x00';
-	cmd += mode_filterB[B.imode];		// filter
+        B.filter = 0;
+    }
+    cmd += B.filter;
 	cmd.append( post );
 	waitFB("set mode B");
 
@@ -593,14 +632,8 @@ int RIG_IC7851::get_modeB()
 
 	cmd.assign(pre_to).append("\x26");
 
-	if (inuse == onA) {
-		cmd  += '\x01';
-		resp += '\x01';
-	} else {
-		cmd  += '\x00';
-		resp += '\x00';
-	}
-
+	cmd  += '\x01';
+	resp += '\x01';
 	cmd.append(post);
 
 	if (waitFOR(10, "get mode B")) {
@@ -608,22 +641,16 @@ int RIG_IC7851::get_modeB()
 		if (p == std::string::npos)
 			goto end_wait_modeB;
 
-		if (replystr[p+6] == -1) { B.imode = B.filter = 0; return B.imode; }
-
 		for (md = 0; md < LSBD1_7851; md++) {
 			if (replystr[p+6] == IC7851_mode_nbr[md]) {
 				B.imode = md;
-				if (replystr[p+7] == 0x01 && B.imode < 4)
-					B.imode += 10;
-				if (replystr[p+7] == 0x02 && B.imode < 4)
-					B.imode += 14;
-				if (replystr[p+7] == 0x03 && B.imode < 4)
-					B.imode += 18;
-				if (B.imode > 21)
+                if (B.imode < 2)
+                    B.imode += 10 + replystr[p+6]*3 + replystr[p+7];
+				if (B.imode > 15)
 					B.imode = 1;
+                    B.filter = replystr[p+8];
 				break;
 			}
-			B.filter = replystr[p+8];
 		}
 	}
 
