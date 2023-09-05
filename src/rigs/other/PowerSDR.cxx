@@ -156,13 +156,14 @@ void RIG_PowerSDR::initialize()
 // get current noise reduction values for NR1 and NR2
 	std::string current_nr;
 	cmd = "ZZNR;";
-	wait_char(';', 6, 100, "read current NR", ASC);
+	waitN(6, 100, "read current NR", ASC);
+	unsigned char uctemp[256];//maxread + 1];
 	gett("get ZZNR");
 	size_t p = replystr.rfind("RL");
 	if (p != std::string::npos)
 		_nrval1 = atoi(&replystr[p+2]);
 	cmd = "ZZNS;";
-	wait_char(';', 6, 100, "read current NR", ASC);
+	waitN(6, 100, "read current NR", ASC);
 	int nrval2=0;
 	if (p != std::string::npos)
 		nrval2 = atoi(&replystr[p+2]);
@@ -211,7 +212,7 @@ RIG_PowerSDR::RIG_PowerSDR() {
 	can_change_alt_vfo = true;
 
 	//has_dsp_controls = true;
-    has_voltmeter = true;
+//    has_voltmeter = true; // re-enable when Thetis fixes this
 	has_power_out = true;
 	has_swr_control = true;
 	has_alc_control =
@@ -284,9 +285,10 @@ int RIG_PowerSDR::get_smeter()
 	else
 		cmd = "ZZSM1;";
 	get_trace(1, "get_smeter");
-	ret = wait_char(';', 9, 100, "get smeter", ASC);
+	ret = waitN(9, 100, "get smeter", ASC);
 	gett("");
-	if (ret == 9) {
+	//if (ret == 9) {
+	{
 		size_t p = replystr.rfind("SM");
 		if (p != std::string::npos) {
 			smtr = fm_decimal(replystr.substr(p+3),3);
@@ -1183,7 +1185,7 @@ int  RIG_PowerSDR::get_squelch()
 	int sq = 0;
 	cmd = "ZZSQ;";
 	get_trace(1, "get_squelch");
-	ret = wait_char(';', 8, 100, "get squelch", ASC);
+	ret = waitN(8, 100, "get squelch", ASC);
 	gett("");
 	if (ret == 8) {
 		size_t p = replystr.rfind("ZZSQ");
