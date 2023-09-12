@@ -421,31 +421,22 @@ void RIG_FT991::set_split(bool val)
 
 int RIG_FT991::get_split()
 {
-	size_t p;
-	int split = 0;
-	char rx, tx;
+size_t p;
+int split = 0;
+//char rx, tx;
+char tx;
 // tx vfo
-	cmd = rsp = "FT";
-	cmd.append(";");
-	wait_char(';', 4, FL991_WAIT_TIME, "get split tx vfo", ASC);
-	p = replystr.rfind(rsp);
-	if (p == std::string::npos) return false;
-	tx = replystr[p+2] - '0';
+cmd = rsp = "FT";
+cmd.append(";");
+wait_char(';', 4, FL991_WAIT_TIME, "get split tx vfo", ASC);
+p = replystr.rfind(rsp);
+if (p == std::string::npos) return false;
+tx = replystr[p+2] - '0';
 
-// rx vfo
-	cmd = rsp = "FR";
-	cmd.append(";");
-	wait_char(';', 4, FL991_WAIT_TIME, "get split rx vfo", ASC);
+split = (tx == 1 ? 2 : 0);
 
-	p = replystr.rfind(rsp);
-	if (p == std::string::npos) return false;
-	rx = replystr[p+2] - '0';
-
-	split = (tx == 1 ? 2 : 0) + (rx >= 4 ? 1 : 0);
-
-	return split;
+return split;
 }
-
 
 int RIG_FT991::get_smeter()
 {
