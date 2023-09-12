@@ -157,7 +157,6 @@ void RIG_PowerSDR::initialize()
 	std::string current_nr;
 	cmd = "ZZNR;";
 	waitN(6, 100, "read current NR", ASC);
-	unsigned char uctemp[256];//maxread + 1];
 	gett("get ZZNR");
 	size_t p = replystr.rfind("RL");
 	if (p != std::string::npos)

@@ -77,7 +77,7 @@ guard_lock::guard_lock(pthread_mutex_t* m, std::string h) : mutex(m) {
 guard_lock::~guard_lock(void) {
 	if (!how.empty()) {
 		char szlock[200];
-		snprintf(szlock, sizeof(szlock), "%s, %s locked for %u msec", how.c_str(), name(mutex), zmsec() - start_time);
+		snprintf(szlock, sizeof(szlock), "%s, %s locked for %lu msec", how.c_str(), name(mutex), zmsec() - start_time);
 		lock_trace(1, szlock);
 	}
 	pthread_mutex_unlock(mutex);
