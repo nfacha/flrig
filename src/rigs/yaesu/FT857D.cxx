@@ -164,7 +164,7 @@ unsigned long long RIG_FT857D::get_vfoA ()
 	}
 
 	static char msg[50];
-	snprintf(msg, sizeof(msg), "get vfoA: %llu, %s", freqA, modes_[modeA].c_str());
+	snprintf(msg, sizeof(msg), "get vfoA: %d, %s", (int)freqA, modes_[modeA].c_str());
 	getr(msg);
 
 	return freqA;
@@ -203,7 +203,7 @@ unsigned long long RIG_FT857D::get_vfoB ()
 	}
 
 	static char msg[50];
-	snprintf(msg, sizeof(msg), "get vfoB: %llu, %s", freqA, modes_[modeB].c_str());
+	snprintf(msg, sizeof(msg), "get vfoB: %d, %s", (int)freqA, modes_[modeB].c_str());
 	getr(msg);
 
 	return freqB;
