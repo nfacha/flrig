@@ -692,6 +692,69 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 	return retnbr;
 }
 
+int rigbase::waitfor(int nr, int timeout, int pr)
+{
+	guard_lock reply_lock(&mutex_replystr);
+
+	int retnbr = 0;
+
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
+
+	replystr.clear();
+
+	if (progStatus.use_tcpip) {
+		send_to_remote(cmd);
+		MilliSleep(progStatus.tcpip_ping_delay);
+		retnbr = read_from_remote(replystr);
+		LOG_DEBUG ("read %d bytes, %s", retnbr, replystr.c_str());
+		return retnbr;
+	}
+
+	if(!RigSerial->IsOpen()) {
+		return 0;
+	}
+
+	RigSerial->FlushBuffer();
+
+	RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+
+	size_t tstart = zmsec();
+	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
+	std::string tempstr;
+	int nret;
+
+	do {
+		tempstr.clear();
+		nret = RigSerial->ReadBuffer(tempstr, nr - retnbr);
+		if (nret) {
+			replystr.append(tempstr);
+			retnbr += nret;
+			tout = zmsec() + timeout + progStatus.serial_timeout;
+		}
+		if (retnbr >= nr) break;
+		MilliSleep(1);
+	} while ( zmsec() < tout );
+
+	static char ctrace[1000];
+	memset(ctrace, 0, 1000);
+
+	snprintf( ctrace, sizeof(ctrace), "read %d bytes in %d msec, %s", 
+		retnbr,
+		(int)(zmsec() - tstart),
+		replystr.c_str());
+
+	if (SERIALDEBUG)
+		ser_trace(1, ctrace);
+
+	LOG_DEBUG ("%s", ctrace);
+
+	return retnbr;
+}
+
 // Yaesu transceiver - wait for response to identifier request
 // return boolean state of response
 // ID  - for most

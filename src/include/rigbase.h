@@ -664,6 +664,7 @@ double vfo_;
 	int wait_char(int ch, int n, int timeout, const char *, int pr = HEX);
 	int wait_crlf(std::string, std::string, int nr = 20, int timeout = 100, int pr = ASC);
 	int wait_string(std::string sz, int nr, int timeout = 100, int pr = ASC);
+	int waitfor(int nr, int timeout = 100, int pr = ASC);
 
 // IC-7610
 	virtual void set_digi_sel(bool) {}
