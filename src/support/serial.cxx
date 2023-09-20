@@ -393,191 +393,88 @@ bool  Cserial::IOselect ()
 // Return type	  : # characters received
 // Argument		 : pointer to buffer; # chars to read; std::string terminator
 ///////////////////////////////////////////////////////
+
 int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::string find2)
 {
 	if (fd < 0) {
-std::cout << "ReadBuffer(...) fd < 0" << std::endl;
 		ser_trace(1, "ReadBuffer(...) fd < 0");
 		return 0;
 	}
 
 	bool hex = false;
-	std::string s1, s2;
-
-	if (find1.length())
-		hex = hex || check_hex(find1.c_str(), find1.length());
-	if (find2.length())
-		hex = hex || check_hex(find2.c_str(), find2.length());
-	if (hex) {
-		s1 = str2hex(find1.c_str(), find1.length());
-		s2 = str2hex(find2.c_str(), find2.length());
-	} else {
-		s1 = find1;
-		size_t p = s1.find("\r\n");
-		if (p != std::string::npos) s1.replace(p,2,"<cr><lf>");
-		p = s1.find('\r');
-		if (p != std::string::npos) s1.replace(p,1,"<cr>");
-		p = s1.find('\n');
-		if (p != std::string::npos) s1.replace(p,1,"<lf>");
-
-		s2 = find2;
-		p = s2.find("\r\n");
-		if (p != std::string::npos) s2.replace(p,2,"<cr><lf>");
-		p = s2.find('\r');
-		if (p != std::string::npos) s2.replace(p,1,"<cr>");
-		p = s2.find('\n');
-		if (p != std::string::npos) s2.replace(p,1,"<lf>");
-	}
-
-	bool  find_two = (!find1.empty() && !find2.empty());
-	bool  find_one = (!find1.empty() && find2.empty());
-
-	if (find_two)
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s  |  %s", s1.c_str(), s2.c_str());
-	else if (find_one)
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s", s1.c_str());
-	else
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %d chars", nchars);
-
-	LOG_DEBUG("%s", traceinfo);
-	if (progStatus.serialtrace || SERIALDEBUG)
-		ser_trace(1, traceinfo);
-
-	int retnum = 0;
-	int nread = 0;
-	int bytes = 0;
-
-	size_t p1, p2;
 
 	fd_set rfds;
 
 	FD_ZERO (&rfds);
 	FD_SET (fd, &rfds);
 
-	size_t tnow = zusec();
-	size_t start = tnow;
+	bool     timedout = false,
+			 echo = false;
+	int      bytes = 0;
+	size_t   retval = 0,
+			 maxchars = nchars + bytes_written,
+			 tnow = 0,
+			 start = 0;
 
-	do {
+	buf.clear();
 
+	start = tnow = zusec();
+
+	while (1) {
+		memset(uctemp, 0, sizeof(uctemp));
 		ioctl( fd, FIONREAD, &bytes);
 		if (bytes) {
-			unsigned char tempbuf[bytes + 1];
-			memset(tempbuf, 0, bytes + 1);
-
-			snprintf(traceinfo, sizeof(traceinfo), "bytes: %d", bytes);
-			if (SERIALDEBUG)
-				ser_trace(1, traceinfo);
-
-			retnum = read (fd, tempbuf, bytes);
-			if (retnum > 0 && retnum <= bytes) {
-				for (int nc = 0; nc < retnum; nc++)
-					buf += tempbuf[nc];
-				nread += retnum;
-			} else if (progStatus.serialtrace || SERIALDEBUG) {
-				char traceinfo[100];
-				snprintf(traceinfo, sizeof(traceinfo), "read(fd %d, tempbuf, 200) error: %s", fd,
-					(errno == EAGAIN ? "EAGAIN" :
-					errno == EWOULDBLOCK ? "EWOULDBLOCK" :
-					errno == EBADF ? "EBADF" :
-					errno == EFAULT? "EFAULT" :
-					errno == EINTR ? "EINTR" :
-					errno == EINVAL ? "EINVAL" :
-					errno == EIO ? "EIO" :
-					errno == EISDIR ? "EISDRI" : "OTHER"));
-					ser_trace(1, traceinfo);
-			}
-
-			if (find_two) {
-				p1 = buf.rfind(find1);
-				p2 = buf.rfind(find2);
-				if (p1 != std::string::npos &&
-					p2 != std::string::npos &&
-					p2 > p1) {
-					
-					char traceinfo[100];
-					std::string srx = buf;
-					size_t p = srx.find("\r\n");
-					if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-					p = srx.find('\r');
-					if (p != std::string::npos) srx.replace(p,1,"<cr>");
-					p = srx.find('\n');
-					if (p != std::string::npos) srx.replace(p,1,"<lf>");
-					bool hex = check_hex(buf.c_str(), buf.length());
-					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
-						(zusec() - start) * 1e-3,
-						(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-					LOG_DEBUG("%s", traceinfo);
-					if (progStatus.serialtrace || SERIALDEBUG)
-						ser_trace(1, traceinfo);
-					return nread;
+			if ( (retval = read (fd, uctemp, bytes)) > 0) {
+				for (size_t nc = 0; nc < retval && nc < sizeof(uctemp); nc++) {
+					buf += uctemp[nc];
 				}
 			}
-
-			if (find_one) {
-				p1 = buf.rfind(find1);
-				if (p1 != std::string::npos) {
-					char traceinfo[100];
-					std::string srx = buf;
-					size_t p = srx.find("\r\n");
-					if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-					p = srx.find('\r');
-					if (p != std::string::npos) srx.replace(p,1,"<cr>");
-					p = srx.find('\n');
-					if (p != std::string::npos) srx.replace(p,1,"<lf>");
-					bool hex = check_hex(buf.c_str(), buf.length());
-					snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
-						(zusec() - start) * 1e-3,
-						(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-					LOG_DEBUG("%s", traceinfo);
-					if (progStatus.serialtrace || SERIALDEBUG)
-						ser_trace(1, traceinfo);
-					return nread;
-				}
-			}
-
-			if ( nread >= nchars ) {
-				char traceinfo[100];
-				std::string srx = buf;
-				size_t p = srx.find("\r\n");
-				if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-				p = srx.find('\r');
-				if (p != std::string::npos) srx.replace(p,1,"<cr>");
-				p = srx.find('\n');
-				if (p != std::string::npos) srx.replace(p,1,"<lf>");
-				bool hex = check_hex(buf.c_str(), buf.length());
-				snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer [%0.3f msec]: %s",
-					(zusec() - start) * 1e-3,
-					(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-				LOG_DEBUG("%s", traceinfo);
-				if (progStatus.serialtrace || SERIALDEBUG)
-					ser_trace(1, traceinfo);
-				return nread;
-			}
-
-			tnow = zusec();
 		}
 
+		timedout = ( (zusec() - tnow) > (size_t)(progStatus.serial_timeout * 1000));
+
+		// test for icom echo
+		if ((buf.length() >= (size_t)nchars) && ((buf[3] & 0xFF) == 0xE0))
+			echo = true;
+		if (buf.length() >= (echo ? maxchars : (size_t)nchars)) break;
+
+		if (timedout) break;
+
 		MilliSleep(1);
-
-	} while ( (zusec() - tnow) < (size_t)(progStatus.serial_timeout * 1000L));
-
-	if (progStatus.serialtrace || SERIALDEBUG) {
-		char traceinfo[100];
-		std::string srx = buf;
-		size_t p = srx.find("\r\n");
-		if (p != std::string::npos) srx.replace(p,2,"<cr><lf>");
-		p = srx.find('\r');
-		if (p != std::string::npos) srx.replace(p,1,"<cr>");
-		p = srx.find('\n');
-		if (p != std::string::npos) srx.replace(p,1,"<lf>");
-		bool hex = check_hex(buf.c_str(), buf.length());
-		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer TIMED OUT [%0.3f msec]: %s",
-			(zusec() - start) * 1e-3,
-			(hex ? str2hex(buf.c_str(), buf.length()) : srx.c_str()) );
-		ser_trace(1, traceinfo);
 	}
 
-	return nread;
+	if (echo)
+		buf = buf.substr(bytes_written);
+	if (buf.length() > (size_t)nchars) buf.erase(nchars);
+
+	size_t readtime = zusec() - start;
+
+	memset(traceinfo, 0, sizeof(traceinfo));
+	hex = check_hex(buf.c_str(), buf.length());
+
+	snprintf(traceinfo, sizeof(traceinfo), 
+		"ReadBuffer [%f msec]: %s",
+		readtime / 1000.0,
+		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
+
+	LOG_DEBUG("%s", traceinfo);
+	if (progStatus.serialtrace)
+		ser_trace(1, traceinfo);
+
+	if (buf.length() < (size_t)nchars) {
+		memset(traceinfo, 0, sizeof(traceinfo));
+		snprintf(traceinfo, sizeof(traceinfo), 
+			"ReadBuffer FAILED [%f msec] wanted %d chars, read %lu chars",
+			(zusec() - start) / 1000.0,
+			nchars,
+			buf.length());
+		LOG_ERROR("%s", traceinfo);
+
+		if (progStatus.serialtrace)
+			ser_trace(1, traceinfo);
+	}
+
+	return buf.length();
 }
 
 ///////////////////////////////////////////////////////
@@ -605,7 +502,10 @@ int Cserial::WriteBuffer(const char *buff, int n)
 		}
 	}
 
+	FlushBuffer();
 	int ret = write (fd, buff, n);
+
+	bytes_written = n;
 
 	if (progStatus.serial_post_write_delay)
 		MilliSleep(progStatus.serial_post_write_delay);
@@ -830,64 +730,79 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		if (p != std::string::npos) s2.replace(p,1,"<lf>");
 	}
 
-	bool  find_two = (!find1.empty() && !find2.empty());
-	bool  find_one = (!find1.empty() && find2.empty());
+//	bool  find_two = (!find1.empty() && !find2.empty());
+//	bool  find_one = (!find1.empty() && find2.empty());
 
-	size_t tnow = zmsec();
-	size_t start = tnow;
+//	if (find_two)
+//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer: %s  |  %s", s1.c_str(), s2.c_str());
+//	else if (find_one)
+//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer XXX: %s", s1.c_str());
+//	else
+//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer: %d chars", nchars);
 
-	if (find_two)
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s  |  %s", s1.c_str(), s2.c_str());
-	else if (find_one)
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %s", s1.c_str());
-	else
-		snprintf(traceinfo, sizeof(traceinfo), "Wait for: %d chars", nchars);
+//	LOG_DEBUG("%s", traceinfo);
+//	if (progStatus.serialtrace)
+//		ser_trace(1, traceinfo);
 
-	LOG_DEBUG("%s", traceinfo);
-	if (progStatus.serialtrace || SERIALDEBUG)
-		ser_trace(1, traceinfo);
+	memset(traceinfo, 0, sizeof(traceinfo));
 
 	long unsigned int thisread = 0;
-	bool     retval = 0;
-	int      maxchars = nchars + nBytesWritten;
-	unsigned char uctemp[maxchars + 1];
+	size_t maxchars = nchars + nBytesWritten;
+	double start = zusec();
 
-    buf.clear();
-    while (1) {
-        retval = ReadFile (hComm, uctemp, nchars - buf.length(), &thisread, NULL);
-        if (!retval || !thisread) break;
-        for (size_t i = 0; i < thisread; ++i) buf += uctemp[i];
-    }
-    if ((buf[3] & 0xFF) == 0xE0) { // test for echo string
-		while (1) {
-			retval = ReadFile (hComm, uctemp, maxchars - buf.length(), &thisread, NULL);
-			if (!retval || !thisread) break;
-			for (size_t i = 0; i < thisread; i++) buf += uctemp[i];
+	bool echo = false;
+	bool retval = false;
+
+	std::string sbuf;
+	sbuf.clear();
+
+	while ( (zusec() - start) < (progStatus.serial_timeout * 1000.0) ) {
+		memset(uctemp, 0, sizeof(uctemp));
+		if ( (retval = ReadFile (hComm, uctemp, maxchars, &thisread, NULL)) ) {
+			for (size_t n = 0; n < thisread && n < sizeof(uctemp); n++) {
+				sbuf += uctemp[n];
+			}
 		}
+		// test for icom echo
+		if ((sbuf.length() >= (size_t)nchars) && ((sbuf[3] & 0xFF) == 0xE0))
+			echo = true;
+		if (sbuf.length() >= (echo ? maxchars : (size_t)nchars)) break;
+		if (!thisread || !retval) MilliSleep(1);
 	}
 
+	double readtime = (zusec() - start) / 1000.0;
+	snprintf(traceinfo, sizeof(traceinfo), 
+		"ReadBuffer [%0.2f msec] (%u): %s",
+		readtime, sbuf.length(), 
+		(hex ? str2hex(buf.c_str(), buf.length()) : sbuf.c_str()));
+	if (progStatus.serialtrace)
+		ser_trace(2, "1:", traceinfo);
+
+	if (echo)
+		sbuf = sbuf.substr(nBytesWritten);
+	if (sbuf.length() > (size_t)nchars) sbuf.erase(nchars);
+
+	buf = sbuf;
 	int nread = (int)buf.length();
 
-	size_t readtime = zmsec() - start;
+//	snprintf(traceinfo, sizeof(traceinfo), 
+//		"ReadBuffer [%0.2f msec] (%d): %s",
+//		readtime, nread, 
+//		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
 
-	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer [%u msec]: %s",
-		readtime,
-		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
-
-	LOG_DEBUG("%s", traceinfo);
-	if (progStatus.serialtrace || SERIALDEBUG)
-		ser_trace(1, traceinfo);
+//	LOG_DEBUG("%s", traceinfo);
+//	if (progStatus.serialtrace)
+//		ser_trace(1, traceinfo);
 
 	if (nread >= nchars) return nread;
 
 	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer FAILED [%u msec]",
-		zmsec() - start);
+		"ReadBuffer FAILED [%0.2f msec], read %d bytes",
+		readtime, nread);
 	LOG_ERROR("%s", traceinfo);
 
-	if (progStatus.serialtrace || SERIALDEBUG)
-		ser_trace(1, traceinfo);
+	if (progStatus.serialtrace)
+		ser_trace(2, "2:", traceinfo);
 
 	return nread;
 }
@@ -939,7 +854,7 @@ int Cserial::WriteBuffer(const char *buff, int n)
 			ser_trace(2, "WriteBuffer: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
 		}
 	}
-
+	FlushBuffer();
 	WriteFile (hComm, buff, n,  &nBytesWritten, NULL);
 	
 	if (progStatus.serial_post_write_delay)

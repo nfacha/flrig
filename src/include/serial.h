@@ -117,8 +117,10 @@ private:
 	bool	rtscts;
 	bool	serptt;
 	int		stopbits;
-	char	bfr[2048];
 
+	unsigned char uctemp[4096];
+
+	int		bytes_written;
 	int		failed_;
 
 //Methods
@@ -246,6 +248,8 @@ private:
 	bool	rtscts;
 	bool	serptt;
 	int		stopbits;
+
+	unsigned char uctemp[4096];
 
 	int		failed_;
 };
