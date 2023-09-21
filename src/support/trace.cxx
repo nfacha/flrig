@@ -308,7 +308,7 @@ void rpc_trace(int n, ...) // all args of type const char *
 
 void ser_trace(int n, ...) // all args of type const char *
 {
-//	if (!progStatus.serialtrace) return;
+	if (!progStatus.serialtrace) return;
 	if (!tracewindow) make_trace_window();
 	if (!n) return;
 
