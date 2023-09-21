@@ -569,7 +569,6 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 	}
 
 	if(!RigSerial->IsOpen()) {
-		LOG_DEBUG("TEST %s", sz.c_str());
 		return 0;
 	}
 

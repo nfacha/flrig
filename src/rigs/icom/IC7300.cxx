@@ -369,7 +369,7 @@ void RIG_IC7300::set_xcvr_auto_on()
 	cmd.append(post);
 	RigSerial->failed(0);
 
-	if (waitFOR(8, "get ID") == false) {
+	if (waitFOR(8, "get ID", 100) == false) {
 		cmd.clear();
 		int fes[] = { 2, 2, 2, 3, 7, 13, 25, 50, 75, 150, 150, 150 };
 		if (progStatus.serial_baudrate >= 0 && progStatus.serial_baudrate <= 11) {
@@ -377,32 +377,38 @@ void RIG_IC7300::set_xcvr_auto_on()
 		}
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 
+		std::string tempbuf;
+		RigSerial->ReadBuffer(tempbuf, 150);
+
 		cmd.assign(pre_to);
 		cmd += '\x18'; cmd += '\x01';
-//		set_trace(1, "power_on()");
 		cmd.append(post);
 		RigSerial->failed(0);
 
-		set_trace(1, "power ON");
-		if (waitFB("Power ON")) {
-			seth();
+		if ( waitFB("Power ON", 100) ) {
+// 5 second delay
+			for (size_t n = 0; n < 50; n++) {
+				Fl::awake();
+				MilliSleep(100);
+				update_progress(2 * n);
+			}
+			update_progress(0);
 			xcvr_is_on = true;
 			cmd = pre_to; cmd += '\x19'; cmd += '\x00';
 			get_trace(1, "getID()");
 			cmd.append(post);
 			int i = 0;
-			for (i = 0; i < 100; i++) { // 10 second total timeout
+			for (i = 0; i < 50; i++) { // 5 second total timeout
 				if (waitFOR(8, "get ID", 100) == true) {
 					RigSerial->failed(0);
+					update_progress(0);
 					return;
 				}
-				update_progress(i / 2);
+				update_progress(2 * i);
 				Fl::awake();
 			}
-			RigSerial->failed(0);
-			return;
 		}
-
+		update_progress(0);
 		set_trace(1, "power_ON failed");
 		RigSerial->failed(1);
 		xcvr_is_on = false;

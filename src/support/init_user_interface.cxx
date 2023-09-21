@@ -2472,6 +2472,17 @@ trace(1, "selrig->initialize()");
 		guard_lock gl_serial(&mutex_serial);
 		trace(1, "init_rig()");
 
+		// Xcvr Auto Power on as soon as possible
+		if (selrig->has_xcvr_auto_on_off && progStatus.xcvr_auto_on) {
+			progress->label("Auto Start");
+			progress->redraw_label();
+			update_progress(0);
+			selrig->set_xcvr_auto_on();
+			progress->label("Initializing");
+			progress->redraw_label();
+			update_progress(0);
+		}
+
 		init_special_controls();
 		init_external_tuner();
 		init_rit();
@@ -2495,17 +2506,6 @@ trace(1, "selrig->initialize()");
 		init_auto_notch();
 		init_swr_control();
 		init_split_control();
-
-		// Xcvr Auto Power on as soon as possible
-		if (selrig->has_xcvr_auto_on_off && progStatus.xcvr_auto_on) {
-			progress->label("Auto Start");
-			progress->redraw_label();
-			update_progress(0);
-			selrig->set_xcvr_auto_on();
-			progress->label("Initializing");
-			progress->redraw_label();
-			update_progress(0);
-		}
 
 		if (selrig->name_ == rig_QCXP.name_) read_menus();
 

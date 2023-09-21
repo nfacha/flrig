@@ -706,6 +706,7 @@ void status::saveLastState()
 	spref.set("poll_auto_notch", poll_auto_notch);
 	spref.set("poll_notch", poll_notch);
 	spref.set("poll_ifshift", poll_ifshift);
+	spref.set("poll_pbt", poll_pbt);
 	spref.set("poll_power_control", poll_power_control);
 	spref.set("poll_pre_att", poll_pre_att);
 	spref.set("poll_micgain", poll_micgain);
@@ -1379,6 +1380,7 @@ bool status::loadXcvrState(std::string xcvr)
 		spref.get("poll_notch", poll_notch, poll_notch);
 		spref.get("poll_ifshift", poll_ifshift, poll_ifshift);
 		spref.get("poll_power_control", poll_power_control, poll_power_control);
+		spref.get("poll_pbt", poll_pbt, poll_pbt);
 		spref.get("poll_pre_att", poll_pre_att, poll_pre_att);
 		spref.get("poll_micgain", poll_micgain, poll_micgain);
 		spref.get("poll_squelch", poll_squelch, poll_squelch);
@@ -2308,6 +2310,7 @@ std::string status::info()
 	info << "poll_notch         : " << poll_notch << "\n";
 	info << "poll_ifshift       : " << poll_ifshift << "\n";
 	info << "poll_power_control : " << poll_power_control << "\n";
+	info << "poll_pbt           : " << poll_pbt << "\n";
 	info << "poll_pre_att       : " << poll_pre_att << "\n";
 	info << "poll_micgain       : " << poll_micgain << "\n";
 	info << "poll_squelch       : " << poll_squelch << "\n";

@@ -490,8 +490,8 @@ int Cserial::WriteBuffer(const char *buff, int n)
 		return 0;
 	}
 
+	std::string sw = std::string(buff, (std::size_t) n);
 	if (progStatus.serialtrace || SERIALDEBUG) {
-		std::string sw = std::string(buff, (std::size_t) n);
 		size_t p = sw.rfind("\r\n");
 		if (p == (sw.length() - 2) ) {
 			sw.replace(p, 2, "<cr><lf>");
@@ -537,6 +537,7 @@ void Cserial::FlushBuffer()
 	if (fd < 0)
 		return;
 	tcflush (fd, TCIFLUSH);
+	
 }
 
 //=============================================================================

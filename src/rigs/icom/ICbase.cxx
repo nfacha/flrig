@@ -178,10 +178,11 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 			if ((pcheck != std::string::npos) && 
 				(peor != std::string::npos) &&
 				(peor > pcheck) ) {
-				LOG_DEBUG("%s: read %d bytes in %ld msec, %s", 
+				LOG_DEBUG(
+				"%s: read %d bytes in %d msec, %s", 
 						sz,
 						retnbr,
-						zmsec() - tstart, 
+						(int)(zmsec() - tstart), 
 						str2hex(replystr.c_str(), replystr.length()));
 				return true;
 			}
@@ -189,9 +190,9 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 		}
 
 	}
-	LOG_ERROR("%s: FAILED in %ld msec; %s", 
+	LOG_ERROR( "%s: FAILED in %d msec; %s", 
 			sz,
-			zmsec() - tstart,
+			(int)(zmsec() - tstart),
 			str2hex(replystr.c_str(), replystr.length()));
 	return false;
 }
