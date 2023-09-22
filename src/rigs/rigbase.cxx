@@ -511,7 +511,9 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 	std::string tempstr;
 	int nret;
 
+	int tries = 0;
 	do  {
+		++tries;
 		tempstr.clear();
 		nret = RigSerial->ReadBuffer(tempstr, n - retnbr, wait_str);
 		if (nret) {
@@ -520,6 +522,7 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 			retnbr += nret;
 			tout = zmsec() + progStatus.serial_timeout;
 		}
+			
 		if (retnbr >= n)
 			break;
 
@@ -531,12 +534,13 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 
 	static char ctrace[1000];
 	memset(ctrace, 0, 1000);
-	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s",
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %d tries, %s",
 		sz, retnbr,
 		(int)(zmsec() - tstart),
+		tries,
 		(pr == HEX ? str2hex(replystr.c_str(), replystr.length()): replystr.c_str()) );
 
-	if (SERIALDEBUG)
+//	if (SERIALDEBUG)
 		ser_trace(1, ctrace);
 
 	LOG_DEBUG ("%s", ctrace);
@@ -610,6 +614,75 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 		sz.c_str(), retnbr,
 		(int)(zmsec() - tstart),
 		srx.c_str());
+
+	if (SERIALDEBUG)
+		ser_trace(1, ctrace);
+
+	LOG_DEBUG ("%s", ctrace);
+
+	return retnbr;
+}
+
+int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
+{
+	guard_lock reply_lock(&mutex_replystr);
+
+	int retnbr = 0;
+
+	if (progStatus.xmlrpc_rig) {
+		replystr = xml_cat_string(cmd);
+//std::cout << "replystr: " << replystr << std::endl;
+		return replystr.length();
+	}
+
+	replystr.clear();
+
+	if (progStatus.use_tcpip) {
+		send_to_remote(cmd);
+		MilliSleep(progStatus.tcpip_ping_delay);
+		retnbr = read_from_remote(replystr);
+		LOG_DEBUG ("%s: read %d bytes, %s", sz.c_str(), retnbr, replystr.c_str());
+		return retnbr;
+	}
+
+	if(!RigSerial->IsOpen()) {
+		LOG_DEBUG("TEST %s", sz.c_str());
+		return 0;
+	}
+
+	RigSerial->FlushBuffer();
+
+	RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+
+	size_t tstart = zmsec();
+	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
+	std::string tempstr;
+	int nret;
+
+	do {
+		tempstr.clear();
+		nret = RigSerial->ReadBuffer(tempstr, nr - retnbr, sz);
+		if (nret) {
+			replystr.append(tempstr);
+			retnbr += nret;
+			tout = zmsec() + timeout + progStatus.serial_timeout;
+		}
+
+		if (replystr.find(sz) != std::string::npos)
+			break;
+
+		if (retnbr >= nr) break;
+
+		MilliSleep(1);
+	} while ( zmsec() < tout );
+
+	static char ctrace[1000];
+	memset(ctrace, 0, 1000);
+
+	snprintf( ctrace, sizeof(ctrace), "%s: read %d bytes in %d msec, %s", 
+		sz.c_str(), retnbr,
+		(int)(zmsec() - tstart),
+		replystr.c_str());
 
 	if (SERIALDEBUG)
 		ser_trace(1, ctrace);
