@@ -347,13 +347,14 @@ int waitResponse(int timeout)
 		return 0;
 
 	MilliSleep(10);
-	if (!(n = readResponse()))
+	if (!(n = readResponse(";", "\0xFD"))) {
 		while (timeout > 0) {
 			if (timeout > 10) MilliSleep(10);
 			else MilliSleep(timeout);
 			timeout -= 10;
 			Fl::awake();
 		}
+	}
 	return n;
 }
 

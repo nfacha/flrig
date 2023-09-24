@@ -430,6 +430,8 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 				}
 			}
 		}
+		if (!find1.empty() && buf.find(find1) == (buf.length() - find1.length())) break;
+		if (!find2.empty() && buf.find(find2) == (buf.length() - find2.length())) break;
 
 		timedout = ( (zusec() - tnow) > (size_t)(progStatus.serial_timeout * 1000));
 
@@ -461,7 +463,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	if (progStatus.serialtrace)
 		ser_trace(1, traceinfo);
 
-	if (buf.length() < (size_t)nchars) {
+	if (timedout) {
 		memset(traceinfo, 0, sizeof(traceinfo));
 		snprintf(traceinfo, sizeof(traceinfo), 
 			"ReadBuffer FAILED [%f msec] wanted %d chars, read %lu chars",
@@ -768,6 +770,9 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		if ((sbuf.length() >= (size_t)nchars) && ((sbuf[3] & 0xFF) == 0xE0))
 			echo = true;
 		if (sbuf.length() >= (echo ? maxchars : (size_t)nchars)) break;
+		if (!find1.empty() && sbuf.find(find1) == (sbuf.length() - find1.length())) break;
+		if (!find2.empty() && sbuf.find(find2) == (sbuf.length() - find2.length())) break;
+		
 		if (!thisread || !retval) MilliSleep(1);
 	}
 
