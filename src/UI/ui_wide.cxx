@@ -477,7 +477,7 @@ Fl_Group *wide_main_group(int X, int Y, int W, int H)
 						btnAttenuator->labelsize(12);
 						btnAttenuator->callback((Fl_Callback*)cb_btnAttenuator);
 
-						cbo_preamp = new Fl_ComboBox(bx_row1b1a->x() + bx_row1b1a->w(), ypos, 140, 20, "");
+						cbo_preamp = new Fl_ComboBox(bx_row1b1a->x() + bx_row1b1a->w(), ypos, 70, 20, "");
 						cbo_preamp->tooltip(_("Preamp in dB"));
 						cbo_preamp->labelsize(12);
 						cbo_preamp->add("-10 dB|0 dB|10 dB|20 dB|30 dB");

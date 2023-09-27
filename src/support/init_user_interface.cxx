@@ -148,14 +148,20 @@ void TRACED(adjust_small_ui)
 		if (selrig->has_pbt_controls) {
 			y += 20;
 			btnLOCK->position( 2, y);
-			btnLOCK->show();
+			if (selrig->name_ == rig_FLEX1500.name_)
+				btnLOCK->hide();
+			else
+				btnLOCK->show();
 			btnLOCK->redraw();
 			sldrINNER->resize( 54, y, 368, 18 );
 			sldrINNER->show();
 			sldrINNER->redraw();
 			y += 20;
 			btnCLRPBT->position( 2, y);
-			btnCLRPBT->show();
+			if (selrig->name_ == rig_FLEX1500.name_)
+				btnCLRPBT->hide();
+			else
+				btnCLRPBT->show();
 			btnCLRPBT->redraw();
 			sldrOUTER->resize( 54, y, 368, 18);
 			sldrOUTER->show();
@@ -451,15 +457,37 @@ void TRACED(adjust_wide_ui)
 		sldrIFSHIFT->show();
 	}
 	if (selrig->has_pbt_controls) {
-		btnLOCK->show();
-		btnLOCK->value(progStatus.pbt_lock);
-		btnCLRPBT->show();
-		sldrINNER->show();
-		sldrOUTER->show();
-		sldrINNER->value(progStatus.pbt_inner);
-		sldrINNER->redraw();
-		sldrOUTER->value(progStatus.pbt_outer);
-		sldrOUTER->redraw();
+		if (selrig->name_ == rig_FLEX1500.name_) {
+			sldrINNER->minimum(-4000);
+			sldrINNER->maximum(4000);
+			sldrINNER->step(50);
+			sldrINNER->tooltip(_("Lower PBT control"));
+			sldrINNER->label(_("Lower"));
+			sldrINNER->align(FL_ALIGN_LEFT);
+			sldrINNER->value(progStatus.pbt_inner);
+			sldrOUTER->minimum(-4000);
+			sldrOUTER->maximum(4000);
+			sldrOUTER->step(50);
+			sldrOUTER->tooltip(_("Upper PBT control"));
+			sldrOUTER->label(_("Upper"));
+			sldrOUTER->align(FL_ALIGN_LEFT);
+			sldrOUTER->value(progStatus.pbt_outer);
+			btnLOCK->hide();
+			btnIFsh->hide();
+			btnCLRPBT->hide();
+			sldrINNER->show();
+			sldrOUTER->show();
+		} else {
+			btnLOCK->show();
+			btnLOCK->value(progStatus.pbt_lock);
+			btnCLRPBT->show();
+			sldrINNER->show();
+			sldrOUTER->show();
+			sldrINNER->value(progStatus.pbt_inner);
+			sldrINNER->redraw();
+			sldrOUTER->value(progStatus.pbt_outer);
+			sldrOUTER->redraw();
+		}
 	}
 	btnNotch->show();
 	sldrNOTCH->show();
@@ -1710,17 +1738,39 @@ void TRACED(init_if_shift_control)
 		}
 	}
 	if (selrig->has_pbt_controls) {
-		btnLOCK->show();
-		btnLOCK->value(progStatus.pbt_lock);
-		btnCLRPBT->show();
-		sldrINNER->show();
-		sldrOUTER->show();
-		sldrINNER->value(progStatus.pbt_inner);
-		sldrINNER->redraw();
-		sldrOUTER->value(progStatus.pbt_outer);
-		sldrOUTER->redraw();
-		selrig->set_pbt_outer(progStatus.pbt_outer);
-		selrig->set_pbt_inner(progStatus.pbt_inner);
+		if (selrig->name_ == rig_FLEX1500.name_) {
+			sldrINNER->minimum(-4000);
+			sldrINNER->maximum(4000);
+			sldrINNER->step(50);
+			sldrINNER->tooltip(_("Lower PBT control"));
+			sldrINNER->label(_("Lower"));
+			sldrINNER->align(FL_ALIGN_LEFT);
+			sldrINNER->redraw_label();
+			sldrOUTER->minimum(-4000);
+			sldrOUTER->maximum(4000);
+			sldrOUTER->step(50);
+			sldrOUTER->tooltip(_("Upper PBT control"));
+			sldrOUTER->label(_("Upperer"));
+			sldrOUTER->align(FL_ALIGN_LEFT);
+			sldrOUTER->redraw_label();
+			btnLOCK->hide();
+			btnIFsh->hide();
+			btnCLRPBT->hide();
+			sldrINNER->show();
+			sldrOUTER->show();
+		} else {
+			btnLOCK->show();
+			btnLOCK->value(progStatus.pbt_lock);
+			btnCLRPBT->show();
+			sldrINNER->show();
+			sldrOUTER->show();
+			sldrINNER->value(progStatus.pbt_inner);
+			sldrINNER->redraw();
+			sldrOUTER->value(progStatus.pbt_outer);
+			sldrOUTER->redraw();
+			selrig->set_pbt_outer(progStatus.pbt_outer);
+			selrig->set_pbt_inner(progStatus.pbt_inner);
+		}
 	}
 
 	if (xcvr_name == rig_TS870S.name_) {

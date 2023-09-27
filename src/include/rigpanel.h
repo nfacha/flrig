@@ -417,9 +417,9 @@ extern Fl_Box *tcpip_menu_box;
 extern Fl_Group *tcpip_box;
 extern Fl_Check_Button *chk_use_tcpip;
 
-extern Fl_Radio_Light_Button *btn_wide_ui;
-extern Fl_Radio_Light_Button *btn_narrow_ui;
-extern Fl_Radio_Light_Button *btn_touch_ui;
+extern Fl_Check_Button *btn_wide_ui;
+extern Fl_Check_Button *btn_narrow_ui;
+extern Fl_Check_Button *btn_touch_ui;
 extern Fl_Check_Button *chk_sliders_button;
 
 extern Fl_Box *lblTest;

@@ -43,7 +43,7 @@ static const char *vFLEX1500_USBwidths[] =
 {
 " 5000", " 4400", " 3800", " 3300", " 2900",
 " 2700", " 2400", " 2100", " 1800", " 1000",
-" Var1", " Var2" };
+"Var 1", "Var 2" };
 static std::vector<std::string>FLEX1500_CAT_USB;
 static const char *vFLEX1500_CAT_USB[] =
 {
@@ -65,7 +65,7 @@ static const char *vFLEX1500_DIGwidths[] =
 {
 " 3000", " 2500", " 2000", " 1500", " 1000",
 "  800", "  600", "  300", "  150", "   75",
-" Var1", " Var2" };
+"Var 1", "Var 2" };
 static std::vector<std::string>FLEX1500_CAT_DIG;
 static const char *vFLEX1500_CAT_DIG[] =
 {
@@ -78,7 +78,7 @@ static const char *vFLEX1500_AMwidths[] =
 {
 "16000", "12000", "10000", " 8000", " 6600",
 " 5200", " 4000", " 3100", " 2900", " 2400",
-"Var1", "Var2" };
+"Var 1", "Var 2" };
 static std::vector<std::string>FLEX1500_CAT_AM;
 static const char *vFLEX1500_CAT_AM[] =
 {
@@ -91,7 +91,7 @@ static const char *vFLEX1500_CWwidths[] =
 {
 " 1000", "  800", "  750", "  600", "  500",
 "  400", "  250", "  100", "   50", "   25",
-" Var1", " Var2"};
+"Var 1", "Var 2"};
 static std::vector<std::string>FLEX1500_CAT_CW;
 static const char *vFLEX1500_CAT_CW[] =
 {
@@ -110,15 +110,13 @@ static const char *vvarwidths[] =
 //------------------------------------------------------------------------------
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
-	{ (Fl_Widget *)sldrVOLUME,   54, 125, 368 }, // 1
-	{ (Fl_Widget *)sldrRFGAIN,   54, 145, 156 }, // 2
-	{ (Fl_Widget *)btnIFsh,       2, 165,  50 }, // 3
-	{ (Fl_Widget *)sldrIFSHIFT,  54, 165, 156 }, // 4
-	{ (Fl_Widget *)btnNotch,    214, 145,  50 }, // 5
-	{ (Fl_Widget *)sldrNOTCH,   266, 145, 156 }, // 6
-	{ (Fl_Widget *)sldrSQUELCH, 266, 165, 156 }, // 7
-	{ (Fl_Widget *)sldrMICGAIN, 266, 165, 156 }, // 8
-	{ (Fl_Widget *)sldrPOWER,    54, 185, 368 }, // 9
+	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 }, // 1
+	{ (Fl_Widget *)sldrSQUELCH, 266, 125, 156 }, // 2
+	{ (Fl_Widget *)sldrRFGAIN,   54, 145, 156 }, // 3
+	{ (Fl_Widget *)sldrMICGAIN, 266, 145, 156 }, // 4
+	{ (Fl_Widget *)sldrINNER,    54, 165, 156 }, // 5
+	{ (Fl_Widget *)sldrOUTER,   266, 165, 156 }, // 6
+	{ (Fl_Widget *)sldrPOWER,    54, 185, 368 }, // 7
 	{ (Fl_Widget *)NULL,          0,   0,   0 }
 };
 
@@ -146,34 +144,12 @@ void RIG_FLEX1500::initialize()
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
-	rig_widgets[2].W = sldrRFGAIN;
-	rig_widgets[3].W = btnIFsh;
-	rig_widgets[4].W = sldrIFSHIFT;
-	rig_widgets[5].W = btnNotch;
-	rig_widgets[6].W = sldrNOTCH;
-	rig_widgets[7].W = sldrSQUELCH;
-	rig_widgets[8].W = sldrMICGAIN;
-	rig_widgets[9].W = sldrPOWER;
-
-//	for (int i = 0; i < 12; i++) {
-//		memset(const_cast<char *>(varwidths.at(i)), ' ', 5);
-//		strncpy(const_cast<char *>(varwidths.at(i)), FLEX1500_USBwidths.at(i), 5);
-//	}
-
-// get current noise reduction values for NR1 and NR2
-	std::string current_nr;
-	cmd = "ZZNR;";
-	wait_char(';', 6, 100, "read current NR", ASC);
-	gett("get ZZNR");
-	size_t p = replystr.rfind("RL");
-	if (p != std::string::npos)
-		_nrval1 = atoi(&replystr[p+2]);
-	cmd = "ZZNS;";
-	wait_char(';', 6, 100, "read current NR", ASC);
-	int nrval2=0;
-	if (p != std::string::npos)
-		nrval2 = atoi(&replystr[p+2]);
-	if (nrval2 == 1) _nrval1 = 2;
+	rig_widgets[2].W = sldrSQUELCH;
+	rig_widgets[3].W = sldrRFGAIN;
+	rig_widgets[4].W = sldrMICGAIN;
+	rig_widgets[5].W = sldrINNER;
+	rig_widgets[6].W = sldrOUTER;
+	rig_widgets[7].W = sldrPOWER;
 }
 
 void RIG_FLEX1500::shutdown()
@@ -217,9 +193,9 @@ RIG_FLEX1500::RIG_FLEX1500() {
 	B.freq = A.freq = 14070000ULL;
 	can_change_alt_vfo = true;
 
-	has_dsp_controls =
-	false;
+	has_dsp_controls = false;
 
+	has_pbt_controls =
 	has_power_out =
 	has_swr_control =
 	has_alc_control =
@@ -227,7 +203,6 @@ RIG_FLEX1500::RIG_FLEX1500() {
 	has_split_AB =
 	has_rf_control =
 	has_auto_notch =
-	has_ifshift_control =
 	has_smeter =
 	has_noise_reduction =
 	has_noise_reduction_control =
@@ -284,20 +259,21 @@ const char * RIG_FLEX1500::get_bwname_(int n, int md)
 int RIG_FLEX1500::get_smeter()
 {
 	int smtr = 0;
+	std::string strmtr;
 	if (rxona)
-		cmd = "ZZSM0;";
+		strmtr = "ZZSM0";
 	else
-		cmd = "ZZSM1;";
+		strmtr = "ZZSM1";
+	cmd = strmtr;
+	cmd.append(";");
 	get_trace(1, "get_smeter");
-	ret = wait_char(';', 9, 100, "get smeter", ASC);
+	ret = wait_string(strmtr, 9);
 	gett("");
-	if (ret == 9) {
-		size_t p = replystr.rfind("SM");
-		if (p != std::string::npos) {
-			smtr = fm_decimal(replystr.substr(p+3),3);
-			smtr = -54 + smtr/(256.0/100.0); // in S-Units
-			smtr = (smtr + 54);
-		}
+	size_t p = replystr.rfind("SM");
+	if (p != std::string::npos) {
+		smtr = fm_decimal(replystr.substr(p+3),3);
+		smtr = -54 + smtr/(256.0/100.0); // in S-Units
+		smtr = (smtr + 54);
 	}
 	return smtr;
 }
@@ -318,9 +294,8 @@ int RIG_FLEX1500::get_power_out()
 	float mtr = 0.0;
 	cmd = "ZZRM5;";
 	get_trace(1, "get_power_out");
-	ret = wait_char(';', 11, 100, "get power", ASC);
+	ret = wait_string("ZZRM5", 26);
 	gett("");
-	if (ret < 11) return 0;
 	sscanf(&replystr[0],"ZZRM5%f", &mtr);
 	return (int)(10 * mtr);
 }
@@ -328,16 +303,11 @@ int RIG_FLEX1500::get_power_out()
 double RIG_FLEX1500::get_power_control()
 {
 	int pctrl = 0;
-	cmd = "PC;";
+	cmd = "ZZPC;";
 	get_trace(1, "get_power_control");
-	ret = wait_char(';', 6, 100, "get pout", ASC);
+	ret = wait_string("ZZPC", 8);
 	gett("");
-	if (ret == 6) {
-		size_t p = replystr.rfind("PC");
-		if (p != std::string::npos) {
-			pctrl = fm_decimal(replystr.substr(p+2), 3);
-		}
-	}
+	sscanf(&replystr[0], "ZZPC%d;", &pctrl);
 	return pctrl;
 }
 
@@ -356,9 +326,8 @@ int RIG_FLEX1500::get_swr()
 	if (get_tune() != 0) return 0; // swr only works when tuning
 	cmd = "ZZRM8;";
 	get_trace(1, "get_swr");
-	ret = wait_char(';', 8, 100, "get SWR", ASC);
+	ret = wait_string("ZZRM8", 26);
 	gett("");
-	if (ret < 8) return (int)mtr;
 	if (sscanf(&replystr[0], "ZZRM8%lf", &mtr)!=1) {
 		return 0;
 	}
@@ -378,10 +347,9 @@ int RIG_FLEX1500::get_alc()
 	double alc = 0;
 	cmd = "ZZRM4;";
 	get_trace(1, "get_alc");
-	ret = wait_char(';', 8, 100, "get ALC", ASC);
+	ret = wait_string("ZZRM4", 26);
 	gett("");
-	if (ret < 8) return (int)alc;
-	if (sscanf(&replystr[0], "ZZRM4%lf", &alc) != 1) alc=0;
+	if (sscanf(&replystr[0], "ZZRM4%lf", &alc) != 1) alc = 0;
 	return alc;
 }
 
@@ -408,7 +376,7 @@ int RIG_FLEX1500::get_preamp()
 {
 	cmd = "ZZPA;";
 	get_trace(1, "get_preamp");
-	ret = wait_char(';', 6, 100, "get PRE", ASC);
+	ret = wait_string("ZZPA", 6);
 	gett("");
 	if (ret < 6) return preamp_level;
 
@@ -427,7 +395,7 @@ int RIG_FLEX1500::set_widths(int val)
 	cmd += ';';
 
 	set_trace(1, "bandwidths:");
-	wait_char(';', 187, 100, "bandwidths", 187);
+	wait_string("ZZMN", 185);
 	sett("");
 	size_t p = replystr.rfind("ZZMN");
 	if (p != std::string::npos) p += 6;
@@ -529,11 +497,11 @@ void RIG_FLEX1500::set_pbt(int inner, int outer)
 {
 	char cmdstr[50];
 	snprintf(cmdstr, sizeof(cmdstr), "ZZFL%c%04d;",
-			inner < 0 ? '-' : '+', inner);
+			inner < 0 ? '-' : '+', abs(inner));
 	sendCommand(cmd = cmdstr);
 	sett("");
 	snprintf(cmdstr, sizeof(cmdstr), "ZZFH%c%04d;",
-			outer < 0 ? '-' : '+', outer);
+			outer < 0 ? '-' : '+', abs(outer));
 	sendCommand(cmd = cmdstr);
 	sett("");
 }
@@ -541,8 +509,8 @@ void RIG_FLEX1500::set_pbt(int inner, int outer)
 int RIG_FLEX1500::get_pbt_inner()
 {
 	cmd = "ZZFL;";
-	get_trace(1, "get_pbt_inner (lower)");
-	ret = wait_char(';', 10, 100, "get PBT lower", ASC);
+	get_trace(1, "get_pbt_lower");
+	ret = wait_string("ZZFL", 10);
 	gett("");
 	size_t p = replystr.find("ZZFL");
 	if (p != std::string::npos) {
@@ -554,8 +522,8 @@ int RIG_FLEX1500::get_pbt_inner()
 int RIG_FLEX1500::get_pbt_outer()
 {
 	cmd = "ZZFH;";
-	get_trace(1, "get_pbt_inner (upper)");
-	ret = wait_char(';', 10, 100, "get PBT upper", ASC);
+	get_trace(1, "get_pbt_upper");
+	ret = wait_string("ZZFH", 10);
 	gett("");
 	size_t p = replystr.find("ZZFH");
 	if (p != std::string::npos) {
@@ -583,10 +551,10 @@ void RIG_FLEX1500::set_modeA(int val)
 
 int RIG_FLEX1500::get_modeA()
 {
-	if (tuning()) return A.imode;
+//	if (tuning()) return A.imode;
 	cmd = "ZZMD;";
 	get_trace(1, "get_modeA");
-	ret = wait_char(';', 7, 100, "get mode A", ASC);
+	ret = wait_string("ZZMD", 7);
 	gett("");
 	if (ret == 7) {
 		size_t p = replystr.rfind("MD");
@@ -624,10 +592,10 @@ void RIG_FLEX1500::set_modeB(int val)
 
 int RIG_FLEX1500::get_modeB()
 {
-	if (tuning()) return B.imode;
-	cmd = "ZZMD;";
+//	if (tuning()) return B.imode;
+	cmd = "MD;";
 	get_trace(1, "get_modeB");
-	ret = wait_char(';', 4, 100, "get mode B", ASC);
+	ret = wait_string("MD", 4);
 	gett("");
 	if (ret == 7) {
 		size_t p = replystr.rfind("MD");
@@ -721,7 +689,7 @@ int RIG_FLEX1500::get_bw(int mode)
 	else {
 		cmd = "ZZFI;";
 		get_trace(3, "get ", FLEX1500modes_[mode].c_str(), " bandwidth");
-		ret = wait_char(';', 7, 100, "get ZZFI", ASC);
+		ret = wait_string("ZZFI", 7);
 		gett("");
 		if (ret) {
 			switch (mode) {
@@ -806,28 +774,8 @@ void RIG_FLEX1500::set_notch(bool on, int val)
 bool  RIG_FLEX1500::get_notch(int &val)
 {
 	bool ison = false;
-	cmd = "BC;";
-	get_trace(1, "get_notch");
-	ret = wait_char(';', 4, 100, "get notch on/off", ASC);
-	gett("");
-	if (ret == 4) {
-		size_t p = replystr.rfind("BC");
-		if (p != std::string::npos) {
-			if (replystr[p+2] == '2') {
-				ison = true;
-				cmd = "BP;";
-				get_trace(1, "get_notch_val");
-				ret = wait_char(';', 6, 100, "get notch val", ASC);
-				gett("");
-				if (ret == 6) {
-					p = replystr.rfind("BP");
-					if (p != std::string::npos)
-						val = 200 + 50 * fm_decimal(replystr.substr(p+2),3);
-				}
-			}
-		}
-	}
-	return (ison);
+	return ison;
+// NOT IMPLEMENTED
 }
 
 void RIG_FLEX1500::get_notch_min_max_step(int &min, int &max, int &step)
@@ -848,14 +796,14 @@ void RIG_FLEX1500::set_auto_notch(int v)
 int  RIG_FLEX1500::get_auto_notch()
 {
 	int anotch = 0;
-	cmd = "NT;";
+	cmd = "ZZNT;";
 	get_trace(1, "get_auto_notch");
-	ret = wait_char(';', 4, 100, "get auto notch", ASC);
+	ret = wait_string("ZZNT", 6);
 	gett("");
-	if (ret == 4) {
-		size_t p = replystr.rfind("NT");
+	if (ret == 6) {
+		size_t p = replystr.rfind("ZZNT");
 		if (p != std::string::npos) {
-			anotch = (replystr[p+2] == '1');
+			anotch = (replystr[p+4] == '1');
 		}
 	}
 	return anotch;
@@ -888,7 +836,7 @@ int  RIG_FLEX1500::get_noise_reduction()
 	cmd = rsp = "ZZNR";
 	cmd.append(";");
 	get_trace(1, "get_noise_reduction");
-	ret = wait_char(';', 4, 100, "GET noise reduction", ASC);
+	ret = wait_string("ZZNR", 6);
 	gett("");
 	if (ret == 6) {
 		size_t p = replystr.rfind(rsp);
@@ -926,9 +874,9 @@ int  RIG_FLEX1500::get_noise_reduction_val()
 	cmd = rsp = "ZZNR";
 	cmd.append(";");
 	get_trace(1, "get_noise_reduction_val");
-	ret = wait_char(';', 5, 100, "GET noise reduction val", ASC);
+	ret = wait_string("ZZNR", 6);
 	gett("");
-	if (ret == 5) {
+	if (ret == 6) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) {
 			nrval = (_noise_reduction_level == 1 ? _nrval1 : _nrval2);
@@ -967,7 +915,7 @@ int RIG_FLEX1500::get_tune()
 	cmd = rsp = "ZZTU";
 	cmd += ';';
 	get_trace(1, "get_tune");
-	ret = wait_char(';', 6, 100, "get tune", ASC);
+	ret = wait_string("ZZTU", 6);
 	gett("");
 
 	size_t p = replystr.rfind(rsp);
@@ -993,7 +941,7 @@ int  RIG_FLEX1500::get_rf_gain()
 	int rfg = 120;
 	char sign;
 	get_trace(1, "get_rf_gain");
-	ret = wait_char(';', 9, 100, "get rf gain", ASC);
+	ret = wait_string("ZZAR", 9);
 	gett("");
 	if (ret == 9) {
 		size_t p = replystr.rfind("ZZAR");
@@ -1028,7 +976,7 @@ int RIG_FLEX1500::get_mic_gain()
 	int mgain = 0;
 	cmd = "ZZMG;";
 	get_trace(1, "get_mic_gain");
-	ret = wait_char(';', 8, 100, "get mic", ASC);
+	ret = wait_string("ZZMG", 8);
 	gett("");
 	if (ret == 8) {
 		size_t p = replystr.rfind("MG");
@@ -1059,7 +1007,7 @@ int RIG_FLEX1500::get_PTT()
 {
 	cmd = "ZZTX;";
 	get_trace(1, "get_PTT");
-	ret = wait_char(';', 6, 100, "get PTT", ASC);
+	ret = wait_string("ZZTX", 6);
 	gett("");
 	if (ret < 6) return ptt_;
 	ptt_ = (replystr[4] == '1');
@@ -1069,7 +1017,7 @@ int RIG_FLEX1500::get_PTT()
 bool RIG_FLEX1500::tuning()
 {
 	cmd = "ZZTU;";
-	if (wait_char(';', 6, 100, "tuning?", ASC) == 6) {
+	if (wait_string("ZZTU", 6) == 6) {
 		if (replystr[4] == '1') return true;
 	}
 	return false;
@@ -1089,7 +1037,7 @@ int RIG_FLEX1500::get_split()
 {
 	cmd = "ZZSP;";
 	get_trace(1, "get_split");
-	ret = wait_char(';', 6, 100, "get split", ASC);
+	ret = wait_string("ZZSP", 6);
 	gett("");
 	if (ret < 6) return split;
 	split = (replystr[4] == '1');
@@ -1110,7 +1058,7 @@ int  RIG_FLEX1500::get_squelch()
 	int sq = 0;
 	cmd = "ZZSQ;";
 	get_trace(1, "get_squelch");
-	ret = wait_char(';', 8, 100, "get squelch", ASC);
+	ret = wait_string("ZZSQ", 7);
 	gett("");
 	if (ret == 8) {
 		size_t p = replystr.rfind("ZZSQ");
@@ -1126,5 +1074,105 @@ void RIG_FLEX1500::get_squelch_min_max_step(int &min, int &max, int &step)
 	min = -160;
 	max = 0;
 	step = 4;
+}
+
+unsigned long long RIG_FLEX1500::get_vfoA()
+{
+	unsigned long long freq = A.freq;
+	cmd = "ZZFA;";
+	get_trace(1, "get_vfoA");
+	ret = wait_string("ZZFA", 16);
+	gett("");
+	if (ret >= 16) {
+		size_t p = replystr.find("ZZFA");
+		if (p != std::string::npos) {
+			sscanf(replystr.c_str(), "ZZFA%llu", &freq);
+			A.freq = freq;
+		}
+	}
+	return A.freq;
+}
+
+void RIG_FLEX1500::set_vfoA(unsigned long long f)
+{
+	A.freq = f;
+	char szf[20];
+	snprintf(szf, sizeof(szf), "ZZFA%011llu;", A.freq);
+	sendCommand(szf);
+	sett("");
+}
+
+unsigned long long RIG_FLEX1500::get_vfoB()
+{
+	unsigned long long freq = B.freq;
+	cmd = "ZZFB;";
+	get_trace(1, "get_vfoB");
+	ret = wait_string("ZZFB", 16);
+	gett("");
+	if (ret >= 16) {
+		size_t p = replystr.find("ZZFB");
+		if (p != std::string::npos) {
+			sscanf(replystr.c_str(), "ZZFB%llu", &freq);
+			B.freq = freq;
+		}
+	}
+	return B.freq;
+}
+
+void RIG_FLEX1500::set_vfoB(unsigned long long f)
+{
+	B.freq = f;
+	char szf[20];
+	snprintf(szf, sizeof(szf), "ZZFB%011llu;", B.freq);
+	sendCommand(szf);
+	sett("");
+}
+
+// Volume control return 0 ... 100
+int RIG_FLEX1500::get_volume_control()
+{
+	int volctrl = 0;
+	cmd = "ZZAG;";
+	get_trace(1, "get_volume_control");
+	ret = wait_string("ZZAG", 8);
+	gett("");
+	size_t p = replystr.rfind("ZZAG");
+	sscanf(&replystr[p], "ZZAG%d;",  &volctrl);
+	return volctrl;
+}
+
+void RIG_FLEX1500::set_volume_control(int val) 
+{
+	char szcmd[20];
+	snprintf(szcmd, sizeof(szcmd), "ZZAG%03d;", val);
+	set_trace(2, "set_volume_control", szcmd); 
+	sendCommand(szcmd);
+	sett("");
+	showresp(WARN, ASC, "set vol", szcmd, "");
+}
+
+void RIG_FLEX1500::set_noise(bool b)
+{
+	if (b)
+		cmd = "ZZNA1;";
+	else
+		cmd = "ZZNA0;";
+	set_trace(1, "set_noise_blanker");
+	sendCommand(cmd);
+	sett("");
+	showresp(WARN, ASC, "set NB", cmd, "");
+}
+
+int RIG_FLEX1500::get_noise()
+{
+	int response = 0;
+	cmd = "ZZNA;";
+	get_trace(1, "get_noise");
+	ret = wait_string("ZZNA", 6);
+	gett("");
+	size_t p = replystr.rfind("ZZNA");
+	if (p != std::string::npos)
+		response = replystr[p +  4] - '0';
+	return response;
 }
 

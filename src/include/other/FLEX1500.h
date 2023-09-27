@@ -39,10 +39,10 @@ enum FLEX1500MODES { LSB, USB, DSB, CWL, CWU, FM, AM, DIGU, SPEC, DIGL, SAM, DRM
 	void initialize();
 	void shutdown();
 
-//	unsigned long long get_vfoA();
-//	void set_vfoA(unsigned long long);
-//	unsigned long long get_vfoB();
-//	void set_vfoB(unsigned long long);
+	unsigned long long get_vfoA();
+	void set_vfoA(unsigned long long);
+	unsigned long long get_vfoB();
+	void set_vfoB(unsigned long long);
 
 //	void selectA();
 //	void selectB();
@@ -133,6 +133,14 @@ enum FLEX1500MODES { LSB, USB, DSB, CWL, CWU, FM, AM, DIGU, SPEC, DIGL, SAM, DRM
 	void set_squelch(int val);
 	int  get_squelch();
 	void get_squelch_min_max_step(int &min, int &max, int &step);
+
+	void set_volume_control(int val);
+	int  get_volume_control();
+	void get_vol_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 1; }
+
+	void set_noise(bool b);
+	int  get_noise();
 
 	bool tuning();
 

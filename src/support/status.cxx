@@ -46,7 +46,7 @@ int current_ui_size = -1;
 status progStatus = {
 	50,			// int mainX;
 	50,			// int mainY;
-	735,		// int mainW;
+	800,		// int mainW;
 	150,		// int mainH;
 	small_ui,	// UISIZE, UIsize;
 	false,		// UIchanged;

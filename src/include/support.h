@@ -153,6 +153,8 @@ extern void setDSP();
 extern void selectDSP();
 extern void selectFILT();
 extern void selectCENTER();
+extern void setFilterInner();
+extern void setFilterOuter();
 
 extern void addFreq();
 extern void delFreq();

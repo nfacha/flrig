@@ -392,6 +392,14 @@ void TRACED(setModeControl, void *)
 
 	opMODE->index(vfo->imode);
 	opMODE->redraw();
+	selrig->bandwidths_ = selrig->bwtable(vfo->imode);
+	opBW->clear();
+	for (size_t i = 0; i < selrig->bandwidths_.size(); i++)
+		opBW->add(selrig->bandwidths_.at(i).c_str());
+	if (vfo->iBW != opBW->index())
+		opBW->index(vfo->iBW);
+	opBW->redraw();
+	opBW->show();
 
 // enables/disables the IF shift control, depending on the mode.
 // the IF Shift function, is ONLY valid in CW modes, with the 870S.
@@ -499,7 +507,8 @@ void TRACED(setBWControl, void *)
 			opDSP_lo->hide();
 			opDSP_hi->hide();
 			btnDSP->hide();
-			opBW->index(vfo->iBW);
+			if (vfo->iBW != opBW->index())
+				opBW->index(vfo->iBW);
 			opBW->show();
 			opBW->redraw();
 		}
@@ -510,14 +519,11 @@ void TRACED(setBWControl, void *)
 		btnDSP->hide();
 		opBW_A->hide();
 		opBW_B->hide();
-		
-//		if (!(	selrig->name_ == rig_tci_sundx.name_ ||
-//				selrig->name_ == rig_tci_sunpro.name_ ||
-//				selrig->name_ == rig_FLEX1500.name_) ) {
+
+		if (vfo->iBW != opBW->index())
 			opBW->index(vfo->iBW);
-			opBW->show();
-			opBW->redraw();
-//		}
+		opBW->show();
+		opBW->redraw();
 	}
 }
 
@@ -1984,94 +1990,66 @@ void updateTCI(void *d)
 		btnCENTER->deactivate();
 		btnCENTER->show();
 		opCENTER->hide();
-		opBW->index(vfo->iBW);
+		if (vfo->iBW != opBW->index())
+			opBW->index(vfo->iBW);
 		opBW->resize(opDSP_lo->x(), opDSP_lo->y(), opDSP_lo->w(), opDSP_lo->h());
 		opBW->redraw();
 		opBW->show();
 	}
 } 
 
-static int last_FLEX1500_bw = -1;
-static int last_FLEX1500_inner = -1;
-static int last_FLEX1500_outer = -1;
-static int last_FLEX1500_mode = -1;
-
 void updateFLEX1500(void *d)
 {
 	if (!(	selrig->name_ == rig_FLEX1500.name_) )
 		return;
 
-	vfo->FilterInner = selrig->get_pbt_inner();
-	vfo->FilterOuter = selrig->get_pbt_outer();
-
-	if (last_FLEX1500_mode != vfo->imode) {
-		last_FLEX1500_mode = vfo->imode;
-		switch (vfo->imode) {
-			case RIG_FLEX1500::AM :
-			case RIG_FLEX1500::SAM :
-			case RIG_FLEX1500::DSB :
-			case RIG_FLEX1500::FM :
-				opFilterInner->minimum(-8000);	opFilterInner->maximum(0);
-				opFilterInner->step(10); opFilterInner->lstep(510);
-				opFilterOuter->minimum(0); 		opFilterOuter->maximum(8000);
-				opFilterOuter->step(10); opFilterOuter->lstep(500);
-				break;
-			case RIG_FLEX1500::LSB :
-				opFilterInner->minimum(-4000);	opFilterInner->maximum(0);
-				opFilterInner->step(10); opFilterInner->lstep(100);
-				opFilterOuter->minimum(-4000); 	opFilterOuter->maximum(0);
-				opFilterOuter->step(10); opFilterOuter->lstep(100);
-				break;
-			case RIG_FLEX1500::USB :
-				opFilterInner->minimum(0);	opFilterInner->maximum(4000);
-				opFilterInner->step(10); opFilterInner->lstep(100);
-				opFilterOuter->minimum(0);	opFilterOuter->maximum(4000);
-				opFilterOuter->step(10); opFilterOuter->lstep(100);
-				break;
-			default: case RIG_FLEX1500::CWL :
-				opFilterInner->minimum(-1500);	opFilterInner->maximum(0);
-				opFilterInner->step(5); opFilterInner->lstep(25);
-				opFilterOuter->minimum(-1500);	opFilterOuter->maximum(0);
-				opFilterOuter->step(5); opFilterOuter->lstep(25);
-				break;
-			case RIG_FLEX1500::CWU:
-				opFilterInner->minimum(0);	opFilterInner->maximum(1500);
-				opFilterInner->step(5); opFilterInner->lstep(25);
-				opFilterOuter->minimum(0);	opFilterOuter->maximum(1500);
-				opFilterOuter->step(5); opFilterOuter->lstep(25);
-				break;
-			case RIG_FLEX1500::DIGL: case RIG_FLEX1500::DIGU:
-				opFilterInner->minimum(0);	opFilterInner->maximum(1500);
-				opFilterInner->step(10); opFilterInner->lstep(100);
-				opFilterOuter->minimum(0); 		opFilterOuter->maximum(1500);
-				opFilterOuter->step(10); opFilterOuter->lstep(100);
-				break;
-			case RIG_FLEX1500::DRM:
-				opFilterInner->minimum(-5000);	opFilterInner->maximum(0);
-				opFilterInner->step(10); opFilterInner->lstep(100);
-				opFilterOuter->minimum(0); 		opFilterOuter->maximum(5000);
-				opFilterOuter->step(10); opFilterOuter->lstep(100);
-				break;
-		}
-
-		updateBandwidthControl((void *)0);
-	}
-
-	if (last_FLEX1500_bw != vfo->iBW) opBW->index(last_FLEX1500_bw = vfo->iBW);
-	if (last_FLEX1500_inner != vfo->FilterInner) opFilterInner->value(last_FLEX1500_inner = vfo->FilterInner);
-	if (last_FLEX1500_outer != vfo->FilterOuter) opFilterOuter->value(last_FLEX1500_outer = vfo->FilterOuter);
-
-	std::string smode = opMODE->value();
-
 	btnCENTER->hide();
 	opCENTER->hide();
 
-	opFilterInner->redraw();
-	opFilterOuter->redraw();
+	switch (vfo->imode) {
+		case RIG_FLEX1500::AM :
+		case RIG_FLEX1500::SAM :
+		case RIG_FLEX1500::DSB :
+		case RIG_FLEX1500::FM :
+			sldrINNER->minimum(-8000); sldrINNER->maximum(0); sldrINNER->step(10);
+			sldrOUTER->minimum(0); sldrOUTER->maximum(8000); sldrOUTER->step(10);
+			break;
+		case RIG_FLEX1500::LSB :
+			sldrINNER->minimum(-4000); sldrINNER->maximum(0); sldrINNER->step(10);
+			sldrOUTER->minimum(-4000); sldrOUTER->maximum(0); sldrOUTER->step(10);
+			break;
+		case RIG_FLEX1500::USB :
+			sldrINNER->minimum(0); sldrINNER->maximum(4000); sldrINNER->step(10);
+			sldrOUTER->minimum(0); sldrOUTER->maximum(4000); sldrOUTER->step(10);
+			break;
+		default: case RIG_FLEX1500::CWL :
+			sldrINNER->minimum(-1500); sldrINNER->maximum(0); sldrINNER->step(5);
+			sldrOUTER->minimum(-1500); sldrOUTER->maximum(0); sldrOUTER->step(5);
+			break;
+		case RIG_FLEX1500::CWU:
+			sldrINNER->minimum(0); sldrINNER->maximum(1500); sldrINNER->step(5);
+			sldrOUTER->minimum(0); sldrOUTER->maximum(1500); sldrOUTER->step(5);
+			break;
+		case RIG_FLEX1500::DIGL: case RIG_FLEX1500::DIGU:
+			sldrINNER->minimum(0); sldrINNER->maximum(1500); sldrINNER->step(10);
+			sldrOUTER->minimum(0); sldrOUTER->maximum(1500); sldrOUTER->step(10);
+			break;
+		case RIG_FLEX1500::DRM:
+			sldrINNER->minimum(-5000); sldrINNER->maximum(0); sldrINNER->step(10);
+			sldrOUTER->minimum(0); sldrOUTER->maximum(5000); sldrOUTER->step(10);
+			break;
+	}
 
-	opBW->redraw();
-	opBW->show();
+	std::string sBW = opBW->value();
+	if (sBW.find("Var") != std::string::npos) {
+		sldrINNER->activate();
+		sldrOUTER->activate();
+	} else {
+		sldrINNER->deactivate();
+		sldrOUTER->deactivate();
+	}
 
+	updateBandwidthControl((void *)0);
 
 } 
 
@@ -2134,12 +2112,10 @@ void TRACED ( updateBandwidthControl, void *d )
 			opDSP_hi->hide();
 			btnDSP->hide();
 			btnFILT->hide();
-			opBW->clear();
+//			opBW->clear();
 			try {
-				selrig->bandwidths_ = selrig->bwtable(vfo->imode);
-				for (size_t i = 0; i < selrig->bandwidths_.size(); i++)
-					opBW->add(selrig->bandwidths_.at(i).c_str());
-				opBW->index(vfo->iBW);
+				if (vfo->iBW != opBW->index())
+					opBW->index(vfo->iBW);
 			} catch (const std::exception& e) {
 				LOG_ERROR("%s", e.what());
 				opBW->index(0);
@@ -2152,13 +2128,10 @@ void TRACED ( updateBandwidthControl, void *d )
 		opDSP_lo->hide();
 		opDSP_hi->hide();
 		btnDSP->hide();
-		opBW->clear();
+//		opBW->clear();
 		try {
-		selrig->bandwidths_ = selrig->bwtable(vfo->imode);
-			for (size_t i = 0; i < selrig->bandwidths_.size(); i++) { 
-				opBW->add(selrig->bandwidths_.at(i).c_str());
-			}
-			opBW->index(vfo->iBW);
+			if (vfo->iBW != opBW->index())
+				opBW->index(vfo->iBW);
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 			opBW->index(0);
@@ -2187,6 +2160,19 @@ void TRACED ( updateBandwidthControl, void *d )
 		opDSP_lo->hide();
 		opDSP_hi->hide();
 	}
+
+//	if (selrig->name_ == rig_FLEX1500.name_) {
+//		std::string sBW = opBW->value();
+//		if (sBW.find("Var") != std::string::npos) {
+//			sldrINNER->activate();
+//			sldrOUTER->activate();
+//		} else {
+//			sldrINNER->deactivate();
+//			sldrOUTER->deactivate();
+//		}
+//		sldrINNER->redraw();
+//		sldrOUTER->redraw();
+//	}
 }
 
 void setMode()
@@ -3049,9 +3035,15 @@ void setLOCK()
 
 void setINNER()
 {
+	if (selrig->name_ == rig_FLEX1500.name_) {
+		progStatus.pbt_inner = sldrINNER->value();
+		selrig->set_pbt( progStatus.pbt_inner, progStatus.pbt_outer);
+		return;
+	}
+
 	progStatus.pbt_inner = sldrINNER->value();
 	if (progStatus.pbt_lock) {
-		progStatus.pbt_outer = progStatus.pbt_inner;
+		progStatus.pbt_outer = sldrOUTER->value();
 		sldrOUTER->value(progStatus.pbt_outer);
 		sldrOUTER->redraw();
 	}
@@ -3074,6 +3066,12 @@ void setINNER()
 
 void setOUTER()
 {
+	if (selrig->name_ == rig_FLEX1500.name_) {
+		progStatus.pbt_outer = sldrOUTER->value();
+		selrig->set_pbt( progStatus.pbt_inner, progStatus.pbt_outer);
+		return;
+	}
+
 	progStatus.pbt_outer = sldrOUTER->value();
 	if (progStatus.pbt_lock) {
 		progStatus.pbt_inner = progStatus.pbt_outer;
@@ -3099,6 +3097,9 @@ void setOUTER()
 
 void setCLRPBT()
 {
+	if (selrig->name_ == rig_FLEX1500.name_)
+		return;
+
 	progStatus.pbt_inner = progStatus.pbt_outer = 0;
 
 	sldrOUTER->value(0);

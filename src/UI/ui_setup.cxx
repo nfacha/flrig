@@ -18,9 +18,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
-Fl_Radio_Light_Button *btn_wide_ui = (Fl_Radio_Light_Button *)0;
-Fl_Radio_Light_Button *btn_narrow_ui = (Fl_Radio_Light_Button *)0;
-Fl_Radio_Light_Button *btn_touch_ui = (Fl_Radio_Light_Button *)0;
+Fl_Check_Button *btn_wide_ui = (Fl_Check_Button *)0;
+Fl_Check_Button *btn_narrow_ui = (Fl_Check_Button *)0;
+Fl_Check_Button *btn_touch_ui = (Fl_Check_Button *)0;
 
 Fl_Box *lblTest = (Fl_Box *)0;
 Fl_Button *prefFont = (Fl_Button *)0;
@@ -60,10 +60,22 @@ Fl_Check_Button *chk_sliders_button = (Fl_Check_Button *)0;
 Fl_Button *btn_tab_color = (Fl_Button *)0;
 Fl_Button *btn_tab_defcolor = (Fl_Button *)0;
 
-static void cb_btn_ui(Fl_Radio_Light_Button* o, void*) {
-	if (o == btn_wide_ui) progStatus.UIsize = wide_ui;
-	else if (o == btn_narrow_ui) progStatus.UIsize = small_ui;
-	else progStatus.UIsize = touch_ui;
+static void cb_btn_ui(Fl_Check_Button* o, void*) {
+	if (o == btn_wide_ui) {
+		progStatus.UIsize = wide_ui;
+		btn_narrow_ui->value(0);
+		btn_touch_ui->value(0);
+	}
+	else if (o == btn_narrow_ui) {
+		progStatus.UIsize = small_ui;
+		btn_wide_ui->value(0);
+		btn_touch_ui->value(0);
+	}
+	else if (o == btn_touch_ui) {
+		progStatus.UIsize = touch_ui;
+		btn_wide_ui->value(0);
+		btn_narrow_ui->value(0);
+	}
 	progStatus.UIchanged = true;
 }
 
@@ -176,21 +188,18 @@ Fl_Double_Window* DisplayDialog() {
 		su_grp1->box(FL_ENGRAVED_FRAME);
 		su_grp1->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
 
-		btn_narrow_ui = new Fl_Radio_Light_Button(
+		btn_narrow_ui = new Fl_Check_Button(
 			su_grp1->w()/2 - 160, 20, 100, 18, _("Narrow UI"));
-		btn_narrow_ui->down_box(FL_DOWN_BOX);
 		btn_narrow_ui->callback((Fl_Callback*)cb_btn_ui);
 		btn_narrow_ui->value(progStatus.UIsize == small_ui);
 
-		btn_wide_ui = new Fl_Radio_Light_Button(
+		btn_wide_ui = new Fl_Check_Button(
 			btn_narrow_ui->x() + 110, 20, 100, 18, _("Wide UI"));
-		btn_wide_ui->down_box(FL_DOWN_BOX);
 		btn_wide_ui->callback((Fl_Callback*)cb_btn_ui);
 		btn_wide_ui->value(progStatus.UIsize == wide_ui);
 
-		btn_touch_ui = new Fl_Radio_Light_Button(
+		btn_touch_ui = new Fl_Check_Button(
 			btn_wide_ui->x() + 110, 20, 100, 18, _("Touch UI"));
-		btn_touch_ui->down_box(FL_DOWN_BOX);
 		btn_touch_ui->callback((Fl_Callback*)cb_btn_ui);
 		btn_touch_ui->value(progStatus.UIsize == touch_ui);
 
