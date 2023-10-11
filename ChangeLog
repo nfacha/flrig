@@ -1,6 +1,20 @@
-2023-08-25  dave-w1hkj  <w1hkj@bellsouth.net>
+2023-10-11  dave-w1hkj  <w1hkj@bellsouth.net>
 
-	f1bcf0b8: Version 2.02.03
+	cfa7db4e: Version 2.0.04
+	ff9c111b: FLEX-1500
+	097c396c: serial-i/o
+	37324503: rigbase
+	070fa476: Serial trace
+	25e61de9: PowerSDR
+	2d641226: Fix Warnings
+	5b2d69e7: IC7300
+	6101988b: Serial read
+	de861af4: Code cleanup
+	fb9ddb2a: FT991
+	517d0aa4: IC7851
+	2657970e: PowerSDR
+	2b5a9bde: Icom Echo
+	02501d69: Version 2.0.03
 	9e1797b7: SmartSDR
 
 2023-07-28  Black Michael  <mdblack98@yahoo.com>
