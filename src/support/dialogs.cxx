@@ -86,7 +86,7 @@ void clear_combos()
 	select_fskioPORT->add("NONE");
 }
 
-void add_combos(char *port)
+void add_combos(const char *port)
 {
 	if (progStatus.serialtrace) {
 		static char sztr[100];
@@ -102,6 +102,12 @@ void add_combos(char *port)
 
 void set_combo_value()
 {
+	add_combos(progStatus.xcvr_serial_port.c_str());
+	add_combos(progStatus.sep_serial_port.c_str());
+	add_combos(progStatus.aux_serial_port.c_str());
+	add_combos(progStatus.cwioPORT.c_str());
+	add_combos(progStatus.FSK_PORT.c_str());
+
 	selectCommPort->value(progStatus.xcvr_serial_port.c_str());
 	selectAuxPort->value(progStatus.aux_serial_port.c_str());
 	selectSepPTTPort->value(progStatus.sep_serial_port.c_str());
@@ -317,6 +323,7 @@ out:
 			add_combos(ttyname);
 		}
 	}
+
 	set_combo_value();
 }
 #endif // __linux__
