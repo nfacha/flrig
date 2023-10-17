@@ -29,6 +29,9 @@
 #include "config.h"
 #include "combo.h"
 
+#undef FLTK_VER
+#define FLTK_VER (FLRIG_FLTK_API_MAJOR * 100 + FLRIG_FLTK_API_MINOR)
+
 void popbrwsr_cb (Fl_Widget *v, long d);
 
 Fl_PopBrowser::Fl_PopBrowser (int X, int Y, int W, int H, const char *label)
@@ -710,5 +713,9 @@ int Fl_ComboBox::find_index(const char *str)
 void Fl_ComboBox::position(int n)
 {
 	if (type_ != LISTBOX)
+#if FLTK_VER >= 104
+		val->insert_position(n,n);
+#else
 		val->position(n, n);
+#endif
 }
