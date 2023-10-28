@@ -45,7 +45,9 @@
 #include <termios.h>
 #include <glob.h>
 #  ifndef __APPLE__
-#    include <error.h>
+#    ifndef __FreeBSD__
+#      include <error.h>
+#    endif
 #  endif
 #endif
 
@@ -219,7 +221,7 @@ void tmate2_write_main_display (unsigned char *lcdstring, int Value)
 	for (i = 3; i < 19; i++) { //Ensures that the used bytes are in a clear state
 		lcdstring[i]=0x00;
 	}
-	for (i = 19; i >= 3; i--) {
+	for (i = 19; i >= 3; i -= 2) {
 		number = Value % 10 ;
 		Value = Value / 10 ;
 		switch (number) {
@@ -268,7 +270,6 @@ void tmate2_write_main_display (unsigned char *lcdstring, int Value)
 				lcdstring[i+1] |= SEG9H;
 				break;
 			}
-		i--;
 		}
 }
 
@@ -829,7 +830,7 @@ void tmate2_write_smeter_display (unsigned char *lcdstring, int SmeterValue)
 	if (SmeterValue < 0) return;
 	int number;
 	int i;
-	for (i = 23; i <= 28; i++) {
+	for (i = 23; i <= 28; i += 2) {
 		number = SmeterValue % 10 ;
 		SmeterValue = SmeterValue / 10 ;
 		switch (number) {
@@ -878,7 +879,6 @@ void tmate2_write_smeter_display (unsigned char *lcdstring, int SmeterValue)
 				lcdstring[i+1] |= SEGSWR9H;
 				break;
 			}
-		i++;
 	}
 }
 
