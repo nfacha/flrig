@@ -1476,6 +1476,29 @@ public:
 
 } rig_get_swrmeter(&rig_server);
 
+class rig_get_SWR : public XmlRpcServerMethod {
+public:
+	rig_get_SWR(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_SWR", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_swr_control)
+			result = "0";
+		else {
+			guard_lock serial_lock(&mutex_serial, "xml 09");
+			int val = selrig->get_swr();
+			char szmeter[20];
+			snprintf(szmeter, sizeof(szmeter), "%2.1f", 3.0 * val / 50);
+			std::string result_string = szmeter;
+			result = result_string;
+		}
+	}
+
+	std::string help() { return std::string("returns SWR"); }
+
+} rig_get_SWR(&rig_server);
+
 //==============================================================================
 // set interface
 //==============================================================================
@@ -3643,7 +3666,8 @@ struct MLIST {
 	{ "rig.get_pwrmeter", "s:n", "return PWR out" },
 	{ "rig.get_pwrmeter_scale", "s:n", "return scale for power meter" },
 	{ "rig.get_pwrmax",   "s:n", "return maximum power available" },
-	{ "rig.get_swrmeter", "s:n", "return SWR out" },
+	{ "rig.get_swrmeter", "s:n", "return SWR meter reading" },
+	{ "rig.get_SWR",      "s:n", "return SWR value" },
 	{ "rig.get_smeter",   "s:n", "return Smeter" },
 	{ "rig.get_DBM",      "s:n", "return Smeter in dBm" },
 	{ "rig.get_Sunits",   "s:n", "return Smeter in S units" },
