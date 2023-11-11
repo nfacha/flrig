@@ -308,7 +308,7 @@ int RIG_TS940S::get_PTT()
 }
 
 
-void RIG_TS940S::tune_rig()
+void RIG_TS940S::tune_rig(int i)
 {
 	cmd = "AT1;";
 	LOG_WARN("%s", cmd.c_str());

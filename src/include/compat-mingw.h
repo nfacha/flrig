@@ -79,7 +79,7 @@ int mingw_rename(const char*, const char*);
 #endif
 
 int nanosleep (const struct timespec *req, struct timespec *rem);
-int socketpair(int family, int type, int protocol, int *sv);
+int socketpair(int family, int type, int protocol, SOCKET *sv);
 
 /* uname */
 /*

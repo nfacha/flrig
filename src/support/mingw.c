@@ -182,7 +182,7 @@ static void wsa_init(void)
 	wsa_init_ = 1;
 }
 
-int socketpair(int family, int type, int protocol, int *sv)
+int socketpair(int family, int type, int protocol, SOCKET *sv)
 {
 	struct sockaddr_in addr;
 	SOCKET sfd;

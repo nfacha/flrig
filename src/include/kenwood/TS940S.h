@@ -40,7 +40,7 @@ public:
 
 	int  getvfoAorB();
 	int  get_modetype(int n);
-	
+
 	void set_modeA(int val);
 	int  get_modeA();
 	void set_modeB(int val);
@@ -48,7 +48,7 @@ public:
 
 	void selectA();
 	void selectB();
-	
+
 	int  adjust_bandwidth(int val) { return 0; }
 
 //	void set_attenuator(int val);
@@ -64,12 +64,12 @@ public:
 	void set_PTT_control(int val);
 	int  get_PTT();
 
-	void tune_rig();
-	
+	void tune_rig(int);
+
 	int get_split();
 	void set_split(bool val);
 	bool can_split();
-	
+
 //	void set_bwA(int val);
 
 };
