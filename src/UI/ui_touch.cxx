@@ -1348,12 +1348,12 @@ CTRL  click: FreqB -> FreqA\
 				spnr_vox_hang = new Hspinner(
 					spnr_anti_vox->x() +
 					spnr_anti_vox->w() + 60,
-					by, 5*bh, bh, _("hang"));
+					by, 5*bh, bh, _("delay"));
 				spnr_vox_hang->type(FL_INT_INPUT);
 				spnr_vox_hang->minimum(0);
 				spnr_vox_hang->maximum(100);
 				spnr_vox_hang->step(1);
-				spnr_vox_hang->tooltip(_("VOX hang time"));
+				spnr_vox_hang->tooltip(_("VOX delay time"));
 				spnr_vox_hang->callback((Fl_Callback*)cb_spnr_vox_hang);
 				spnr_vox_hang->value(progStatus.vox_hang);
 				spnr_vox_hang->align(FL_ALIGN_CENTER | FL_ALIGN_BOTTOM);
@@ -1762,7 +1762,7 @@ CTRL  click: FreqB -> FreqA\
 
 				spnr_tt550_cw_qsk = new Hspinner(
 					spnr_tt550_cw_weight->x() + spnr_tt550_cw_weight->w() + 60, by,
-					5*bh, bh, _("Delay"));
+					5*bh, bh, _("delay"));
 				spnr_tt550_cw_qsk->tooltip(_("QSK delay (msec)"));
 				spnr_tt550_cw_qsk->type(FL_INT_INPUT);
 				spnr_tt550_cw_qsk->minimum(0);
@@ -1836,7 +1836,7 @@ CTRL  click: FreqB -> FreqA\
 				spnr_tt550_vox_hang = new Hspinner(
 					spnr_tt550_anti_vox->x() +
 					spnr_tt550_anti_vox->w() + 60, by,
-					5*bh, bh, _("hang"));
+					5*bh, bh, _("delay"));
 				spnr_tt550_vox_hang->type(FL_INT_INPUT);
 				spnr_tt550_vox_hang->minimum(0);
 				spnr_tt550_vox_hang->maximum(100);

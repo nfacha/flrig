@@ -786,7 +786,7 @@ Fl_Double_Window *tabs_window()
 			spnr_tt550_cw_qsk = new Hspinner(
 				spnr_tt550_cw_weight->x() +
 				spnr_tt550_cw_weight->w() + 2, 40,
-				70, 22, _("Delay"));
+				70, 22, _("delay"));
 			spnr_tt550_cw_qsk->tooltip(_("QSK delay (msec)"));
 			spnr_tt550_cw_qsk->type(1);
 			spnr_tt550_cw_qsk->minimum(0);
@@ -864,7 +864,7 @@ Fl_Double_Window *tabs_window()
 			spnr_tt550_vox_hang = new Hspinner(
 				spnr_tt550_anti_vox->x() +
 				spnr_tt550_anti_vox->w() + 4, 40,
-				70, 22, _("hang"));
+				70, 22, _("delay"));
 			spnr_tt550_vox_hang->type(1);
 			spnr_tt550_vox_hang->minimum(0);
 			spnr_tt550_vox_hang->maximum(100);
@@ -1561,12 +1561,12 @@ Fl_Double_Window *tabs_window()
 
 			spnr_vox_hang = new Hspinner(
 				spnr_anti_vox->x() + spnr_anti_vox->w() + 10, 40,
-				80, 22, _("hang"), 18);
+				80, 22, _("delay"), 18);
 			spnr_vox_hang->type(1);
 			spnr_vox_hang->minimum(0);
 			spnr_vox_hang->maximum(100);
 			spnr_vox_hang->step(1);
-			spnr_vox_hang->tooltip(_("VOX hang time"));
+			spnr_vox_hang->tooltip(_("VOX delay time"));
 			spnr_vox_hang->callback((Fl_Callback*)cb_spnr_vox_hang);
 			spnr_vox_hang->value(progStatus.vox_hang);
 			spnr_vox_hang->align(FL_ALIGN_CENTER | FL_ALIGN_BOTTOM);
