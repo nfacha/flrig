@@ -935,6 +935,8 @@ static void cb_se_text(Fl_Input2 *o, void *d) {
 	*cmd[val] = o->value();
 }
 
+extern bool testmode;
+
 static void cb_init_ser_port(Fl_Return_Button*, void*) {
 
 	if (selrig->io_class == TCI) {
@@ -946,7 +948,7 @@ static void cb_init_ser_port(Fl_Return_Button*, void*) {
 	std::string p2 = selectAuxPort->value();
 	std::string p3 = selectSepPTTPort->value();
 
-	if ( (p1 == "NONE") && (p1 == p2 || p1 == p3) ) {
+	if ( !testmode && (p1 != "NONE") && (p1 == p2 || p1 == p3) ) {
 		fl_message("Select separate ports");
 		return;
 	}
