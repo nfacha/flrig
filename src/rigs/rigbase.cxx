@@ -417,7 +417,6 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 
 	if (progStatus.xmlrpc_rig) {
 		replystr = xml_cat_string(cmd);
-//std::cout << "replystr: " << replystr << std::endl;
 		return replystr.length();
 	}
 

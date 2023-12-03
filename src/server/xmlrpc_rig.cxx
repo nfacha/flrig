@@ -91,9 +91,13 @@ std::string xml_cat_string( std::string send )
 
 	try {
 
+		xml_trace(2, "rig_client_string send:", to_hex(send).c_str());
+
 		if (flrig_client->execute("rig.client_string", Args, result)) {
 
 			std::string res = (std::string)result;
+
+			xml_trace(2, "rig.client_string recv:", res.c_str());
 
 			if (res.find("x") != std::string::npos) {
 				std::string raw;
