@@ -422,7 +422,7 @@ unsigned long long RIG_FT710::get_vfoB ()
 
 //	replystr = "YYYYYFB7300000;";
 	unsigned long long f = 0;
-	sscanf(replystr.c_str(), "FA%lld", &f);
+	sscanf(replystr.c_str(), "FB%lld", &f);
 	if (f)
 		freqB = f;
 	return freqB;
