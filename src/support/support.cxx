@@ -3037,8 +3037,16 @@ void setINNER()
 	}
 
 	progStatus.pbt_inner = sldrINNER->value();
+	if (progStatus.pbt_inner == 0) {
+		sldrINNER->value(1); sldrINNER->redraw();
+		sldrINNER->value(0); sldrINNER->redraw();
+	}
 	if (progStatus.pbt_lock) {
-		progStatus.pbt_outer = sldrOUTER->value();
+		progStatus.pbt_outer = progStatus.pbt_inner;
+		if (progStatus.pbt_outer == 0) {
+			sldrOUTER->value(1);
+			sldrOUTER->redraw();
+		}
 		sldrOUTER->value(progStatus.pbt_outer);
 		sldrOUTER->redraw();
 	}
@@ -3068,8 +3076,16 @@ void setOUTER()
 	}
 
 	progStatus.pbt_outer = sldrOUTER->value();
+	if (progStatus.pbt_outer == 0) {
+		sldrOUTER->value(1); sldrOUTER->redraw();
+		sldrOUTER->value(0); sldrOUTER->redraw();
+	}
 	if (progStatus.pbt_lock) {
 		progStatus.pbt_inner = progStatus.pbt_outer;
+		if (progStatus.pbt_inner == 0) {
+			sldrINNER->value(1);
+			sldrINNER->redraw();
+		}
 		sldrINNER->value(progStatus.pbt_inner);
 		sldrINNER->redraw();
 	}
