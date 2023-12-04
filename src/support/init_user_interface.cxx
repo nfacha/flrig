@@ -2559,8 +2559,8 @@ trace(1, "selrig->initialize()");
 
 		if (selrig->name_ == rig_QCXP.name_) read_menus();
 
-if (!testmode && xcvr_name != rig_null.name_) {
-	trace(1, "selrig->check()");
+	if (!testmode && xcvr_name != rig_null.name_ && (progStatus.xcvr_serial_port != "xml_client")) {
+		trace(1, "selrig->check()");
 		if (!selrig->check()) {
 			trace(1, "FAILED");
 			bypass_serial_thread_loop = true;
