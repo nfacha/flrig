@@ -1,0 +1,57 @@
+/**
+\page supported_transceivers Supported Transceivers
+
+Each table entry is a clickable link to a specific transceiver.
+
+<center>
+| Elecraft          |Icom                                  |Kenwood                        |Ten-Tec                          | Yaesu                              | Other                           |
+|:-----------------:|:------------------------------------:|:-----------------------------:|:-------------------------------:|:----------------------------------:|:-------------------------------:|
+|\ref ek_k2_a "K2"  |\ref icom_703_a "IC-703"              |\ref kwd_ts140_a "TS 140"      |\ref tt_516_a "TT 516"           |\ref yaesu_100d_a "FT 100D"         |\ref o_aor5000_a "AOR5000"       |
+|\ref ek_kx2_a "KX2"|\ref icom_705_a "IC-705"              |\ref kwd_ts440_a "TS 440"      |\ref tt_delta-ii_a "TT DELTA-II" |\ref yaesu_450_a "FT 450"           |\ref o_pcr1000_a "PCR 1000"      |
+|\ref ek_k3_a "K3"  |\ref icom_706mk2g_a "IC 706 MK IIG"   |\ref kwd_ts450s_a "TS 450S"    |\ref tt_538_a "TT 538" 	     |\ref yaesu_450d_a "FT 450D"         |\ref o_ray152_a "RAY 152"        |
+|\ref ek_kx3_a "KX3"|\ref icom_718_a "IC-718"              |\ref kwd_ts480hx_a "TS 480HX"  |\ref tt_550_a "TT 550" 	     |\ref yaesu_736r_a "FT 736R"         |<br>                             |
+|\ref ek_k4_a "K4"  |\ref icom_728_a "IC 728"              |\ref kwd_ts480sat_a "TS 480SAT"|\ref tt_omni6_a "Omni-VI" 	     |\ref yaesu_747_a "FT 747"           |\ref o_PowerSDR_a "PowerSDR"     |
+|<br>               |\ref icom_735_a "IC 735"              |\ref kwd_ts570_a "TS 570"      |\ref tt_566_a "TT Orion-II"      |\ref yaesu_757gx2_a "FT 757GX2"     |\ref o_Flex1500_a "Flex 1500"    |
+|<br>               |\ref icom_746_a "IC 746"              |\ref kwd_ts590s_a "TS 590S"    |\ref tt_omni7_a "Onmi-VII" 	     |\ref yaesu_767_a "FT 767"           |\ref o_SunSDR2_a "SunSDR2 Pro"   |
+|<br>               |\ref icom_746pro_a "IC 746 Pro"       |\ref kwd_ts590sg_a  "TS 590SG" |\ref tt_599_a "TT Eagle" 	     |\ref yaesu_817_a "FT 817"           |\ref o_smartsdr_a "SmartSDR"     |   
+|<br>               |\ref icom_751_a "IC 751"  		   |\ref kwd_ts790_a "TS 790"      |<br>                     	     |\ref yaesu_817bb_a "FT 817BB"       |\ref o_tcisdr_a "TCISDR"         |
+|<br>               |\ref icom_756_a "IC 756"		   |\ref kwd_ts850_a "TS 850"      |<br>                     	     |\ref yaesu_818nd_a "FT 818ND"       |<br>                             |
+|<br>               |\ref icom_756pro_a "IC 756 Pro"       |\ref kwd_ts870S_a "TS 870S"    |<br>                     	     |\ref yaesu_847_a "FT 847"           |\ref o_Xiegu-5105_a "Xiegu 5105" |
+|<br>               |\ref icom_756pro2_a "IC 756 Pro II"   |\ref kwd_ts890S_a "TS 890S"    |<br>                     	     |\ref yaesu_857d_a "FT 857D"         |\ref o_Xiegu-G90_a "Xiegu G90"   |
+|<br>               |\ref icom_756pro3_a "IC 756 Pro III"  |\ref kwd_ts940S_a "TS 940S"    |<br>                     	     |\ref yaesu_890_a "FT 890"           |\ref o_Xiegu-6100_a "Xiegu 6100" |
+|<br>               |\ref icom_910h_a "IC 910H"		   |\ref kwd_ts950_a "TS 950"      |<br>                     	     |\ref yaesu_891_a "FT 891"           |<br>                             |
+|<br>               |\ref icom_7000_a "IC 7000"            |\ref kwd_ts990_a "TS 990"      |<br>                     	     |\ref yaesu_897d_a "FT 897D"         |\ref o_FDMDUO_a "FDM-DUO"        | 
+|<br>               |\ref icom_7100_a "IC 7100"            |\ref kwd_ts2000_a "TS 2000"    |<br>                     	     |\ref yaesu_900_a "FT 900"           |<br>                             |
+|<br>               |\ref icom_7200_a "IC 7200"            |<br>                           |<br>                     	     |\ref yaesu_920_a "FT 920"           |<br>                             |
+|<br>               |\ref icom_7300_a "IC 7300"            |<br>                           |<br>                     	     |\ref yaesu_950_a "FT 950"           |\ref o_TX500_a "TX500"           |
+|<br>               |\ref icom_7410_a "IC 7410"            |<br>                           |<br>                     	     |\ref yaesu_990_a "FT 990"           |<br>                             |
+|<br>               |\ref icom_7600_a "IC 7600"            |<br>                           |<br>                     	     |\ref yaesu_990a_a "FT 990A"         |\ref o_QCXplus_a "QRP Labs QCX+" |
+|<br>               |\ref icom_7610_a "IC 7610"            |<br>                           |<br>                     	     |\ref yaesu_991_a "FT 991"           |\ref o_QDX_a "QRP Labs QDX"      |
+|<br>               |\ref icom_7700_a "IC 7700"            |<br>                           |<br>                     	     |\ref yaesu_991A_a "FT 991A"         |\ref o_QMX_a "QRP Labs QMX"      |
+|<br>               |\ref icom_7800_a "IC 7800"            |<br>                           |<br>                     	     |\ref yaesu_1000d_a "FT 1000/D"      |<br>                             |
+|<br>               |\ref icom_7851_a "IC 7851"	           |<br>                           |<br>                     	     |\ref yaesu_1000mp_a "FT 1000MP"     |\ref o_tmd710_a "TMD710"         |
+|<br>               |\ref icom_9100_a "IC 9100"            |<br>                           |<br>                     	     |\ref yaesu_1000mp-a_a "FT 1000MP-A" |<br>                             |
+|<br>               |\ref icom_9700_a "IC 9700"        	   |<br>                           |<br>                             |\ref yaesu_2000_a "FT 2000" 	  |<br>                             |
+|<br>               |\ref icom_f8101_a "IC F8101"      	   |<br>                           |<br>                             |\ref yaesu_dx10_a "FT DX10" 	  |<br>                             |
+|<br>               |\ref icom_icR71_a "IC R71"        	   |<br>                           |<br>                             |\ref yaesu_dx101d_a "FT DX101D" 	  |<br>                             |
+|<br>               |<br>                            	   |<br>                           |<br>                             |\ref yaesu_dx101mp_a "FT DX101MP"   |<br>                             |
+|<br>               |<br>                            	   |<br>                           |<br>                             |\ref yaesu_1200dx_a "FT DX1200"  	  |<br>                             |
+|<br>               |<br>                            	   |<br>                           |<br>                             |\ref yaesu_3000dx_a "FT DX3000"  	  |<br>                             |
+|<br>               |<br>                            	   |<br>                           |<br>                             |\ref yaesu_5000dx_a "FT DX5000"  	  |<br>                             |
+|<br>               |<br>                            	   |<br>                           |<br>                             |\ref yaesu_9000dx_a "FT DX9000"  	  |<br>                             |
+</center> 
+\section howto Transceiver Setup Examples
+<ul>
+<li>\ref yaesu_991A_setup</li>
+<li>\ref ic7100_setup</li>
+<li>\ref ic7300_setup</li>
+<li>\ref ic7600_setup</li>
+<li>\ref tt550_ops_page</li>
+</ul>
+
+Additional setup examples may be found on the fldigi wiki: https://sourceforge.net/p/fldigi/wiki/how_to/
+
+\ref contents "Return to Contents"
+
+*/
+

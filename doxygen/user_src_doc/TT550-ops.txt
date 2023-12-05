@@ -1,5 +1,5 @@
 /**
-\page tt550_ops_page  TT550 - Pegasus Operating instructions
+\page tt550_ops_page  TT550 - Pegasus
 
 \tableofcontents
 
@@ -169,6 +169,6 @@ input by pressing the decimal value twice in succession.
 
 \ref tt550_ops_page "Page Top"
 
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 
 */

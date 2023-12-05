@@ -32,7 +32,7 @@ enum mFTdx10 {
    mLSB, mUSB, mCW_U, mFM, mAM, mRTTY_L, mCW_L, mDATA_L, mRTTY_U, mDATA_FM, mFM_N, mDATA_U, mAM_N, mPSK, mDATA_FMN };
 //  0,    1,    2,    3,    4,    5,       6,     7,      8,       9,        10,    11,      12,    13,      14		// mode index
 
-static const char FTdx10name_[] = "FTdx10";
+static const char FTdx10name_[] = "FTDX10";
 
 #undef  NUM_MODES
 #define NUM_MODES  15

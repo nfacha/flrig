@@ -1,0 +1,47 @@
+/**
+\page program_debugging Program Debugging
+
+\tableofcontents
+
+\section sEventLog Event Log
+
+Several debugging tools are available in flrig, including the ability to observe code
+execution in various parts of the program.
+<br><br>
+The event log is opened from the "Help/Events" menu item.  It allows you to view the
+serial and xmlrpc data exchanges between FLRIG, FLDIGI, xmlrpc transactions,
+and the transceiver.
+<center>
+\image latex debugging/flrig-event-log.png "Event Log" width=6.5in
+\image html debugging/flrig-event-log.png "Event Log"
+</center>
+
+\section sTraceLog Tracing Program Execution
+
+The trace tool sends time annotated data to
+both a viewing dialog and a file named "trace.txt" which is written to the flrig files
+folder.  The trace tool is very useful to the programmer developing a 3rd party application
+using the flrig xmlrpc server.  It may also be used at the request of a support person
+assisting the user with transceiver connection or data stream issues.
+<center>
+\image latex config/config-trace.png "Configure code execution trace" width=5.0in
+\image html  config/config-trace.png "Configure code execution trace"
+</center>
+<ul>
+<li> Trace support code - main processing loop execution points.</li>
+<li> Trace debug code - replicate the event log debugging output.</li>
+<li> Trace rig class code - execution points within a specific transceiver class (not for all).</li>
+<li> Trace xml_server code - execution points within the xmlrpc interface code for i/o to/from fldigi.</li>
+<li> Trace xmlrpcpp code - sent and received xmlrpc data packets<br>
+six levels of detail 0 ... 5 can be specified.</li>
+</ul>
+<br>
+<center>
+\image latex debugging/trace-dialog.png "Example showing support code trace" width=5.0in
+\image html  debugging/trace-dialog.png "Example showing support code trace"
+</center>
+
+\ref contents "Return to Contents"
+
+*/
+

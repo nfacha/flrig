@@ -5,6 +5,11 @@
 \image latex transceivers/TS140.png "TS 140" width=3.75in
 \image html transceivers/TS140.png "TS 140"
 </center>
+\anchor kwd_ts440_a
+<center>
+\image latex transceivers/TS440.png "TS 440" width=3.75in
+\image html transceivers/TS440.png "TS 440"
+</center>
 \anchor kwd_ts450s_a
 <center>
 \image latex transceivers/TS450S.png "TS 450S" width=3.75in
@@ -35,6 +40,36 @@
 \image latex transceivers/TS590SG.png "TS 590SG" width=3.75in
 \image html transceivers/TS590SG.png "TS 590SG"
 </center>
+\anchor kwd_ts790_a
+<center>
+\image latex transceivers/TS790.png "TS 790" width=3.75in
+\image html transceivers/TS790.png "TS 790"
+</center>
+\anchor kwd_ts850_a
+<center>
+\image latex transceivers/TS850.png "TS 850" width=3.75in
+\image html transceivers/TS850.png "TS 850"
+</center>
+\anchor kwd_ts870S_a
+<center>
+\image latex transceivers/TS870S.png "TS 870S" width=3.75in
+\image html transceivers/TS870S.png "TS 870S"
+</center>
+\anchor kwd_ts890S_a
+<center>
+\image latex transceivers/TS890S.png "TS 890S" width=3.75in
+\image html transceivers/TS890S.png "TS 890S"
+</center>
+\anchor kwd_ts940S_a
+<center>
+\image latex transceivers/TS940S.png "TS 940S" width=3.75in
+\image html transceivers/TS940S.png "TS 940S"
+</center>
+\anchor kwd_ts950_a
+<center>
+\image latex transceivers/TS950.png "TS 950" width=3.75in
+\image html transceivers/TS950.png "TS 950"
+</center>
 \anchor kwd_ts990_a
 <center>
 \image latex transceivers/TS990.png "TS 990" width=3.75in
@@ -46,6 +81,6 @@
 \image html transceivers/TS2000.png "TS 2000"
 </center>
 \ref kenwood_rigs "Page Top"
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 */
 

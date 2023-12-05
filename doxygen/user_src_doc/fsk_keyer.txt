@@ -1,0 +1,54 @@
+/**
+\page fsk_keyer FSK Keyer
+
+Open the FSK keyer dialog
+
+<center>
+\image latex fskio-keyer/fskio_dialog.png "" width=5.0in
+\image html  fskio-keyer/fskio_dialog.png ""
+</center>
+
+ with the main dialog menu item "Keyer/FSK keyer".
+ 
+ <center>
+\image latex menus/keyer_menu.png "" width = 3.0in
+\image html  menus/keyer_menu.png ""
+</center>
+
+Config opens:
+
+<center>
+\image latex fskio-keyer/fskio_config.png "" width=5.0in
+\image html  fskio-keyer/fskio_config.png ""
+</center>
+
+The DTR/RTS port can be either
+<ul>
+<li>shared with the CAT port</li>
+<li>shared with the AUX port</li>
+<li>shared with the SEP port</li>
+<li>shared port with CWIO (if separate)</li>
+<li>a unique serial port configured on this dialog</li>
+<li>Inverted - enable if interface requires a Mark/Space reversed signal level</li>
+<li>select either DTR or RTS for the keyline as required by h/w, 
+selection must not conflict with CW keyline</li>
+</ul>
+
+PTT delay is in milliseconds.  Enter a non-zero value to enable a delay 
+between the PTT-on and the first FSK keyline closure.  The same delay will 
+be applied to the last FSK keyline closure and PTT-off.
+
+Control-left-click opens:
+
+<center>
+\image latex fskio-keyer/fskio_editor.png "" width=5.0in
+\image html  fskio-keyer/fskio_editor.png ""
+</center>
+
+An RY macro with start/stop (ptt enable/disable):
+<pre>[RYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRYRY DE W1HKJ K]</pre>
+
+\ref contents "Return to Contents"
+
+*/
+

@@ -20,7 +20,7 @@
 
 #include "kenwood/TS140.h"
 
-const char TS140name_[] = "TS140";
+const char TS140name_[] = "TS-140";
 
 static std::vector<std::string>TS140modes_;
 static const char *vTS140modes_[] =

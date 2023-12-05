@@ -38,7 +38,7 @@ static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 
-static const char FTdx9000name_[] = "FTdx9000";
+static const char FTdx9000name_[] = "FTDX9000";
 
 static std::vector<std::string>FTdx9000modes_;
 static const char *vFTdx9000modes_[] = {

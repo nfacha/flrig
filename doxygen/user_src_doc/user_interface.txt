@@ -1,0 +1,70 @@
+/**
+\page user_interface Configure User Interface
+
+\tableofcontents
+
+<center>
+\image latex menus/config-ui-menu.png "" width=3.0in
+\image html menus/config-ui-menu.png ""
+</center>
+<br>
+\subsection ssMetering Meter Display and Filters
+
+<center>
+\image latex ui/meters-dialog.png "Meters Dialog" width=3.18in
+\image html ui/meters-dialog.png "Meters Dialog"
+</center>
+<br>
+
+<center>
+\image latex ui/meter-filters.png "Meter Filter Controls" width=4.18in
+\image html ui/meter-filters.png "Meter Filter Controls"
+</center>
+<br>
+
+You can control the behavior of both the average and peak values of the
+S-meter and Power out meters.  Setting the controls to 1 for both average
+and peak will simply display the latest value available from the
+transceiver.  The average setting results in the display showing the
+average of the last N readings.  The peak value will display the average
+peak value over the last M readings.
+<br>
+
+<center>
+\image latex ui/power-scale-select.png "Meter Scale" width=4.6in
+\image html ui/power-scale-select.png "Meter Scale"
+</center>
+<br>
+
+Right click on the main dialog power meter scale to open up this selection
+dialog.  Each of the 4 scales and the "Auto scaled" box are buttons.  Press
+the one you want to use.  Auto-scaling adjusts the meter scale to the
+smallest scale consistent with the current measured peak power.  If that
+power is fluctuating near the transistion point between two scales you
+might want to fix the scale to either the larger or smaller.
+<br>
+
+\subsection ssSliders Slider sizing
+
+When the user interface is configured to be "small" then the UI submenu will
+contain the item "Small sliders".  Toggling this menu item will immediately
+change the size and positions of the various slider controls. Select the toggle button 
+"Small sliders" on the Config menu for 1/2 size sliders and a dialog layout 
+that uses less vertical space.
+
+<center>
+\image latex FT-991A-ui-small.png "Small UI - Large Sliders" width=4.6in
+\image html FT-991A-ui-small.png "Small UI - Large Sliders"
+</center>
+<br>
+
+<center>
+\image latex FT-991A-ui-narrow.png "Small UI - Small Sliders" width=4.6in
+\image html FT-991A-ui-narrow.png "Small UI - Small Sliders"
+</center>
+<br>
+
+\ref contents "Return to Contents"
+
+*/
+

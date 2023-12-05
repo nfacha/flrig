@@ -1,0 +1,83 @@
+/**
+\page ui_form_factors User Interface Styles
+
+\section sFlrigDesc Transceiver Control
+
+The FLRIG user interface changes to accommodate the degree of CAT support 
+available for the transceiver in use.
+
+Three different main dialog aspect ratios can be selected to suit the
+computer screen dimensions and operator preferences.  The wide aspect
+ratio can be resized horizontally.  The narrow aspect ratios are fixed
+in width and height.
+
+<center>
+\image latex images/ic-7300/ui_small.png "" width=4in
+\image html images/ic-7300/ui_small.png ""
+</center>
+<br>
+
+<center>
+\image latex images/ic-7300/ic-7300-main-extras.png "With embedded extras tab" width=3.75in
+\image html images/ic-7300/ic-7300-main-extras.png "With embedded extras tab"
+<br>
+\image latex images/ic-7300/ic-7300-main-extras-dialog.png "Separate extras tab dialog" width=3.75in
+\image html images/ic-7300/ic-7300-main-extras-dialog.png "Separate extras tab dialog"
+</center>
+<br>
+<center>
+\image latex images/ic-7300/ui_wide.png "" width=6in
+\image html images/ic-7300/ui_wide.png ""
+</center>
+<br>
+
+A fourth interface is available for all transceivers.  It is suitable for use on
+a touch screen
+
+<center>
+\image latex ft-991a/FT-991A-ui-touch.png "Shown at 75% of full size" width=5in
+\image html ft-991a/FT-991A-ui-touch.png "Shown at 75% of full size"
+</center>
+<br>
+
+\section selecting_interface Select Interface
+
+<center>
+\image latex config/config-ui-dropdown.png "" width=5in
+\image html  config/config-ui-dropdown.png ""
+</center>
+<br>
+
+
+\image latex config/config-ui.png "" width=5in
+\image html  config/config-ui.png ""
+
+Many details regarding the user interface can be customized via selections with this dialog.
+
+Turning on "Tooltips" will be very helpful to understand what will change when
+as item is selected. Changes are shown immediately so the change is obvious. 
+
+"Freq. top/bottom left click" refers to changing the frequency via the mouse clicking 
+on the frequency digits in the main display.
+
+"Xcvr follows slider drag" refers to dragging the slider buttons on the flrig interface either 
+changing as you drag or waiting to change until the dragging stops.
+
+The font and size of the frequency display maybe chosen via the Font, Color, Back(ground) buttons. 
+Note: Using fixed fonts usually gives better results.
+
+The "System" group refers to different looks & feel of the main dialog. Try each and see which you prefer.
+Also the Fgnd, Bngd & Bgnd2 will affect those aspects of the main GUI.
+
+Change the default meter indicator colors by clicking on the corresponding button. 
+
+The main interface slider backgrounds & button colors are changed via the buttons in that group.
+
+In the group at the bottom right the "Lt Btn" button allows the changing of the "On" light color.
+The "Tab Clr" refers to the color of the additional controls tabs visable when you click the 
+large down arrow in the main flrig display.
+
+\ref contents "Return to Contents"
+
+*/
+

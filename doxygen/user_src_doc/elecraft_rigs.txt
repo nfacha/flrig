@@ -5,17 +5,27 @@
 \image latex transceivers/K2.png "K2" width=3.75in
 \image html transceivers/K2.png "K2"
 </center>
+\anchor ek_kx2_a
+<center>
+\image latex transceivers/KX2.png "KX2" width=3.75in
+\image html transceivers/KX2.png "KX2"
+</center>
 \anchor ek_k3_a
 <center>
-\image latex transceivers/K3.png "K3/KX3" width=3.75in
-\image html transceivers/K3.png "K3/KX3"
+\image latex transceivers/K3.png "K3" width=3.75in
+\image html transceivers/K3.png "K3"
 </center>
 \anchor ek_kx3_a
 <center>
-\image latex transceivers/KX3.png "K3/KX3" width=3.75in
-\image html transceivers/KX3.png "K3/KX3"
-</center>
+\image latex transceivers/KX3.png "KX3" width=3.75in
+\image html transceivers/KX3.png "KX3"
+</center>   
+\anchor ek_k4_a
+<center>
+\image latex transceivers/K4.png "K4" width=3.75in
+\image html transceivers/K4.png "K4"
+</center>  
 \ref elecraft_rigs "Page Top"
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 */
 

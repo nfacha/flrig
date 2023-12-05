@@ -2,7 +2,7 @@
 #
 # A simple script for creating/archiving doxygen documentation for FLRig
 
-PRG_NAME="FLRig"
+PRG_NAME="flrig"
 
 LATEX="0"
 DOXY="0"
@@ -215,8 +215,8 @@ if [ $BUILD_USER_DOCS -eq "1" ]; then
 (
 	cd user_src_doc
 	check_doxy
-	( compress_html "${PRG_NAME}_Users_Manual" "user_docs")
-	pdf_docs "../../doc/user_docs/latex" "../../pdf/${PRG_NAME}_Users_Manual.pdf"
+	( compress_html "${PRG_NAME}_help" "user_docs")
+	pdf_docs "../../doc/user_docs/latex" "../../pdf/${PRG_NAME}_help.pdf"
 )
 fi
 

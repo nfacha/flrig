@@ -1,0 +1,54 @@
+/**
+\page pg_remote_flrig Remote flrig
+
+\section remote_server Remote Flrig Server
+
+flrig's xmlrpc server interface is always executing.  If the computer that is
+connected to the transceiver is on a local area network then another computer
+may access that instance of flrig via the xmlrpc interface.  This is an instance
+of my FT-710 being controlled on a computer whose network address name is "tk7"
+
+<center>
+\image latex server_main_dialog.png "flrig server" width=4.0in
+\image html server_main_dialog.png "flrig server"
+</center>
+
+It has been configured to use the default xmlrpc port
+
+<center>
+\image latex server_port.png "flrig server" width=5.0in
+\image html server_port.png "flrig server"
+</center>
+
+\section remote_client Remote Client
+
+A second computer on the local area network has been configured to run an instance
+of flrig that connects to the above server.
+
+<center>
+\image latex client_main_dialog.png "flrig client" width=4.0in
+\image html client_main_dialog.png "flrig client"
+</center>
+
+Note that the title bar indicates that this is a client and not directly connected to the transceiver.
+
+The server address and port must be configured on the client tab before attempting to 
+connect to the external xmlrpc server.
+
+<center>
+\image latex client_configure_client.png "flrig server port" width=5.0in
+\image html client_configure_client.png "flrig server port"
+</center>
+
+The Xcvr tab is then configured to use the xmlrpc interface by selecting "xml_client" in lieu of a
+serial port inteface, and pressing the Init button.
+
+<center>
+\image latex client_configure_xcvr.png "select xml_client" width=5.0in
+\image html client_configure_xcvr.png "select xml_client"
+</center>
+
+\ref contents "Return to Contents"
+
+*/
+

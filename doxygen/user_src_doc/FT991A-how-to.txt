@@ -1,5 +1,5 @@
 /**
-\page ft991a_how_to_page FT-991A How-to
+\page yaesu_991A_setup FT-991A setup
 
 \tableofcontents
 
@@ -74,18 +74,18 @@ You should have already installed the driver for the built-in sound card in the 
 
 Connect the rig to the computer with a USB A-Male to B-Male cable and turn on the radio.
 
-\subsection initial_setup Initial Setup
+\subsection ft991a_initial_setup Initial Setup
 With the radio on and the USB cable connected and no other communications 
 program running, Start flrig.  It will come up with just a basic display. 
 <center>
-\image latex flrig-none.png "Initial Flrig Dialog" width=4.0in
+\image latex flrig-none.png "Initial Flrig Dialog" width=4.5in
 \image html flrig-none.png "Initial Flrig Dialog"
 </center>
 
 Open the menu <em>Config/Setup/Transceiver</em>.
 
 <center>
-\image latex xcvr.png "Select FT991A" width=6.0in
+\image latex xcvr.png "Select FT991A" width=5.0in
 \image html  xcvr.png "Select FT991A"
 </center>
 
@@ -116,7 +116,7 @@ do as they are labeled.</li>
 
 \subsection ssRestore Restore tab:
 <center>
-\image latex restore.png width=6.0in
+\image latex restore.png width=5.0in
 \image html  restore.png
 </center>
 
@@ -127,14 +127,10 @@ same settings as the rig currently is using.
 
 \subsection ssPoll Poll tab
 <center>
-\image latex polling.png width=6.0in
+\image latex polling.png width=5.0in
 \image html  polling.png
 </center>
-and click the Set All buttons for the initial polling options. You can play with 
-these values later if you wish. The larger the number the slower the response time 
-to button pushes etc, but also the less load on the system so there is a balance. 
-A very fast machine can use all ones, but there is normally no need to add the 
-additional load to your system for that.
+and click the Set All buttons for the initial polling options. 
 
 I would recommend before you move on that you go to the Config/UI menu and 
 select Tooltips. They are a great help to the new user to figure out what 
@@ -154,7 +150,7 @@ go to the fldigi menu “Configuration/Rig control/flrig” and check the top
 box to tell fldigi to use flrig for rig control with fldigi as client.   
 Leave the other controls at their default setting.
 <center>
-\image latex flrig-fldigi.png width=6.0in
+\image latex flrig-fldigi.png width=5.0in
 \image html  flirig-fldigi.png
 </center>
 Once that is done fldigi should communicate with flrig and changes such as 
@@ -190,4 +186,5 @@ should cause no ALC action on the radio. The FT991A will put out quite a bit
 of power without ALC action, but you don't want to interfere with other close 
 signals on the band either so ideally the power should be between 25-40 watts.
 
+\ref contents "Return to Contents"
 */

@@ -613,22 +613,41 @@ int SerialCompare( const void *x1, const void *x2 )
 	return 1;
 }
 
+inline std::string ucase(std::string s) {
+	for (size_t n = 0; n < s.length(); n++)
+		s[n] = toupper(s[n]);
+	return s;
+}
+
 int AlphaCompare( const void *x1, const void *x2 )
 {
 	datambr *X1, *X2;
 	X1 = *(datambr **)(x1);
 	X2 = *(datambr **)(x2);
-	std::string str1 = X1->s;
-	std::string str2 = X2->s;
-	size_t len = str1.length();
-	if (len > str2.length()) len = str2.length();
-	for (size_t p = 0; p < len; p++) {
-		if (toupper(str1[p]) < toupper(str2[p])) return -1;
-		if (toupper(str1[p]) > toupper(str2[p])) return 1;
+	std::string str1 = ucase(X1->s);
+	std::string str2 = ucase(X2->s);
+	if (str1.substr(0,3) < str2.substr(0,3)) return -1;
+	if (str1.substr(0,3) > str2.substr(0,3)) return 1;
+	std::string s1, s2;
+	bool have_digit = false;
+	for (size_t n = 0; n < str1.length(); n++) {
+		if (have_digit && !isdigit(str1[n])) break;
+		if (isdigit(str1[n])) {
+			s1 += str1[n];
+			have_digit = true;
+		}
 	}
-//	if (str1.length() < str2.length()) return -1;
-//	if (str1.length() > str2.length()) return 1; 
-	return 0;
+	have_digit = false;
+	for (size_t n = 0; n < str2.length(); n++) {
+		if (have_digit && !isdigit(str2[n])) break;
+		if (isdigit(str2[n])) {
+			s2 += str2[n];
+			have_digit = true;
+		}
+	}
+	if (s1.length() < s2.length()) return -1;
+	if (s1.length() > s2.length()) return 1;
+	return str1.compare(str2);
 }
 
 int UcaseCompare( const void *x1, const void *x2 )

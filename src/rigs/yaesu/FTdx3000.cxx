@@ -34,7 +34,7 @@ enum mFTdx3000 {
 //  0,    1,    2,   3,   4,   5,       6,     7,      8,       9,       10,    11,    12	// mode index
 // 19,   19,    9,   0,   0,  10,       9,    15,     10,       0,        0,    15,     0	// FTdx3000_def_bw
 
-static const char FTdx3000name_[] = "FTdx3000";
+static const char FTdx3000name_[] = "FTDX3000";
 
 #undef  NUM_MODES
 #define NUM_MODES  13

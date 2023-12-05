@@ -1,5 +1,5 @@
 /**
-\page prefs_file_contents  flrig prefs file contents
+\page prefs_file_contents  Prefs file contents
 
 A typical transceiver prefs file contains:
 <pre>

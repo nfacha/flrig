@@ -1,66 +1,105 @@
 /**
 \page yaesu_rigs  Supported Yaesu Transceivers
 \anchor yaesu_100d_a
-\image latex transceivers/FT100D.png "FT-100D" width=3.75in
-\image html transceivers/FT100D.png "FT-100D"
+\image latex transceivers/FT100D.png "FT 100D" width=3.75in
+\image html transceivers/FT100D.png "FT 100D"
 \anchor yaesu_450_a
-\image latex transceivers/FT450.png "FT-450" width=3.75in
-\image html transceivers/FT450.png "FT-450"
+\image latex transceivers/FT450.png "FT 450" width=3.75in
+\image html transceivers/FT450.png "FT 450"
 \anchor yaesu_450d_a
-\image latex transceivers/FT450D.png "FT-450D" width=3.75in
-\image html transceivers/FT450D.png "FT-450D"
-\anchor yaesu_747gx_a
-\image latex transceivers/FT747GX.png "FT-747GX" width=3.75in
-\image html transceivers/FT747GX.png "FT-747GS"
+\image latex transceivers/FT450D.png "FT 450D" width=3.75in
+\image html transceivers/FT450D.png "FT 450D"
+\anchor yaesu_736r_a
+\image latex transceivers/FT736R.png "FT-736R" width=3.75in
+\image html transceivers/FT736R.png "FT-736R"
+\anchor yaesu_747_a
+\image latex transceivers/FT747.png "FT-747" width=3.75in
+\image html transceivers/FT747.png "FT-747"
+\anchor yaesu_757gx2_a
+\image latex transceivers/FT757GX2.png "FT-757GX2" width=3.75in
+\image html transceivers/FT757GX2.png "FT-757GX2"
 \anchor yaesu_767_a
 \image latex transceivers/FT767.png "FT-767" width=3.75in
 \image html transceivers/FT767.png "FT-767"
 \anchor yaesu_817_a
 \image latex transceivers/FT817.png "FT-817" width=3.75in
 \image html transceivers/FT817.png "FT-817"
+\anchor yaesu_817bb_a
+\image latex transceivers/FT817BB.png "FT-817BB" width=3.75in
+\image html transceivers/FT817BB.png "FT-817BB"
+\anchor yaesu_818nd_a
+\image latex transceivers/FT818ND.png "FT-818ND" width=3.75in
+\image html transceivers/FT818ND.png "FT-818ND"
 \anchor yaesu_847_a
 \image latex transceivers/FT847.png "FT-847" width=3.75in
 \image html transceivers/FT847.png "FT-847"
 \anchor yaesu_857d_a
 \image latex transceivers/FT857D.png "FT-857D" width=3.75in
 \image html transceivers/FT857D.png "FT-857D"
+\anchor yaesu_890_a
+\image latex transceivers/FT890.png "FT-890" width=3.75in
+\image html transceivers/FT890.png "FT-890"
+\anchor yaesu_891_a
+\image latex transceivers/FT891.png "FT-891" width=3.75in
+\image html transceivers/FT891.png "FT-891"
 \anchor yaesu_897d_a
 \image latex transceivers/FT897D.png "FT-897D" width=3.75in
 \image html transceivers/FT897D.png "FT-897D"
+\anchor yaesu_900_a
+\image latex transceivers/FT900.png "FT-900" width=3.75in
+\image html transceivers/FT900.png "FT-900"
+\anchor yaesu_920_a
+\image latex transceivers/FT920.png "FT-920" width=3.75in
+\image html transceivers/FT920.png "FT-920"
 \anchor yaesu_950_a
-\image latex transceivers/FT950.png "FT-950" width=6in
+\image latex transceivers/FT950.png "FT-950" width=3.75in
 \image html transceivers/FT950.png "FT-950"
-\anchor yaesu_991
-\image latex transceivers/FT991.png "FT-991" width=6in
+\anchor yaesu_990_a
+\image latex transceivers/FT990.png "FT-990" width=3.75in
+\image html transceivers/FT990.png "FT-990"
+\anchor yaesu_990a_a
+\image latex transceivers/FT990A.png "FT-990A" width=3.75in
+\image html transceivers/FT990A.png "FT-990A"
+\anchor yaesu_991_a
+\image latex transceivers/FT991.png "FT-991" width=3.75in
 \image html transceivers/FT991.png "FT-991"
-\anchor yaesu_991a
-\image latex transceivers/FT991A.png "FT-991A" width=6in
+\anchor yaesu_991A_a
+\image latex transceivers/FT991A.png "FT-991A" width=3.75in
 \image html transceivers/FT991A.png "FT-991A"
+\anchor yaesu_1000d_a
+\image latex transceivers/FT1000D.png "FT-1000D" width=3.75in
+\image html transceivers/FT1000D.png "FT-1000D"
 \anchor yaesu_1000mp_a
-\image latex transceivers/FT1000MP.png "FT-1000mp" width=3.75in
-\image html transceivers/FT1000MP.png "FT-1000mp"
+\image latex transceivers/FT1000MP.png "FT-1000MP" width=3.75in
+\image html transceivers/FT1000MP.png "FT-1000MP"
+\anchor yaesu_1000mp-a_a
+\image latex transceivers/FT1000MP-A.png "FT-1000MP-A" width=3.75in
+\image html transceivers/FT1000MP-A.png "FT-1000MP-A"
 \anchor yaesu_2000_a
-\image latex transceivers/FT2000.png "FT-2000" width=6in
+\image latex transceivers/FT2000.png "FT-2000" width=3.75in
 \image html transceivers/FT2000.png "FT-2000"
-\anchor yaesu_1200dx_a
-\anchor yaesu_FTdx101D
-\image latex transceivers/FTdx101D.png "FTdx101D" width=6in
+\anchor yaesu_dx10_a
+\image latex transceivers/FTdx10.png "FTdx10" width=3.75in
+\image html transceivers/FTdx10.png "FTdx10"
+\anchor yaesu_dx101d_a
+\image latex transceivers/FTdx101D.png "FTdx101D" width=3.75in
 \image html transceivers/FTdx101D.png "FTdx101D"
-\anchor yaesu_FTdx101MP
-\image latex transceivers/FTdx101MP.png "FTdx101MP" width=6in
+\anchor yaesu_dx101mp_a
+\image latex transceivers/FTdx101MP.png "FTdx101MP" width=3.75in
 \image html transceivers/FTdx101MP.png "FTdx101MP"
-\image latex transceivers/FTdx1200.png "FT-dx1200" width=6in
+\anchor yaesu_1200dx_a
+\image latex transceivers/FTdx1200.png "FT-dx1200" width=3.75in
 \image html transceivers/FTdx1200.png "FT-dx1200"
 \anchor yaesu_3000dx_a
-\image latex transceivers/FTdx3000.png "FT-dx3000" width=6in
+\image latex transceivers/FTdx3000.png "FT-dx3000" width=3.75in
 \image html transceivers/FTdx3000.png "FT-dx3000"
 \anchor yaesu_5000dx_a
 \image latex transceivers/FTdx5000.png "FT-dx5000" width=3.75in
 \image html transceivers/FTdx5000.png "FT-dx5000"
 \anchor yaesu_9000dx_a
-\image latex transceivers/FTdx9000.png "FTdx9000" width=6in
+\image latex transceivers/FTdx9000.png "FTdx9000" width=3.75in
 \image html transceivers/FTdx9000.png "FTdx9000"
 \ref yaesu_rigs "Page Top"
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 */
 

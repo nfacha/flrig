@@ -1,0 +1,25 @@
+/**
+\page multiple_transceivers Controlling Multiple Transceivers
+
+You can have multiple instances of flrig running, each controlling a separate
+and unique transceiver.  Doing this requires a separate configuration folder
+for each target transceiver.  Either start flrig from a command line or
+copy the desktop launch icon and then modify it's "target" executable.  In
+either case you will be adding a command line parameter
+
+"--config-dir <target-dir>"
+
+Note the double dash.  The <target-dir> will be unique to each supported
+transceiver, for example: "C:\Users\<user-name>\flrig.ic7200" on Win-10, 
+"/home/<user>/flrig.ic7200" on Linux or OS X.  You will have to configure
+each instance with the correct interface parameters.
+
+<center>
+\image latex mulitple_configs.png "" width=2.48in
+\image html mulitple_configs.png ""
+</center>
+
+\ref contents "Return to Contents"
+
+*/
+

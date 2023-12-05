@@ -20,7 +20,7 @@
 
 #include "kenwood/TS940S.h"
 
-const char TS940Sname_[] = "TS940S";
+const char TS940Sname_[] = "TS-940S";
 
 static std::vector<std::string>TS940Smodes_;
 static const char *vTS940Smodes_[] =             {"LSB", "USB", "CW", "FM", "AM", "FSK"};
@@ -308,7 +308,7 @@ int RIG_TS940S::get_PTT()
 }
 
 
-void RIG_TS940S::tune_rig(int i)
+void RIG_TS940S::tune_rig()
 {
 	cmd = "AT1;";
 	LOG_WARN("%s", cmd.c_str());

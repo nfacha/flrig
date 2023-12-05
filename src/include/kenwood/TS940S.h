@@ -64,7 +64,7 @@ public:
 	void set_PTT_control(int val);
 	int  get_PTT();
 
-	void tune_rig(int);
+	void tune_rig();
 
 	int get_split();
 	void set_split(bool val);

@@ -1,5 +1,10 @@
 /**
 \page other_rigs  Other Supported Transceivers
+\anchor o_aor5000_a
+<center>
+\image latex transceivers/AOR5000.png "AOR5000" width=3.75in
+\image html transceivers/AOR5000.png "AOR5000"
+</center>
 \anchor o_pcr1000_a
 <center>
 \image latex transceivers/PCR1000.png "PCR 1000" width=3.75in
@@ -10,45 +15,77 @@
 \image latex transceivers/RAY152.png "RAY 152" width=3.75in
 \image html transceivers/RAY152.png "RAY 152"
 </center>
-\anchor o_PowerSDR
+\anchor o_PowerSDR_a
 <center>
 \image latex transceivers/PowerSDR.png "Power SDR" width=3.75in
 \image html transceivers/PowerSDR.png "Power SDR"
 </center>
-\anchor o_Flex1500
+\anchor o_Flex1500_a
 <center>
 \image latex transceivers/Flex1500.png "Flex 1500" width=3.75in
 \image html transceivers/Flex1500.png "Flex 1500"
 </center>
-\anchor o_QCXplus
+\anchor o_SunSDR2_a
 <center>
-\image latex transceivers/QCXplus.png "QCX+" width=3.75in
-\image html transceivers/QCXplus.png "QCX+"
-\anchor o_SunSDR2
-<center>
-\image latex transceivers/SunSDR2.png "SunSDR2 Pro" width=5.0in
+\image latex transceivers/SunSDR2.png "SunSDR2 Pro" width=3.75in
 \image html transceivers/SunSDR2.png "SunSDR2 Pro"
-\anchor o_Xiegu-5105
+</center>
+\anchor o_smartsdr_a
+<center>
+\image latex transceivers/SmartSDR.png "SmartSDR" width=3.75in
+\image html transceivers/SmartSDR.png "SmartSDR"
+</center>
+\anchor o_tcisdr_a
+<center>
+\image latex transceivers/TCISDR.png "TCISDR" width=3.75in
+\image html transceivers/TCISDR.png "TCISDR"
+</center>
+\anchor o_Xiegu-5105_a
 <center>
 \image latex transceivers/Xiegu-5105.png "Xiegu-5105" width=3.75in
 \image html transceivers/Xiegu-5105.png "Xiegu-5105"
 </center>
-\anchor o_Xiegu-G90
+\anchor o_Xiegu-G90_a
 <center>
 \image latex transceivers/Xiegu-G90.png "Xiegu-G90" width=3.75in
 \image html transceivers/Xiegu-G90.png "Xiegu-G90"
 </center>
-\anchor o_FDMDUO
+\anchor o_Xiegu-6100_a
+<center>
+\image latex transceivers/X6100.png "X6100" width=3.75in
+\image html transceivers/X6100.png "X6100"
+</center>
+\anchor o_FDMDUO_a
 <center>
 \image latex transceivers/FDMDUO.png "FDM-DUO" width=3.75in
 \image html transceivers/FDMDUO.png "FDM-DUO"
 </center>
-\anchor o_TX500
+\anchor o_TX500_a
 <center>
 \image latex transceivers/TX500.png "Lab599 TX500" width=3.75in
 \image html transceivers/TX500.png "Lab599 TX500"
 </center>
+\anchor o_QCXplus_a
+<center>
+\image latex transceivers/QCXplus.png "QCX+" width=3.75in
+\image html transceivers/QCXplus.png "QCX+"
+</center>
+\anchor o_QDX_a
+<center>
+\image latex transceivers/QDX.png "QDX" width=3.75in
+\image html transceivers/QDX.png "QDX"
+</center>
+\anchor o_QMX_a
+<center>
+\image latex transceivers/QMX.png "QMX" width=3.75in
+\image html transceivers/QMX.png "QMX"
+</center>
+\anchor o_tmd710_a
+<center>
+\image latex transceivers/TMD710.png "TMD710" width=3.75in
+\image html transceivers/TMD710.png "TMD710"
+</center>
 \ref other_rigs "Page Top"
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 */
 

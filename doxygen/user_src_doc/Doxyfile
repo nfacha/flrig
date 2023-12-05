@@ -11,8 +11,8 @@
 # Documents produced by Doxygen are derivative works derived from the
 # input used in their production; they are not affected by this license.
 
-PROJECT_NAME         = "FLRig Users Manual"
-PROJECT_NUMBER       = 1.4.8
+PROJECT_NAME         = "flrig_help"
+PROJECT_NUMBER       = 2.0.04
 PROJECT_BRIEF        =
 ALLEXTERNALS         = NO
 CASE_SENSE_NAMES     = NO
@@ -46,23 +46,38 @@ IMAGE_PATH           = ../images \
                        ../images/menus \
                        ../images/transceivers \
                        ../images/ui \
-                       ../images/fskio-keyer
+                       ../images/fskio-keyer \
+                       ../images/remote_flrig
 INPUT                = index.txt \
-                       config_fonts_colors.txt \
+                       contents.txt \
+                       initial_setup.txt \
+                       restore_save_settings.txt \
+                       additional_controls.txt \
+                       user_interface.txt \
+                       ui_form_factors.txt \
+                       main_dialog.txt \
+                       memory_dialog.txt \
+                       cw_keyer.txt \
+                       fsk_keyer.txt \
+                       user_defined_commands.txt \
+                       multiple_transceivers.txt \
+                       xmlrpc_server.txt \
+                       remote_flrig.txt \
+                       program_debugging.txt \
+                       supported_transceivers.txt \
                        elecraft_rigs.txt \
                        icom_rigs.txt \
                        kenwood_rigs.txt \
                        tentec_rigs.txt \
                        yaesu_rigs.txt \
                        other_rigs.txt \
-                       prefs_file.txt \
-                       xmlrpc_cmds.txt \
                        FT991A-how-to.txt \
                        IC7100-how-to.txt \
                        IC7300-how-to.txt \
                        IC7600-how-to.txt \
-                       cw_keyer.txt \
-                       TT550-ops.txt
+                       TT550-ops.txt \
+                       prefs_file.txt
+
 INCLUDE_PATH         = .
 EXAMPLE_PATH         = .
 OUTPUT_DIRECTORY     = ../../doc/user_docs

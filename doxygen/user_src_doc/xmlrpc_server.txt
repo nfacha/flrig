@@ -1,14 +1,30 @@
 /**
-\page xmlrpc_commands  flrig XmlRpc Command Structures
+\page xmlrpc_server Configure XmlRpc Server
+
+\tableofcontents
+
+Flrig accepts remote control via an XmlRpc socket interface.  fldigi uses this 
+access method for reading and writing transceiver parameters via flrig.  WSJT-X and
+several other third party programs also use this method.
+
+<center>
+\image latex config/server.png "Configure server" width=5.0in
+\image html  config/server.png "Configure server"
+</center>
+
+\section xmlrpc_commands  flrig XmlRpc Command Structures
 <pre>
 main.set_frequency        d:d  set current VFO in Hz
-main.get_version          s:n  returns version string
+main.get_version          s:n  returns version std::string
 rig.get_AB                s:n  returns vfo in use A or B
 rig.get_bw                A:n  return BW of current VFO
 rig.get_bws               A:n  return table of BW values
 rig.get_bwA               A:n  return BW of vfo A
 rig.get_bwB               A:n  return BW of vfo B
-rig.get_info              s:n  return an info string
+rig.get_pbt               A:n  return passband tuning
+rig.get_pbt_inner         i:i  return passband inner
+rig.get_pbt_outer         i:i  return passband outer
+rig.get_info              s:n  return an info std::string
 rig.get_mode              s:n  return MODE of current VFO
 rig.get_modeA             s:n  return MODE of current VFO A
 rig.get_modeB             s:n  return MODE of current VFO B
@@ -20,7 +36,8 @@ rig.get_power             i:n  return power level control value
 rig.get_pwrmeter          s:n  return PWR out
 rig.get_pwrmeter_scale    s:n  return scale for power meter
 rig.get_pwrmax            s:n  return maximum power available
-rig.get_swrmeter          s:n  return SWR out
+rig.get_swrmeter          s:n  return SWR meter reading
+rig.get_SWR               s:n  return SWR value
 rig.get_smeter            s:n  return Smeter
 rig.get_DBM               s:n  return Smeter in dBm
 rig.get_Sunits            s:n  return Smeter in S units
@@ -37,6 +54,9 @@ rig.set_AB                n:s  set VFO A/B
 rig.set_bw                i:i  set BW iaw BW table
 rig.set_bandwidth         i:i  set bandwidth to nearest requested value
 rig.set_BW                i:i  set L/U pair
+rig.set_pbt               i:A  set pbt inner/outer
+rig.set_pbt_inner         i:i  set pbt inner
+rig.set_pbt_outer         i:i  set pbt outer
 rig.set_frequency         d:d  set current VFO in Hz
 rig.set_mode              i:s  set MODE iaw MODE table
 rig.set_modeA             i:s  set MODE A iaw MODE table
@@ -73,19 +93,59 @@ rig.set_verify_rfgain     n:i  set & verify rf gain control
 rig.set_verify_micgain    n:i  set & verify mic gain control
 rig.swap                  n:n  execute vfo swap
 rig.tune                  n:n  enable transceiver tune function
-rig.cat_string            s:s  execute CAT string
-rig.cat_priority          s:s  priority CAT string
+rig.cat_string            s:s  execute CAT std::string
+rig.cat_priority          s:s  priority CAT std::string
 rig.shutdown              i:n  shutdown xcvr & flrig
-rig.cwio_wpm              n:i  set cwio WPM
+rig.cwio_set_wpm          n:i  set cwio WPM
 rig.cwio_text             i:s  send text via cwio interface
-rig.cwio_char             n:i  send char via cwio interface
 rig.cwio_send             n:i  cwio transmit 1/0 (on/off)
+rig.fskio_text            i:s  send text via fskio interface
+rig.mod_vfoA              d:d  modify vfo A +/- NNN Hz
+rig.mod_vfoB              d:d  modify vfo B +/- NNN Hz
+rig.mod_vol               n:i  modify volume control +/- NNN %
+rig.mod_pwr               n:i  modify power control level +/- NNN watts
+rig.mod_rfg               n:i  modify rf gain by +/- NNN units
+rig.mod_cwio_wpm          n:i  modify cwio WPM by +/- NNN wpm
+rig.mod_bw                i:i  modify bandwidth +- to nearest new value
+rig.vfoA2B                n:n  set vfo B to vfo A freq/mode
+rig.freqA2B               n:n  set freq B to freq A
+rig.modeA2B               n:n  set mode B to mode A
+rig.cmd                   n:i  execute command button 1..24; 25..48(shift)
 </pre>
 
 The xmlrpc command structure can be accessed using the menu item help/xml-help.
 <center>
-\image latex ui/xmlrpc-help.png "" width=2.48in
+\image latex ui/xmlrpc-help.png "" width=4.0in
 \image html ui/xmlrpc-help.png ""
 </center>
+<br>
+<center>
+\image latex ui/flrig-fldigi.png "FLRIG/FLDIGI" width=4.37in
+\image html ui/flrig-fldigi.png "FLRIG/FLDIGI"
+</center>
+<br>
+Operating FLRIG with FLDIGI requires a simple setup in FLDIGI.  Open the fldigi
+configuration dialog to <i>rig control / flrig </i>
+\image latex fldigi-flrig.png "" width=5in
+\image html  fldigi-flrig.png ""
+
+Deselect all other rig control methods and enable fldigi as an flrig client.
+Xmlrpc is used via a local socket device for
+the two programs to communicate.  flrig acts as the server and fldigi the
+client.  There is no requirement for start / stop ordering of the programs.
+
+FLRIG sends rig configuration data to FLDIGI when the two programs initially
+recognize each other.  This data is used to populate the rig name, the
+available modes and the available bandwidths.
+
+After this initial communications the operator can set the paired controls
+from either FLDIGI or FLRIG.  The two programs will remain synchronized.  The
+data from the computer to the transceiver is always from FLRIG.
+
+Flrig can service multiple xmlrpc clients.  Changes either at the transceiver, flrig,
+or one of the clients will quickly be reflected at the other entities.
+
+\ref contents "Return to Contents"
 
 */
+

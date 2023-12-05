@@ -1,0 +1,22 @@
+/**
+\page restore_save_settings Configure Read/Restore Xvcr Settings
+
+\tableofcontents
+
+Flrig will read various transceiver parameters and restore them upon closing.
+The next image shows the available read/restore parameters for the Icom 7200.  If
+a parameter is not available (or coded) it will be disabled and grayed out.  Check
+each parameter that you want to read and restore.  Reading and restoring transceiver
+parameters takes time, especially on older transceivers with low baud rate serial
+i/o.  Check "Use xcvr data" i\If you want flrig to NOT change the transceiver operating state
+when it begins execution.
+
+<center>
+\image latex config/restore.png "Restoring transceiver Status" width=4.9in
+\image html config/restore.png "Restoring transceiver Status"
+</center>
+
+\ref contents "Return to Contents"
+
+*/
+

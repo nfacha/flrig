@@ -1,0 +1,90 @@
+/**
+\page user_defined_commands User-Defined Commands
+
+\tableofcontents
+
+<center>
+\image latex config/cmds.png "Defining Commands for Extra Controls A, B, C Tabs" width=4.9in
+\image html config/cmds.png "Defining Commands for Extra Controls A, B, C Tabs"
+</center>
+<br>
+
+Flrig supports 24 unshifted and 24 shifted user-defined commands.  The commands are defined via
+the Configuration dialog "Commands" tab and are invoked via buttons on the A, B, and C tabs on the flrig
+extra controls dialog.  Refer to your rig's remote interface control documentation to learn how
+to construct a command.
+
+As shown in the Figure, the user provides text for the button label and an appropriate command string
+for their radio.  The command can be tested by clicking on the button in the extra controls dialog
+and examining the response in the Configuration dialog.  In the example, the unshifted command sets
+the frequency in use on the Main band of an Icom IC-7610 radio to the 80 meter CW range, and the
+shifted command sets it to the 40 meter CW range (these commands only affect frequency - not mode).
+In the label in this example, the '/' is used as a way to distinguish the unshifted/shifted functions.
+
+The command string must comply with the
+transceiver requirements.  If ASCII text is used, as with transceivers based
+on the Kenwood command set, you enter the string without spaces; e.g.,
+
+\verbatim
+FA;
+\endverbatim
+to read the A vfo .
+
+For binary strings, used in older Yaesu transceivers and all Icom CI-V type
+transceivers, you need to enter the string as space-delineated hex values;
+e.g.,
+
+\verbatim
+Yaesu:  x00 x00 x00 x01 x05
+
+Icom: xFE xFE x70 xE0 x1A x05 x00 x92 x00 xFD
+\endverbatim
+
+
+Additionally, the user can define commands that should be executed during program start-up or termination
+by making entries on the Start/Exit tab of the Commands configuration page.
+
+
+
+\subsection ssSENDING Send Command String
+
+<center>
+\image latex config/send.png "I/O Ports - Sending" width=4.9in
+\image html config/send.png "Sending"
+</center>
+<br>
+
+Testing your transceiver commands.  FLRIG might not support a particular CAT
+command for your transceiver.  You can test the support for a particular
+command using the "Send Cmd" tab.  The command string must comply with the
+transceiver requirements.  If ASCII text is used, as with transceivers based
+on the Kenwood command set you enter the string without spaces, i.e.
+
+\verbatim
+FA;
+\endverbatim
+to read the A vfo .
+
+For binary strings, used in older Yaesu transceivers, and all Icom CI-V type
+transceivers you need to enter the string as space delineated hex values,
+i.e.
+
+\verbatim
+Yaesu:  x00 x00 x00 x01 x05
+
+Icom: xFE xFE x70 xE0 x1A x05 x00 x92 x00 xFD
+\endverbatim
+
+The button "ICOM pre" and "ICOM post" will insert the preamble and postamble
+hex code sequences for the selected Icom transceiver.
+
+Press the SEND button to transfer the command to the transceiver.  The
+response will appear in the lower text control.
+
+The diamond indicators will be lit for transceiver and fldigi connections respectively.
+
+
+\ref contents "Return to Contents"
+
+*/
+

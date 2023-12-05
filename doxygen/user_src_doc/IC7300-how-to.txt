@@ -1,5 +1,5 @@
 /**
-\page ic7300_how_to_page IC-7300 How-to
+\page ic7300_setup IC-7300 Setup
 
 \tableofcontents
 
@@ -29,7 +29,7 @@ CAT control. Many of these are ok at default, but verify the ones listed below:
 <li>CI-V Transceive - Off</li>
 <li>CI-V USB Port - Unlink from REMOTE</li>
 <li>CI-V USB Baud Rate - 19,200. I use 115,200, but use 19,200 for starters as that is what flrig defaults to. Response will be a bit quicker with higher rates, but it will do well at 19,200 also.</li>
-<li>CI-V USB Echo Back – On</li>
+<li>CI-V USB Echo Back – On. On is only needed for compatability with other software. Flrig does not need it on so if only using flrig then set to Off.</li>
 </ul>
 
 \section sflrig_setup flrig setup
@@ -102,17 +102,14 @@ startup and exit or whether you want it to open with the same settings as the ri
 currently using. If Use xcvr data is checked flrig will start up with the same settings 
 as the rig currently is using.
 
-\subsetion ss7300-poll Select the Poll tab
+\subsection ss7300-poll Select the Poll tab
 
 <center>
 \image latex ic7300-poll.png "IC7300 Polling Settings" width=4.0in
 \image html  ic7300-poll.png "IC7300 Polling Settings"
 </center>
 
-and select to poll all of the parameters. You can play with these values later if you wish. 
-The larger the number the slower the response time to button pushes etc, but also the less 
-load on the system so there is a balance. A very fast machine can use all ones, but there 
-is normally no need to add the additional load to your system for that.
+and select to poll all of the parameters.
 
 Flrig now should have control of the rig so changing frequency in flrig will changed the 
 frequency on the rig and visa versa. The buttons and sliders should do as they are labeled.
@@ -131,6 +128,6 @@ be working and you should be able to change frequency on the radio and flrig sho
 
 \ref ic7300_how_to_page "Page Top"
 
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 
 */

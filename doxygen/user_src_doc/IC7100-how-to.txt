@@ -1,5 +1,5 @@
 /**
-\page ic7100_how_to_page IC-7100 How-to
+\page ic7100_setup IC-7100 Setup
 
 \tableofcontents
 
@@ -81,7 +81,8 @@ installed properly so that needs to be rectified before going on. If you're usin
 MacOS High Sierra or a later version of MacOS you may need to authorize the driver 
 install in Security & Privacy setup in System Preferences after runing the install 
 program. There will be a message on the General page if it has been blocked.
-Windows
+
+Windows:
 
 Open the device manager and determine to which com port the serial driver from 
 Silcon Labs is assigned and choose that from the drop down list. Verify that the 
@@ -111,10 +112,7 @@ as the rig currently is using.
 \image html  ic7100-poll.png "IC7100 Polling Settings"
 </center>
 
-and select to poll all of the parameters. You can play with these values later if you wish. 
-The larger the number the slower the response time to button pushes etc, but also the less 
-load on the system so there is a balance. A very fast machine can use all ones, but there 
-is normally no need to add the additional load to your system for that.
+and select to poll all of the parameters.
 
 Flrig now should have control of the rig so changing frequency in flrig will changed the 
 frequency on the rig and visa versa. The buttons and sliders should do as they are labeled.
@@ -128,11 +126,11 @@ I would recommend before you move on that you go to the Config/UI menu and selec
 They are a great help to the new user to figure out what each control does as not all are 
 labeled. You can choose 4 different UI’s from the narrow one with small sliders (I use this 
 one – see above screen shot of flrig), to a narrow one with large sliders, to a wide version 
-or a touch version. Now close flrig and restart it to be sure all is well . Everything should 
+or a touch version. Now close flrig and restart it to be sure all is well. Everything should 
 be working and you should be able to change frequency on the radio and flrig should follow.
 
 \ref ic7100_how_to_page "Page Top"
 
-\ref sFlrigDesc "Return to Main Page"
+\ref contents "Return to Contents"
 
 */

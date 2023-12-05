@@ -1,5 +1,91 @@
 /**
-\page cw_keyer CW Keyer Interface
+\page cw_keyer CW Keyer
+
+\section scw_keyer CW Keyer
+
+Open the keyer dialog
+
+<center>
+\image latex cw-keyer/cwkeyer.png "" width=4.0in
+\image html  cw-keyer/cwkeyer.png ""
+</center>
+
+ with the main dialog menu item "Keyer/CW keyer".
+ 
+ <center>
+\image latex menus/keyer_menu.png "" width = 3.0in
+\image html  menus/keyer_menu.png ""
+</center>
+
+<ul>
+<li>WPM slider selects the keyer speed.</li>
+<li>Clear - clears the text in the transmit buffer.</li>
+<li>Transmit text will marquee to the left as each character is transmitted.</li>
+<li>Send/Pause button toggles sending text.</li>
+<li>Macro buttons / function keys load transmit buffer with canned message.
+<ul>
+<li>Left click to load macro contents into transmit buffer.</li>
+<li>Control left click to open macro editor dialog.</li>
+</ul>
+</li>
+<li>The transmit text buffer must have keyboard focus for character entry.  left click on the entry area to gain keyboard focus.</li>
+</ul>
+
+Tip for the function / macro buttons: 
+
+<center>
+\image latex cw-keyer/cwkeyer_tooltip.png "" width=3.0in
+\image html  cw-keyer/cwkeyer_tooltip.png ""
+</center>
+
+Control-left-click opens:
+
+<center>
+\image latex cw-keyer/cwkeyer_editor.png "" width=3.0in
+\image html  cw-keyer/cwkeyer_editor.png ""
+</center>
+
+A CQ macro with start/stop (ptt enable/disable): <pre>[CQ CQ DE W1HKJ K]</pre>
+
+Prosign characters can be configured by the user.  The macros and prosign assignments are save in the transceiver prefs file.
+
+Config opens:
+
+<center>
+\image latex cw-keyer/cwkeyer_config.png "" width=5.0in
+\image html  cw-keyer/cwkeyer_config.png ""
+</center>
+
+The DTR/RTS port can be either
+<ul>
+<li>shared with the CAT port</li>
+<li>shared with the SEP port</li>
+<li>shared with the AUX port</li>
+<li>a unique serial port configured on this dialog</li>
+</ul>
+
+Select either DTR or RTS for the keyline as required by h/w.
+
+Calibrate button sends standard "PARIS " word, WPM times.  Program 
+measures actual time to transmit and sets compensation value.  WPM Comp msec 
+can be adjusted by user.
+
+Xcvr comp msec is used to increase or decrease each key down interval by 
+the specified time interval.  
+
+<center>
+\image latex flrig-24wpm.png "7300 CW DTR/RTS keying @ 24 WPM" width=6.0in
+\image html  flrig-24wpm.png "7300 CW DTR/RTS keying @ 24 WPM"
+</center>
+
+The effect of a -2 msec Xcvr comp adjustment is clearly seen and easily heard.  
+It is especially important to correct weight errors introduced by the transceiver 
+keying circuits when operating QRQ (high speed CW).  At 80 wpm 2 msec is a significant
+part of the target dit interval of 15 msec.
+
+PTT delay is in milliseconds.  Enter a non-zero value to enable a delay 
+between the PTT-on and the first CW keyline closure.  The same delay will 
+be applied to the last CW keyline closure and PTT-off.
 
 The CW keyer is specifically designed to work with a DTR/RTS keyline to 
 emulate the closure of a CW key.  Several transceivers have this capability 
@@ -8,9 +94,17 @@ some share the CAT serial port (IC-7300).  A simple DTR/RTS keying circuit
 can also provide the h/w interface.  This one provides galvanic isolation:
 
 <center>
-\image latex cw-keyer/DTR_keyer.png width=2.0in
+\image latex cw-keyer/DTR_keyer.png width=3.0in
 \image html  cw-keyer/DTR_keyer.png
 </center>
 
+Inexpensive USB serial-to-CW-keyline devices are available from internet vendors.
+This is one sold by by Amazon.com and WalMart.com.
 
+<center>
+\image latex cw_fsk_keyline.png "" width=5in
+\image html  cw_fsk_keyline.png "" 
+</center>
+
+\ref contents "Return to Contents"
 */
