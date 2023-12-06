@@ -391,6 +391,9 @@ void TRACED(setModeControl, void *)
 	opBW->clear();
 	for (size_t i = 0; i < selrig->bandwidths_.size(); i++)
 		opBW->add(selrig->bandwidths_.at(i).c_str());
+
+	if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
+		return;
 	if (vfo->iBW != opBW->index())
 		opBW->index(vfo->iBW);
 	opBW->redraw();
@@ -515,6 +518,8 @@ void TRACED(setBWControl, void *)
 		opBW_A->hide();
 		opBW_B->hide();
 
+		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
+			return;
 		if (vfo->iBW != opBW->index())
 			opBW->index(vfo->iBW);
 		opBW->show();

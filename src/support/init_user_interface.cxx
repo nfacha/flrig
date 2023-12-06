@@ -1323,6 +1323,9 @@ static void cb_pbt(Fl_Counter *, void *)
 
 void TRACED(init_dsp_controls)
 
+	if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
+		return;
+
 	if (selrig->has_dsp_controls) {
 		opDSP_lo->clear();
 		opDSP_hi->clear();
@@ -2318,12 +2321,6 @@ void cb_bw_A(Fl_ComboBox *, void *)
 	guard_lock serial(&mutex_serial);
 	selrig->set_bwA( nubw );
 	vfoA.iBW = nubw;
-//	int timeout = 500; // msec
-//	while (timeout && (selrig->get_bwA() != nubw)) {
-//		MilliSleep(50);
-//		timeout -= 50;
-//		Fl::awake();
-//	}
 }
 
 void cb_bw_B(Fl_ComboBox *, void *)
@@ -2332,18 +2329,9 @@ void cb_bw_B(Fl_ComboBox *, void *)
 	guard_lock serial(&mutex_serial);
 	selrig->set_bwB( nubw );
 	vfoB.iBW = nubw;
-//	int timeout = 500; // msec
-//	while (timeout && (selrig->get_bwB() != nubw)) {
-//		MilliSleep(50);
-//		timeout -= 50;
-//		Fl::awake();
-//	}
 }
 
 void TRACED(init_elecraft_xcvrs)
-	if (!(xcvr_name == rig_K3.name_ || 
-		  xcvr_name == rig_KX3.name_ ||
-		  xcvr_name == rig_K4.name_ ) ) return;
 
 	if (xcvr_name == rig_K3.name_) {
 		btnB->hide();

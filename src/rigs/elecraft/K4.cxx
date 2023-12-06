@@ -976,7 +976,8 @@ int RIG_K4::get_bwA()
 	} catch (...) {
 		n = 0;
 	}
-	return bwA = n;
+	mode_bwA[vfoA.imode] = bwA = n;
+	return bwA;
 }
 
 void RIG_K4::set_bwB(int val)
@@ -1013,7 +1014,8 @@ int RIG_K4::get_bwB()
 	} catch (...) {
 		n = 0;
 	}
-	return bwB = n;
+	mode_bwB[vfoB.imode] = bwB = n;
+	return bwB;
 }
 
 int RIG_K4::get_power_out()
