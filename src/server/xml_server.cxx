@@ -1476,11 +1476,46 @@ public:
 
 } rig_get_swrmeter(&rig_server);
 
+struct meterpair {float mtr; float val;};
+
+// Table entries below correspond to SWR readings of 1.1, 1.5, 2.0, 2.5, 3.0 and infinity.
+// Values are also tweaked to fit the display of the SWR meter.
+
+static meterpair swr_tbl[] = {
+    {0, 1.0},
+    {10, 1.5 },
+    {23.0, 2.0 },
+    {35.0, 2.5 },
+    {48.0, 3.0 },
+    {100.0, 10.0 }
+};
+
+static float interpolateVal(float mtr, struct meterpair swr_tbl[], int n) {
+
+    // Handle edge cases
+    if (mtr <= swr_tbl[0].mtr) return swr_tbl[0].val;
+    if (mtr >= swr_tbl[n - 1].mtr) return swr_tbl[n - 1].val;
+
+    // Search for the interval mtr falls in
+    for (int i = 0; i < n - 1; i++) {
+        if (mtr >= swr_tbl[i].mtr && mtr <= swr_tbl[i + 1].mtr) {
+            // Linear interpolation formula
+            float diff_mtr = swr_tbl[i + 1].mtr - swr_tbl[i].mtr;
+            float diff_val = swr_tbl[i + 1].val - swr_tbl[i].val;
+            float fraction = (mtr - swr_tbl[i].mtr) / diff_mtr;
+            return swr_tbl[i].val + fraction * diff_val;
+        }
+    }
+
+    // In case mtr doesn't fall within the defined intervals
+    return 0;
+}
+
 class rig_get_SWR : public XmlRpcServerMethod {
 public:
 	rig_get_SWR(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_SWR", s) {}
 
-		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		void execute(XmlRpcValue& params, XmlRpcValue& result) {
 		Fl::awake(connection_ON);
 
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_swr_control)
@@ -1489,7 +1524,8 @@ public:
 			guard_lock serial_lock(&mutex_serial, "xml 09");
 			int val = selrig->get_swr();
 			char szmeter[20];
-			snprintf(szmeter, sizeof(szmeter), "%2.1f", 3.0 * val / 50);
+			float swr = interpolateVal(val, swr_tbl, sizeof(swr_tbl)/sizeof(meterpair));
+			snprintf(szmeter, sizeof(szmeter), "%2.1f", swr);
 			std::string result_string = szmeter;
 			result = result_string;
 		}

@@ -349,38 +349,56 @@ struct meterpair {float mtr; float val;};
 
 static meterpair swr_tbl[] = {
     {1.0, 0},
-    {1.5, 10.5 },
+    {1.5, 12.0 },
     {2.0, 23.0 },
     {2.5, 35.0 },
     {3.0, 48.0 },
-    {10.0, 100.0 } 
+    {5.0, 100.0 } 
 };
+
+float interpolateVal(float mtr) {
+    int n = sizeof(swr_tbl) / sizeof(swr_tbl[0]);
+
+    // Handle edge cases
+    if (mtr <= swr_tbl[0].mtr) return swr_tbl[0].val;
+    if (mtr >= swr_tbl[n - 1].mtr) return swr_tbl[n - 1].val;
+
+    // Search for the interval mtr falls in
+    for (int i = 0; i < n - 1; i++) {
+        if (mtr >= swr_tbl[i].mtr && mtr <= swr_tbl[i + 1].mtr) {
+            // Linear interpolation formula
+            float diff_mtr = swr_tbl[i + 1].mtr - swr_tbl[i].mtr;
+            float diff_val = swr_tbl[i + 1].val - swr_tbl[i].val;
+            float fraction = (mtr - swr_tbl[i].mtr) / diff_mtr;
+            return swr_tbl[i].val + fraction * diff_val;
+        }
+    }
+
+    // In case mtr doesn't fall within the defined intervals
+    return 0;
+}
 
 int RIG_PowerSDR::get_swr()
 {
-	double mtr = 0;
+	static int mtr = 0;
+	static double swr=0;
+ 
+	if (!ptt_) return mtr; // return last value if ptt is not on
 
 	cmd = "ZZRM8;";
 	get_trace(1, "get_swr");
 	ret = wait_string("ZZRM8", 13);
 	gett("");
-    // Response is ZZRM86.1 : 1; 
-    // What's the 2nd part?
-	if(sscanf(&replystr[0], "ZZRM8%lf", &mtr)!=1)
+	// Response is ZZRM86.1 : 1;
+	// What's the 2nd part?
+	if(sscanf(&replystr[0], "ZZRM8%lf", &swr)!=1)
 	{
-		return 3;
+		return mtr;
 	}
-    size_t i = 0;
-    for (i = 0; i < sizeof(swr_tbl) / sizeof(meterpair) - 1; i++)
-            if (mtr >= swr_tbl[i].mtr && mtr < swr_tbl[i+1].mtr)
-                    break;
-    if (mtr > 19) mtr = 19;
-    mtr = (int)round(swr_tbl[i].val +
-            (swr_tbl[i+1].val - swr_tbl[i].val)*(mtr - swr_tbl[i].mtr)/(swr_tbl[i+1].mtr - swr_tbl[i].mtr));
-    if (mtr > 100) mtr = 100;
+	mtr = round(interpolateVal(swr));
 
 	std::stringstream str;
-	str << "swr mtr=" << mtr;
+	str << " swr=" << swr << " mtr=" << mtr;
 	trace(2, __func__, str.str().c_str());
 	return mtr;
 }
