@@ -779,7 +779,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	double readtime = (zusec() - start) / 1000.0;
 	snprintf(traceinfo, sizeof(traceinfo), 
 		"ReadBuffer [%0.2f msec] (%u): %s",
-		readtime, sbuf.length(), 
+		readtime, (long)sbuf.length(), 
 		(hex ? str2hex(buf.c_str(), (unsigned  int)buf.length()) : sbuf.c_str()));
 	if (progStatus.serialtrace)
 		ser_trace(2, "1:", traceinfo);
