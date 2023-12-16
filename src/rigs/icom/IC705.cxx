@@ -524,7 +524,7 @@ int RIG_IC705::get_modeA()
 
 		if (replystr[p+6] == -1) { md = A.imode = 0; }
 		else {
-			for (md = 0; md < DV705; md++) {
+			for (md = 0; md <= DV705; md++) {
 				if (replystr[p+6] == IC705_mode_nbr[md]) {
 					A.imode = md;
 					if (replystr[p+7] == 0x01 && A.imode < CW705)
@@ -942,7 +942,7 @@ int RIG_IC705::adjust_bandwidth(int m)
 			bw_vals_ = IC705_bw_vals_AM;
 			bw = 19;
 			break;
-		case 3: case 11: // FM, FM-D
+		case 3: case 11: case 12: // FM, FM-D, DV
 			bandwidths_ = IC705_fm_bws;
 			bw_vals_ = IC705_bw_vals_FM;
 			bw = 0;
@@ -973,7 +973,7 @@ std::vector<std::string>& RIG_IC705::bwtable(int m)
 		case 2: case 10: // AM, AM-D
 			return IC705_am_bws;
 			break;
-		case 3: case 11: // FM, FM-D
+		case 3: case 11: case 12: // FM, FM-D, DV
 			return IC705_fm_bws;
 			break;
 		case 6: case 7: // RTTY, RTTY-R
