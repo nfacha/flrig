@@ -75,9 +75,13 @@ public:
 	void set_vox_onoff();
 	int  get_vox_onoff();
 
-	void set_volume_control(int val);
-	int  get_volume_control();
-	void get_vol_min_max_step(int &min,  int &max, int &step);
+//	void set_volume_control(int val);
+//	int  get_volume_control();
+//	void get_vol_min_max_step(int &min,  int &max, int &step);
+
+	void set_rf_gain(int val);
+	int  get_rf_gain();
+	void get_rf_min_max_step(int &min, int &max, int &step);
 
 	void setRit(int val);
 	int  getRit();

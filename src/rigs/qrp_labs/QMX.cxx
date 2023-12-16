@@ -25,14 +25,14 @@ static const char QMXname_[] = "QMX";
 
 static std::vector<std::string>vQMXmodes_;
 static const char *QMXmodes_[] = {
-	"CW", "CW-R", "LSB", "USB"};
+	"CW-U", "CW-L", "DIGI-U", "DIGI-L"};
 static const char QMX_mode_type[] = { 'L', 'U' };
 static const char *QMX_mode_str[] = {
-	"MD3;", "MD7;", "MD1;", "MD2;", NULL };
+	"MD3;", "MD7;", "MD6;", "MD9;", NULL };
 
 static std::vector<std::string>vQMX_BW;
 static const char *QMX_BW[] = {
-  "3200" };
+  "300", "3200" };
 
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)NULL,          0,   0,   0 }
@@ -78,7 +78,7 @@ RIG_QMX::RIG_QMX() {
 	has_mode_control =
 	has_bandwidth_control =
 	has_extras =
-	has_volume_control =
+	has_rf_control =
 	has_ptt_control =
 	has_vfo_adj =
 	has_vox_onoff =
@@ -292,22 +292,30 @@ int RIG_QMX::get_split()
 
 void RIG_QMX::set_bwA(int val)
 {
-	A.iBW = 0;
 }
 
 int RIG_QMX::get_bwA()
 {
-	return A.iBW = 0;
+	cmd = "FW;";
+	TRACE_CMD("get_bw", cmd);
+	ret = wait_char(';', 7, 100, "get bw", ASC);
+	gett("");
+	if (replystr.find("0300") != std::string::npos) return A.iBW = 0;
+	return A.iBW = 1;
 }
 
 void RIG_QMX::set_bwB(int val)
 {
-	B.iBW = 0;
 }
 
 int RIG_QMX::get_bwB()
 {
-	return B.iBW = 0;
+	cmd = "FW;";
+	TRACE_CMD("get_bw", cmd);
+	ret = wait_char(';', 7, 100, "get bw", ASC);
+	gett("");
+	if (replystr.find("0300") != std::string::npos) return B.iBW = 0;
+	return B.iBW = 1;
 }
 
 // Tranceiver PTT on/off
@@ -546,11 +554,10 @@ int RIG_QMX::get_vox_onoff()
 	return progStatus.vox_onoff;
 }
 
-void RIG_QMX::set_volume_control(int val)
+void RIG_QMX::set_rf_gain(int val)
 {
-	cmd = "AG";
 	char szval[20];
-	snprintf(szval, sizeof(szval), "%02d", val);
+	snprintf(szval, sizeof(szval), "AG%03d", val);
 	cmd += szval;
 	cmd += ';';
 	set_trace(1, "set vol control");
@@ -564,7 +571,7 @@ void RIG_QMX::set_volume_control(int val)
 
 }
 
-int RIG_QMX::get_volume_control()
+int RIG_QMX::get_rf_gain()
 {
 	int val = progStatus.volume;
 	cmd = "AG;";
@@ -572,18 +579,18 @@ int RIG_QMX::get_volume_control()
 
 	TRACE_CMD("get_vol", cmd);
 
-	ret = wait_char(';', 5, 100, "get vol", ASC);
+	ret = wait_char(';', 6, 100, "get vol", ASC);
 	gett("");
 
 	TRACE_REP("get_vol", replystr);
 
 	size_t p = replystr.rfind("AG");
 	if (p == std::string::npos) return val;
-	val = atoi(&replystr[p + 2]);
+	sscanf(replystr.c_str(), "AG%d", &val);
 	return val;
 }
 
-void RIG_QMX::get_vol_min_max_step(int &min, int &max, int &step)
+void RIG_QMX::get_rf_min_max_step(int &min, int &max, int &step)
 {
 	min = 0;
 	max = 99;
