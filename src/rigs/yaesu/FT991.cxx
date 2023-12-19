@@ -452,6 +452,19 @@ int RIG_FT991::get_smeter()
 	return mtr;
 }
 
+/*
+const static std::vector< std::vector< float > > swr_tbl = {
+    {
+        {  0,  1 }, // 1.0
+        { 10,  3 }, // 1.1
+        { 63, 11 }, // 1.5
+        { 92, 23 }, // 2.0
+        {107, 35 }, // 2.5
+        {116, 48 }, // 3.0
+        {255, 100 }, // infinity
+    }
+};
+
 int RIG_FT991::get_swr()
 {
 	cmd = rsp = "RM6";
@@ -462,7 +475,34 @@ int RIG_FT991::get_swr()
 	if (p == std::string::npos) return 0;
 	if (p + 6 >= replystr.length()) return 0;
 	int mtr = atoi(&replystr[p+3]);
-	return (int)ceil(mtr / 2.56);
+	//return interpolate(mtr, std::vector<std::vector<float>>swr_tbl);
+	return interpolate(mtr, swr_tbl);
+}
+*/
+
+const static PAIR swr_tbl[] = { // values can be mix of int, float, or double
+	{  0,  1 }, // 1.0
+	{ 10,  3 }, // 1.1
+	{ 63, 11 }, // 1.5
+	{ 92, 23 }, // 2.0
+	{107, 35 }, // 2.5
+	{116, 48 }, // 3.0
+	{255, 100 }, // infinity
+};
+
+int RIG_FT991::get_swr()
+{
+	PAIRS swr_pairs( define_PAIR(swr_tbl) );
+
+	cmd = rsp = "RM6";
+	cmd += ';';
+	wait_char(';',7, FL991_WAIT_TIME, "get swr", ASC);
+
+	size_t p = replystr.rfind(rsp);
+	if (p == std::string::npos) return 0;
+	if (p + 6 >= replystr.length()) return 0;
+	int mtr = atoi(&replystr[p+3]);
+	return swr_pairs.value(mtr);
 }
 
 int RIG_FT991::get_alc()
@@ -480,6 +520,8 @@ int RIG_FT991::get_alc()
 
 double RIG_FT991::get_voltmeter()
 {
+	get_swr();
+
 	cmd = "RM8;";
 	std::string resp = "RM";
 

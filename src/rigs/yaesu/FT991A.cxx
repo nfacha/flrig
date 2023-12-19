@@ -41,7 +41,7 @@ static const char FT991A_mode_chr[] =  { '1', '2', '3', '4', '5', '6', '7', '8',
 static const char FT991A_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'U', 'U', 'U', 'U', 'U', 'U' };
 
 static const int FT991A_def_bw[] = {
-    17,   17,   5,   0,   0,   10,       5,     16,     10,       0,       0,     16,     0,      0 };
+	17,   17,   5,   0,   0,   10,       5,     16,     10,       0,       0,     16,     0,      0 };
 // mLSB, mUSB, mCW, mFM, mAM, mRTTY_L, mCW_R, mPKT_L, mRTTY_U, mPKT_FM, mFM_N, mPKT_U, mAM_N, mC4FM
 
 static std::vector<std::string>FT991A_widths_SSB;
@@ -475,8 +475,20 @@ int RIG_FT991A::get_smeter()
 	return mtr;
 }
 
+const static PAIR swr_tbl[] = {
+	{  0,  1 }, // 1.0
+	{ 10,  3 }, // 1.1
+	{ 63, 11 }, // 1.5
+	{ 92, 23 }, // 2.0
+	{107, 35 }, // 2.5
+	{116, 48 }, // 3.0
+	{255, 100 }, // infinity
+};
+
 int RIG_FT991A::get_swr()
 {
+	PAIRS swr_pairs( define_PAIR(swr_tbl) );
+
 	cmd = rsp = "RM6";
 	cmd += ';';
 	wait_char(';',7, FL991A_WAIT_TIME, "get swr", ASC);
@@ -486,7 +498,7 @@ int RIG_FT991A::get_swr()
 	if (p == std::string::npos) return 0;
 	if (p + 6 >= replystr.length()) return 0;
 	int mtr = atoi(&replystr[p+3]);
-	return (int)ceil(mtr / 2.56);
+	return swr_pairs.value(mtr);
 }
 
 int RIG_FT991A::get_alc()
@@ -1592,22 +1604,22 @@ void RIG_FT991A::sync_clock(char *tm)
 static int agcval = 0;
 int  RIG_FT991A::get_agc()
 {
-    cmd = "GT0;";
-    wait_char(';', 6, FL991A_WAIT_TIME, "get agc", ASC);
-    gett("get_agc");
-    size_t p = replystr.rfind("GT");
-    if (p == std::string::npos) return agcval;
+	cmd = "GT0;";
+	wait_char(';', 6, FL991A_WAIT_TIME, "get agc", ASC);
+	gett("get_agc");
+	size_t p = replystr.rfind("GT");
+	if (p == std::string::npos) return agcval;
 
-    switch (replystr[3]) {
-        default:
-        case '0': agcval = 0; break;
-        case '1': agcval = 1; break;
-        case '2': agcval = 2; break;
-        case '3': agcval = 3; break;
-        case '4': case 5:
-        case '6': agcval = 4; break;
-    }
-    return agcval;
+	switch (replystr[3]) {
+		default:
+		case '0': agcval = 0; break;
+		case '1': agcval = 1; break;
+		case '2': agcval = 2; break;
+		case '3': agcval = 3; break;
+		case '4': case 5:
+		case '6': agcval = 4; break;
+	}
+	return agcval;
 }
 
 int RIG_FT991A::incr_agc()

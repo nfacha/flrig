@@ -729,4 +729,22 @@ extern rigbase *rigs[];
 
 extern char bcdval[];
 
+struct PAIR { double p1; double p2; };
+#define define_PAIR(a) (sizeof(a) / sizeof(*a)), a
+
+class PAIRS {
+private:
+	size_t nbr;
+	std::vector<PAIR> pairs;
+public:
+	PAIRS(size_t num, const PAIR table[]) {
+		pairs.clear();
+		nbr = num;
+		for (size_t n = 0; n < nbr; n++)
+			pairs.push_back(table[n]);
+	}
+	~PAIRS() {};
+	double value(double val);
+};
+
 #endif

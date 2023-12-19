@@ -89,6 +89,8 @@
 #define LISTSIZE 200
 #define ATAGSIZE 128 //21
 
+float interpolate(float raw, const std::vector< std::vector< float > > & table);
+
 enum { SWR_IMAGE, ALC_IMAGE, IDD_IMAGE };
 extern int meter_image;
 

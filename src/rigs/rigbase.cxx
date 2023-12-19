@@ -18,7 +18,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
 
+#include <stdlib.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "rigbase.h"
 #include "util.h"
@@ -842,3 +850,26 @@ char bcdval[100] = {
 '\x80', '\x81', '\x82', '\x83', '\x84', '\x85', '\x86', '\x87', '\x88', '\x89',
 '\x90', '\x91', '\x92', '\x93', '\x94', '\x95', '\x96', '\x97', '\x98', '\x99'
 };
+
+double PAIRS::value(double val) {
+	if (nbr == 0) return 0;
+
+// Handle cases where raw is outside the range of the table
+	if (val <= pairs[0].p1)
+		return pairs[0].p2;
+	if (val >= pairs[nbr - 1].p1)
+		return pairs[nbr - 1].p2;
+
+// Find the appropriate segment in the table
+	for (size_t i = 0; i < nbr - 2; ++i) {
+		if (val >= pairs[i].p1 && val <= pairs[i + 1].p1) {
+			if (pairs[i].p1 == pairs[i + 1].p1)
+				return pairs[i].p2;
+// Linear interpolation
+			double slope = 1.0 * (pairs[i + 1].p2 - pairs[i].p2) / (pairs[i + 1].p1 - pairs[i].p1);
+			double nuval = pairs[i].p2 + slope * (val - pairs[i].p1);
+			return nuval;
+		}
+	}
+	return 0;
+}

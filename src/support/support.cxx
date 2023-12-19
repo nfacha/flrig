@@ -4780,3 +4780,21 @@ void enable_yaesu_bandselect(int btn_num, bool enable)
 }
 
 
+float interpolate(float raw, const std::vector< std::vector< float > > & table) {
+    if (table.empty() || table[0].size() != 2) return 0; // Error value
+
+    // Handle cases where raw is outside the range of the table
+    if (raw <= table.front()[0]) return table.front()[1];
+    if (raw >= table.back()[0]) return table.back()[1];
+
+    // Find the appropriate segment in the table
+    for (size_t i = 0; i < table.size() - 1; ++i) {
+        if (raw >= table[i][0] && raw <= table[i + 1][0]) {
+            // Linear interpolation
+            float slope = (table[i + 1][1] - table[i][1]) / (table[i + 1][0] - table[i][0]);
+            return table[i][1] + slope * (raw - table[i][0]);
+        }
+    }
+
+    return 0; // Error value
+}
