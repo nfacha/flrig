@@ -1,5 +1,24 @@
-// Kennwood TM-D710 and similar
+// ----------------------------------------------------------------------------
+// Copyright (C) 2023
+//              David Freese, W1HKJ
+//
+// This file is part of flrig.
+//
+// flrig is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// flrig is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ----------------------------------------------------------------------------
 
+// Kennwood TM-D710 and similar
 
 #include "other/TMD710.h"
 
@@ -23,7 +42,7 @@ RIG_TMD710::RIG_TMD710() {
 	serial_retries = 3;
 
 //	serial_write_delay = 0;
-//	serial_post_write_delay = 0;
+	serial_post_write_delay = 50;
 
 	serial_timeout = 1000;
 	serial_rtscts = true;
@@ -81,19 +100,23 @@ unsigned long long RIG_TMD710::get_vfoA ()
 	int ret = wait_char('\r', 49, 100, "get VFO", ASC);
 	if (ret < 49) return freqA;
 
-	gett("get_vfoA");
-	char frequency[11];
-	int p = 5;
-	int n = 0;
-	for (n = 0; n < 10; n++) frequency[n] = (replystr[p + n]);
-	frequency[10] = '\0';
-	sscanf(frequency, "%lld", &freqA);
+	getcr("get_vfoA");
 
-	char mode[2];
-	mode[0] = (replystr[47]);
-	mode[1] = '\0';
- 	modeA = atoi(mode);
+//	char frequency[11];
+//	int p = 5;
+//	int n = 0;
+//	for (n = 0; n < 10; n++) frequency[n] = (replystr[p + n]);
+//	frequency[10] = '\0';
+//	sscanf(frequency, "%lld", &freqA);
 
+//	char mode[2];
+//	mode[0] = (replystr[47]);
+//	mode[1] = '\0';
+// 	modeA = atoi(mode);
+
+	replystr[15] = 0;
+	sscanf(&replystr[5], "%lld", &freqA);
+	modeA = replystr[47] - '0';
 
 	return freqA;
 
@@ -232,20 +255,26 @@ unsigned long long RIG_TMD710::get_vfoB ()
 {
 	cmd = "FO 1\r";
 	int ret = wait_char('\r', 49, 100, "get VFO", ASC);
+	getcr("get_vfoB");
+
 	if (ret < 49) return freqB;
 
-	gett("get_vfoB");
-	char frequency[11];
-	int p = 5;
-	int n = 0;
-	for (n = 0; n < 10; n++) frequency[n] = (replystr[p + n]);
-	frequency[10] = '\0';
-	sscanf(frequency, "%lld", &freqB);
+//	char frequency[11];
+//	int p = 5;
+//	int n = 0;
+//	for (n = 0; n < 10; n++) frequency[n] = (replystr[p + n]);
+//	frequency[10] = '\0';
+//	sscanf(frequency, "%lld", &freqB);
 
-	char mode[2];
-	mode[0] = (replystr[47]);
-	mode[1] = '\0';
- 	modeB = atoi(mode);
+//	char mode[2];
+//	mode[0] = (replystr[47]);
+//	mode[1] = '\0';
+// 	modeB = atoi(mode);
+
+	replystr[15] = 0;
+	sscanf(&replystr[5], "%lld", &freqB);
+	modeB = replystr[47] - '0';
+
 	return freqB;
 }
 
@@ -253,6 +282,7 @@ void RIG_TMD710::set_vfoA (unsigned long long freq)
 {
 	cmd = "FO 0\r";
 	int ret = wait_char('\r', 49, 200, "get VFO A", ASC);
+	getcr("read info vfoA");
 	if (ret < 49) return;
 	cmd = replystr;
 	char frequency[11];
@@ -261,6 +291,7 @@ void RIG_TMD710::set_vfoA (unsigned long long freq)
 	int p = 5;
 	for (n = 0; n < 10; n++) (cmd[p + n])= frequency[n];
 	wait_char('\r', 49, 200, "set frequency A", ASC);
+	setcr("set vfoA");
 	return;
 }
 
@@ -268,6 +299,7 @@ void RIG_TMD710::set_vfoB (unsigned long long freq)
 {
 	cmd = "FO 1\r";
 	int ret = wait_char('\r', 49, 200, "get VFO B", ASC);
+	getcr("read info vfoB");
 	if (ret < 49) return;
 	cmd = replystr;
 	char frequency[11];
@@ -276,6 +308,7 @@ void RIG_TMD710::set_vfoB (unsigned long long freq)
 	int p = 5;
 	for (n = 0; n < 10; n++) (cmd[p + n])= frequency[n];
 	wait_char('\r', 49, 200, "set frequency B", ASC);
+	setcr("set vfoB");
 	return;
 }
 
@@ -289,11 +322,13 @@ void RIG_TMD710::set_modeA(int val)
 	// AM is not available at 430 MHz
 	cmd = "FO 0\r";
 	int ret = wait_char('\r', 49, 200, "get VFO A", ASC);
+	getcr("read info vfoA");
 	if (ret < 49) return;
 
 	cmd = replystr;
 	cmd[47] = val +'0';
 	wait_char('\r', 49, 200, "set mode A", ASC);
+	setcr("set modeA");
 	return;
 }
 
@@ -301,11 +336,13 @@ void RIG_TMD710::set_modeB(int val)
 {
 	cmd = "FO 1\r";
 	int ret = wait_char('\r', 49, 200, "get VFO B", ASC);
+	getcr("read info vfoB");
 	if (ret < 49) return;
 
 	cmd = replystr;
 	cmd[47] = val +'0';
 	wait_char('\r', 49, 200, "set mode B", ASC);
+	setcr("set mode B");
 	return;
 }
 
@@ -325,7 +362,7 @@ void RIG_TMD710::selectA()
 {
 	cmd = "BC 0,0\r";
 	wait_char('\r', 3, 100, "set select A PTT/CTRL band", ASC);
-	sett("selectA");
+	setcr("selectA");
 	inuse = onA;
 }
 
@@ -333,7 +370,7 @@ void RIG_TMD710::selectB()
 {
 	cmd = "BC 1,1\r";
 	wait_char('\r', 3, 100, "set select B PTT/CTRL band", ASC);
-	sett("selectB");
+	setcr("selectB");
 	inuse = onB;
 }
 
@@ -359,9 +396,10 @@ double RIG_TMD710::get_power_control()
 	cmd += seite;
 	cmd += '\r';
 	int ret = wait_char('\r', 8, 100, "get power", ASC);
+	getcr("get power control");
 	if (ret < 1) return false;
 
-	gett("get_power_control");
+	getcr("get_power_control");
 	int wert;
 	int mtr = 30;
 	wert = replystr[5] - '0';
@@ -387,6 +425,7 @@ void RIG_TMD710::set_power_control(double val)
 	cmd += mtrs;
 	cmd += '\r';
 	wait_char('\r', 8, 100, "set power", ASC);
+	setcr("set power control");
 }
 
 void RIG_TMD710::set_squelch(int val)
@@ -401,6 +440,7 @@ void RIG_TMD710::set_squelch(int val)
 	cmd += hexstr;
 	cmd += '\r';
 	wait_char('\r', 9, 100, "set power", ASC);
+	setcr("set squelch");
 }
 
 // needed for mingw compile which does not support the C++11 stoi template
@@ -425,7 +465,7 @@ int  RIG_TMD710::get_squelch()
 		cmd += '\r';
 		int ret = wait_char('\r', 7, 100, "get squelch", ASC);
 		if (ret < 1) return false;
-		gett("get_squelch_control");
+		getcr("get_squelch_control");
 
 		char hexstr[3];
 		hexstr[0]= replystr[3];
