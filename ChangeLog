@@ -1,6 +1,51 @@
-2023-10-11  dave-w1hkj  <w1hkj@bellsouth.net>
+2023-12-29  dave-w1hkj  <w1hkj@bellsouth.net>
 
-	cfa7db4e: Version 2.0.04
+	fb72498d: MinGW compile warning
+	e2ce0334: FT 891/991/991A
+	afb6943c: TMD710
+	35a47a1e: vector interpolator
+
+2023-12-16  Philip Rose GM3ZZA  <gm3zza@btinternet.com>
+
+	af9b8bd5: IC705
+
+2023-12-16  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	b323c9ba: qmx14
+	8b6b0d8f: mingw64 warnings
+
+2023-12-08  Michael Black  <mdblack98@yahoo.com>
+
+	bc7eba83: XMLrpc get_swr
+
+2023-12-05  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	b6919ea4: Documentation Overhaul
+	5f4894e8: K4 update
+	3cd14cb8: Value Wheel Slider
+	208f4f1e: xml client fix
+	64f1b867: FT710 bug fix
+	0d8ca1b3: xml trace
+	b533a9e4: Test mode
+	add2a5e1: UI cosmetics
+
+2023-11-10  Michael Black  <mdblack98@yahoo.com>
+
+	39aee6d1: gcc 13 mingw fixes
+
+2023-11-10  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	b8d35aa9: SWR xmlrpc
+
+2023-10-28  db VA3DB  <db@db.net>
+
+	3aed89e1: FreeBSD fixes
+
+2023-10-17  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	722c1e8e: FLTK 1.4.x / gcc 12
+	f9ec542e: Serial Port ID
+	9404a761: Version 2.0.04
 	ff9c111b: FLEX-1500
 	097c396c: serial-i/o
 	37324503: rigbase
