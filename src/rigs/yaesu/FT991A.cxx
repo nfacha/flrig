@@ -1441,32 +1441,42 @@ void RIG_FT991A::set_xcvr_auto_on()
 {
 	if (!progStatus.xcvr_auto_on) return;
 
+// This command requires dummy data be initially sent. Then after one
+// second and before two seconds the command is sent.
+
+	cmd = "IF;"; // use as the dummy data
+	sendCommand(cmd);
+	update_progress(0);
+	for (int i = 0; i < 1500; i += 100) {
+		MilliSleep(100);
+		update_progress(100 * i / 6000);
+		Fl::awake();
+	}
+
 	cmd = rsp = "PS";
 	cmd.append(";");
-	wait_char(';',4, FL991A_WAIT_TIME, "Test: Is Rig ON", ASC);
-	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) {	// rig is off, power on
-		cmd = "PS1;";
-		sendCommand(cmd);
-		for (int i = 0; i < 1500; i += 100) {
-			MilliSleep(100);
-			update_progress(100 * i / 4500);
-			Fl::awake();
-		}
-		sendCommand(cmd);
-		for (int i = 2500; i < 3000; i += 100) {
-			MilliSleep(100);
-			update_progress(100 * i / 4500);
-			Fl::awake();
-		}
-		sendCommand(cmd);
-		for (int i = 3000; i < 4500; i += 100) {
-			MilliSleep(100);
-			update_progress(100 * i / 4500);
-			Fl::awake();
+	get_trace(1, "xcvr ON? ()");
+	wait_char(';',4, 500, "Test: Is Rig ON", ASC);
+	gett("");
+
+	int powerstat;
+	if(sscanf(replystr.c_str(),"PS%d", &powerstat)) {
+		if (powerstat != 0) {
+			update_progress(0);
+			return;
 		}
 	}
-	sett("set_xcvr_auto_on");
+
+	cmd = "PS1;";
+	set_trace(1, "set xcvr ON()");
+	sendCommand(cmd);
+	sett("");
+
+	for (int i = 1500; i < 6000; i += 100) {
+		MilliSleep(100);
+		update_progress(100 * i / 6000);
+		Fl::awake();
+	}
 }
 
 void RIG_FT991A::set_xcvr_auto_off()
