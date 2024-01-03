@@ -2191,15 +2191,71 @@ void setMode()
 }
 
 void sortList() {
-	if (!numinlist) return;
-	ATAG_XCVR_STATE temp;
-	for (int i = 0; i < numinlist - 1; i++)
-		for (int j = i + 1; j < numinlist; j++)
-			if (oplist[i].freq > oplist[j].freq) {
-					temp = oplist[i];
-					oplist[i] = oplist[j];
-					oplist[j] = temp;
+	if (numinlist < 2) return;
+	bool swap = false;
+	int comp = 0;
+	ATAG_XCVR_STATE temp, *A, *B;
+	for (int i = 0; i < numinlist - 1; i++) {
+		A = &oplist[i];
+		for (int j = i + 1; j < numinlist; j++) {
+			B = &oplist[j];
+			swap = false;
+			if (progStatus.mem_sortby == "FREQ") {
+				if (A->freq > B->freq) swap = true;
+				else if (A->freq == B->freq) {
+					if (A->imode > B->imode) swap = true;
+					else if (A->imode == B->imode) {
+						if (A->iBW > B->iBW) swap = true;
+						else {
+							comp = strcasecmp(A->alpha_tag, B->alpha_tag);
+							if (comp > 0) swap = true;
+						}
+					}
+				}
+			} else if (progStatus.mem_sortby == "BW") {
+				if (A->iBW > B->iBW) swap = true;
+				else if (A->iBW == B->iBW) {
+					if (A->freq > B->freq) swap = true;
+					else if (A->freq == B->freq) {
+						if (A->imode > B->imode) swap = true;
+						else if (A->imode == B->imode) {
+							comp = strcasecmp(A->alpha_tag, B->alpha_tag);
+							if (comp > 0) swap = true;
+						}
+					}
+				}
+			} else if (progStatus.mem_sortby == "MODE") {
+				if (A->imode > B->imode) swap = true;
+				else if (A->imode == B->imode) {
+					if (A->freq > B->freq) swap = true;
+					else if (A->freq == B->freq) {
+						if (A->iBW > B->iBW) swap = true;
+						else if (A->iBW == B->iBW) {
+							comp = strcasecmp(A->alpha_tag, B->alpha_tag);
+							if (comp > 0) swap = true;
+						}
+					}
+				}
+			} else {
+				comp = strcasecmp(A->alpha_tag, B->alpha_tag);
+				if (comp > 0) swap = true;
+				else if (comp == 0) {
+					if (A->freq > B->freq) swap = true;
+					else if (A->freq == B->freq) {
+					if (A->imode > B->imode) swap = true;
+						else if (A->imode == B->imode) {
+							if (A->iBW > B->imode) swap = true;
+						}
+					}
+				}
 			}
+			if (swap) {
+				temp = oplist[i];
+				oplist[i] = oplist[j];
+				oplist[j] = temp;
+			}
+		}
+	}
 }
 
 void clearList() {

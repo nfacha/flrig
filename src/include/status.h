@@ -515,6 +515,7 @@ struct status {
 // memory management
 	Fl_Font	memfontnbr;
 	int		memfontsize;
+	std::string mem_sortby;
 
 // gpio parameters
 	int		gpio_ptt;

@@ -94,6 +94,15 @@ void cbFreqSelectFontBrowser(Fl_Widget*, void*) {
 
 }
 
+void cb_header()
+{
+	int X = Fl::event_x() - header->x();
+	progStatus.mem_sortby = (X < 140 ? "FREQ" :
+							(X < 235 ? "BW" :
+							(X < 330 ? "MODE" : "COMMENT")));
+	updateSelect();
+}
+
 void cbFreqFontBrowser()
 {
 	fntSelectbrowser = new Font_Browser;
@@ -183,6 +192,7 @@ Fl_Double_Window* Memory_Dialog() {
 			progStatus.memfontnbr, progStatus.memfontsize, 247,
 			progStatus.memfontnbr, progStatus.memfontsize, 247 );
 		header->add(hdrline);
+		header->callback( (Fl_Callback*)cb_header );
 
 		FreqSelect = new Fl_Browser2(66, 24, 532, 131);
 		FreqSelect->tooltip(

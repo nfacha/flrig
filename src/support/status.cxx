@@ -523,6 +523,7 @@ status progStatus = {
 // memory management
 	4,								// Fl_Font	memfontnbr;
 	14,								// int		memfontsize;
+	"FREQ",							// std::string mem_sortby;
 
 // gpio parameters
 	false,		// bool	gpio_ptt;
@@ -1184,6 +1185,7 @@ void status::saveLastState()
 
 	spref.set("memfontnbr", memfontnbr);
 	spref.set("memfontsize", memfontsize);
+	spref.set("mem_sortby", mem_sortby.c_str());
 
 	spref.set("gpio_ptt", gpio_ptt);
 	spref.set("enable_gpio", enable_gpio);
@@ -1971,6 +1973,8 @@ bool status::loadXcvrState(std::string xcvr)
 
 		spref.get("memfontnbr", memfontnbr, memfontnbr);
 		spref.get("memfontsize", memfontsize, memfontsize);
+		spref.get("mem_sortby", defbuffer, mem_sortby.c_str(), MAX_DEFBUFFER_SIZE);
+		mem_sortby = defbuffer;
 
 		if (spref.get("gpio_ptt", i, i)) gpio_ptt = i;
 		spref.get("enable_gpio", enable_gpio, enable_gpio);
