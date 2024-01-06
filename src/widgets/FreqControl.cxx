@@ -30,11 +30,8 @@
 #include <iostream>
 #include <string>
 
-#if GCC_VERSION > 40201
-#	include <cstdint>
-#endif
-
 #include <string.h>
+#include <stdint.h>
 
 #include "FreqControl.h"
 #include "gettext.h"
