@@ -22,8 +22,6 @@
 #include "support.h"
 #include "trace.h"
 
-struct pwrpair {int mtr; float pwr;};
-
 static const char TS950name_[] = "TS-950";
 
 enum {LSB950, USB950, CW950, FM950, AM950, FSK950};
@@ -257,7 +255,7 @@ int RIG_TS950::get_swr()
 	return mtr;
 }
 
-static pwrpair pwrtbl[] = { 
+static meterpair pwrtbl[] = { 
 {0, 0.0},
 {3, 5.0},
 {6, 10.0},
@@ -280,15 +278,15 @@ int RIG_TS950::get_power_out(void)
 	sscanf(&replystr[2], "%d", &mtr);
 
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 
 	if (mtr < 0) mtr = 0;
 	if (mtr > 30) mtr = 30;
 	int pwr = (int)ceil(
-		   pwrtbl[i].pwr
-		   + (pwrtbl[i+1].pwr - pwrtbl[i].pwr)
+		   pwrtbl[i].val
+		   + (pwrtbl[i+1].val - pwrtbl[i].val)
 		     * (mtr - pwrtbl[i].mtr)
 		     / (pwrtbl[i+1].mtr - pwrtbl[i].mtr)
 		  );

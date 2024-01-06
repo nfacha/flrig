@@ -341,11 +341,8 @@ double RIG_PowerSDR::get_power_control()
 	return pctrl;
 }
 
-struct meterpair {float mtr; float val;};
-
 // Table entries below correspond to SWR readings of 1.1, 1.5, 2.0, 2.5, 3.0 and infinity.
 // Values are also tweaked to fit the display of the SWR meter.
-
 
 static meterpair swr_tbl[] = {
     {1.0, 0},

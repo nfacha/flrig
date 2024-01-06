@@ -432,9 +432,7 @@ int RIG_FT5000::get_smeter()
 	return mtr;
 }
 
-struct meterpair {int mtr; float val;};
-
-struct meterpair swrtbl[] = {
+static meterpair swrtbl[] = {
 	{0, 0.0},		// 1.0
 	{39, 7.5},		// 1.3
 	{52, 12.0},		// 1.5

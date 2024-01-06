@@ -1428,8 +1428,6 @@ void RIG_IC7100::get_vol_min_max_step(int &min, int &max, int &step)
 	min = 0; max = 100; step = 1;
 }
 
-struct meterpair {int mtr; float val;};
-
 static meterpair smtrtbl[] = {
 {0, 0},
 {120, 50},
@@ -1454,7 +1452,7 @@ int RIG_IC7100::get_smeter()
 		if (p != std::string::npos) {
 			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
-			for (i = 0; i < sizeof(smtrtbl) / sizeof(meterpair) - 1; i++)
+			for (i = 0; i < sizeof(smtrtbl) / sizeof(*smtrtbl) - 1; i++)
 				if (mtr >= smtrtbl[i].mtr && mtr < smtrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
@@ -1552,7 +1550,7 @@ int RIG_IC7100::get_power_out(void)
 			mtr = hex2val(replystr.substr(p+6, 2));
 			mtr = std::max(0, std::min(mtr, 255));
 			size_t i = 0;
-			for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
+			for (i = 0; i < sizeof(pwrtbl) / sizeof(*pwrtbl) - 1; i++)
 				if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 					break;
 			val = (int)ceil(pwrtbl[i].val + 

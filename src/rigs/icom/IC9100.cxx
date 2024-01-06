@@ -1013,9 +1013,7 @@ int RIG_IC9100::get_smeter()
 	return mtr;
 }
 
-struct pwrpair {int mtr; float pwr;};
-
-static pwrpair pwrtbl[] = { 
+static meterpair pwrtbl[] = { 
 	{0, 0.0},
 	{21, 5.0},
 	{43,10.0}, 
@@ -1044,13 +1042,13 @@ int RIG_IC9100::get_power_out(void)
 		if (p != std::string::npos) {
 			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
-			for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+			for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 				if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
 			if (mtr > 255) mtr = 255;
-			mtr = (int)ceil(pwrtbl[i].pwr + 
-				(pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+			mtr = (int)ceil(pwrtbl[i].val + 
+				(pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 			
 			if (mtr > 100) mtr = 100;
 		}
@@ -1058,12 +1056,10 @@ int RIG_IC9100::get_power_out(void)
 	return mtr;
 }
 
-struct swrpair {int mtr; float swr;};
-
 // Table entries below correspond to SWR readings of 1.1, 1.5, 2.0, 2.5, 3.0 and infinity.
 // Values are also tweaked to fit the display of the SWR meter.
 
-static swrpair swrtbl[] = { 
+static meterpair swrtbl[] = { 
 	{0, 0.0},
 	{48, 10.5},
 	{80, 23.0}, 
@@ -1085,13 +1081,13 @@ int RIG_IC9100::get_swr(void)
 		if (p != std::string::npos) {
 			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
-			for (i = 0; i < sizeof(swrtbl) / sizeof(swrpair) - 1; i++)
+			for (i = 0; i < sizeof(swrtbl) / sizeof(meterpair) - 1; i++)
 				if (mtr >= swrtbl[i].mtr && mtr < swrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
 			if (mtr > 255) mtr = 255;
-			mtr = (int)ceil(swrtbl[i].swr + 
-				(swrtbl[i+1].swr - swrtbl[i].swr)*(mtr - swrtbl[i].mtr)/(swrtbl[i+1].mtr - swrtbl[i].mtr));
+			mtr = (int)ceil(swrtbl[i].val + 
+				(swrtbl[i+1].val - swrtbl[i].val)*(mtr - swrtbl[i].mtr)/(swrtbl[i+1].mtr - swrtbl[i].mtr));
 
 			if (mtr > 100) mtr = 100;
 		}

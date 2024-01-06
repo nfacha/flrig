@@ -309,9 +309,7 @@ int RIG_TS480SAT::get_smeter()
 	return mtr;
 }
 
-struct pwrpair {int mtr; float pwr;};
-
-static pwrpair pwrtbl[] = { 
+static meterpair pwrtbl[] = { 
 	{0, 0.0}, 
 	{2, 5.0},
 	{4, 10.0}, 
@@ -334,8 +332,8 @@ int RIG_TS480SAT::get_power_out()
 		else if (mtr > 20) mtr = 20;
 		else while(mtr > pwrtbl[i].mtr) i++;
 
-		mtr = (int)ceil(pwrtbl[i].pwr + 
-			(pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+		mtr = (int)ceil(pwrtbl[i].val + 
+			(pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 		if (mtr > 200) mtr = 200;
 	}
 	gett("power out");

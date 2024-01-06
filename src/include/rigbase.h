@@ -53,6 +53,8 @@ extern std::vector<std::string>vDSPHI;
 extern const char *szdsptooltip;
 extern const char *szbtnlabel;
 
+struct meterpair {float mtr; float val;};
+
 struct XCVR_STATE {
 	unsigned long long freq;
 	int  imode;

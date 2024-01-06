@@ -378,17 +378,6 @@ int RIG_FT450D::get_split()
 	return split;
 }
 
-struct mtrpair {int val; float mtr;};
-
-static mtrpair sm_tbl[] = { 
-{0, 0.0},
-{18, 6.0},
-{51, 17.0},
-{85, 28.0},
-{118, 39.0},
-{151, 50.0},
-{255, 100.0} };
-
 int RIG_FT450D::get_smeter()
 {
 	cmd = rsp = "SM0";
@@ -397,21 +386,9 @@ int RIG_FT450D::get_smeter()
 	wait_char(';',7, FL450D_WAIT_TIME, "get smeter", ASC); // sets replystr via rigbase
 	gett("");
 
-	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return 0;
-	if (p + 6 >= replystr.length()) return 0;
-	int val = atoi(&replystr[p+3]);
-	
-	size_t i = 0;
-	if (val < 0) val = 0;
-	else if (val > 255) val = 255;
-	else while(val > sm_tbl[i].val) i++;
-	int mtr = (int)ceil(sm_tbl[i].mtr + 
-				(sm_tbl[i+1].mtr - sm_tbl[i].mtr) * 
-				(val - sm_tbl[i].val)/(sm_tbl[i+1].val - sm_tbl[i].val));
-
-	if (mtr > 100) mtr = 100;
-
+	int mtr = 0;
+	sscanf(replystr.c_str(), "SM0%d", &mtr);
+	mtr = mtr * 100.0 / 256.0;
 	return mtr;
 }
 
@@ -465,9 +442,7 @@ int RIG_FT450D::get_alc()
 //		zone 2: 10 - 50W  --> Slope = 2.2; Intercept = 54
 //		zone 1: 50 - 100W --> Slope = 1.5; Intercept = 91
 
-struct pwrpair {int mtr; double pwr;};
-
-static pwrpair pwrtbl[] = { 
+static meterpair pwrtbl[] = { 
   {0, 0.0},
   {74, 10.0},
   {164, 50.0},
@@ -490,13 +465,13 @@ int RIG_FT450D::get_power_out()
 	if (mtr > 238) mtr = 238;
 
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 
 	double pwr = floor (
-					pwrtbl[i].pwr + 
-					(pwrtbl[i+1].pwr - pwrtbl[i].pwr) * (mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr)
+					pwrtbl[i].val + 
+					(pwrtbl[i+1].val - pwrtbl[i].val) * (mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr)
 				);
 	if (pwr > 100) pwr = 100;
 	return (int)pwr;

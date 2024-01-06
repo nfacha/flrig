@@ -178,12 +178,10 @@ int tmate2_set_lcd (unsigned char *bufout)
 	int i;
 	unsigned char buf[65];
 	buf[64]= '\0';
+	memset( buf, 0xFF, 65 );
 	buf[0] = 0x0; // report number
-	for (i = 1; i <= 45; i++) {
-		buf[i] = bufout[i-1];
-	}
-	for (i = 46; i <= 64; i++) {
-		buf[i] = 0xFF;
+	for (i = 0; i < LCD_STRING_SIZE; i++) {
+		buf[i + 1] = bufout[i];
 	}
 
 	buf[64]= '\0';

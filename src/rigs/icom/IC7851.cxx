@@ -1069,9 +1069,7 @@ int RIG_IC7851::get_smeter()
 	return mtr;
 }
 
-struct pwrpair {int mtr; float pwr;};
-
-static pwrpair pwrtbl[] = { 
+static meterpair pwrtbl[] = { 
 {0, 0.0},
 {40, 20.0},
 {76, 40.0},
@@ -1097,13 +1095,13 @@ int RIG_IC7851::get_power_out(void)
 		if (p != std::string::npos) {
 			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
-			for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+			for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 				if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
 			if (mtr > 213) mtr = 213;
-			mtr = (int)ceil(pwrtbl[i].pwr + 
-				(pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+			mtr = (int)ceil(pwrtbl[i].val + 
+				(pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 			
 			if (mtr > 100) mtr = 100;
 		}

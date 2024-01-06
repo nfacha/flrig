@@ -564,11 +564,9 @@ int RIG_FTdx10::get_swr()
 	return mtr / 2.56;
 }
 
-struct pwrpair {int mtr; float pwr;};
-
 int RIG_FTdx10::get_power_out()
 {
-	static pwrpair pwrtbl[] = { 
+	static meterpair pwrtbl[] = { 
 		{ 35,  5.0 },
 		{ 94, 25.0 },
 		{147, 50.0 },
@@ -587,13 +585,13 @@ int RIG_FTdx10::get_power_out()
 	int mtr = atoi(replystr.substr(p + 3, 3).c_str());
 
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 	if (mtr < 0) mtr = 0;
 	if (mtr > 205) mtr = 205;
-	double pwr = (int)ceil(pwrtbl[i].pwr + 
-			  (pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+	double pwr = (int)ceil(pwrtbl[i].val + 
+			  (pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 
 	if (pwr > 100) pwr = 100;
 
@@ -615,11 +613,9 @@ int RIG_FTdx10::get_alc()
 	return (int)ceil(mtr / 2.56);
 }
 
-struct mtrpair {int mtr; float val;};
-
 double RIG_FTdx10::get_idd()
 {
-	static mtrpair iddtbl[] = {
+	static meterpair iddtbl[] = {
 		{ 52, 5.0 },
 		{ 70, 7.0 },
 		{ 96, 10.0 },
@@ -644,7 +640,7 @@ double RIG_FTdx10::get_idd()
 	if (p != std::string::npos) {
 		sscanf(&replystr[p], "RM7%3d%3d", &mtr, &dmy);
 		size_t i = 0;
-		for (i = 0; i < sizeof(iddtbl) / sizeof(mtrpair) - 1; i++)
+		for (i = 0; i < sizeof(iddtbl) / sizeof(meterpair) - 1; i++)
 			if (mtr >= iddtbl[i].mtr && mtr < iddtbl[i+1].mtr)
 				break;
 		if (mtr < 0) mtr = 0;

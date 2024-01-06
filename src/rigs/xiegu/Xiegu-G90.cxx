@@ -634,8 +634,6 @@ static char hexchr(int val)
 	return c;
 }
 
-struct meterpair {int mtr; float val;};
-
 static meterpair pwrtbl[] = { 
 { 0, 1 },
 { 13, 2 },
@@ -887,7 +885,7 @@ int RIG_Xiegu_G90::get_smeter()
 			if (mtr < 0) mtr = 0;
 			if (mtr > 241) mtr = 241;
 			size_t i = 0;
-			for (i = 0; i < sizeof(smtrtbl) / sizeof(meterpair) - 1; i++)
+			for (i = 0; i < sizeof(smtrtbl) / sizeof(*smtrtbl) - 1; i++)
 				if (mtr >= smtrtbl[i].mtr && mtr < smtrtbl[i+1].mtr)
 					break;
 			mtr = (int)ceil(smtrtbl[i].val + 
@@ -930,7 +928,7 @@ int RIG_Xiegu_G90::get_swr()
 				mtr = 100 * hexval(replystr[p + 6]) + hexval(replystr[p + 7]);
 			}
 			size_t i = 0;
-			for (i = 0; i < sizeof(swrtbl) / sizeof(meterpair) - 1; i++)
+			for (i = 0; i < sizeof(swrtbl) / sizeof(*swrtbl) - 1; i++)
 				if (mtr >= swrtbl[i].mtr && mtr < swrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;

@@ -557,11 +557,9 @@ int RIG_FT710::get_swr()
 	return mtr / 2.56;
 }
 
-struct mtrpair {int mtr; float val;};
-
 double RIG_FT710::get_idd()
 {
-	static mtrpair iddtbl[] = {
+	static meterpair iddtbl[] = {
 		{ 52, 5.0 },
 		{ 70, 7.0 },
 		{ 96, 10.0 },
@@ -586,7 +584,7 @@ double RIG_FT710::get_idd()
 	if (p != std::string::npos) {
 		sscanf(&replystr[p], "RM7%3d%3d", &mtr, &dmy);
 		size_t i = 0;
-		for (i = 0; i < sizeof(iddtbl) / sizeof(mtrpair) - 1; i++)
+		for (i = 0; i < sizeof(iddtbl) / sizeof(meterpair) - 1; i++)
 			if (mtr >= iddtbl[i].mtr && mtr < iddtbl[i+1].mtr)
 				break;
 		if (mtr < 0) mtr = 0;
@@ -623,7 +621,7 @@ double RIG_FT710::get_voltmeter()
 
 int RIG_FT710::get_power_out()
 {
-	static mtrpair pwrtbl[] = { 
+	static meterpair pwrtbl[] = { 
 		{ 35,  5.0 },
 		{ 94, 25.0 },
 		{147, 50.0 },
@@ -642,7 +640,7 @@ int RIG_FT710::get_power_out()
 	sscanf(&replystr[p], "RM5%3d%3d", &mtr, &dmy);
 
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(mtrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 	if (mtr < 0) mtr = 0;

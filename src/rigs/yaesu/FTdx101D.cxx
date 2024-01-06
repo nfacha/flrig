@@ -504,11 +504,9 @@ int RIG_FTdx101D::get_swr()
 	return mtr / 2.56;
 }
 
-struct pwrpair {int mtr; float pwr;};
-
 int RIG_FTdx101D::get_power_out()
 {
-	static pwrpair pwrtbl[] = { 
+	static meterpair pwrtbl[] = { 
 		{  0,  0.0 },
 		{ 27,  5.0 },
 		{ 94, 25.0 },
@@ -528,13 +526,13 @@ int RIG_FTdx101D::get_power_out()
 	replystr.erase(3);
 	int mtr = atoi(replystr.c_str());
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 	if (mtr < 0) mtr = 0;
 	if (mtr > 205) mtr = 205;
-	int pwr = (int)ceil(pwrtbl[i].pwr + 
-			  (pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+	int pwr = (int)ceil(pwrtbl[i].val + 
+			  (pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 
 	if (pwr > 100) pwr = 100;
 
@@ -1520,7 +1518,7 @@ RIG_FTdx101MP::RIG_FTdx101MP() {
 
 int RIG_FTdx101MP::get_power_out()
 {
-	static pwrpair pwrtbl[] = { 
+	static meterpair pwrtbl[] = { 
 		{ 32, 10.0 },
 		{ 53, 20.0 },
 		{ 80, 40.0 },
@@ -1545,13 +1543,13 @@ int RIG_FTdx101MP::get_power_out()
 	replystr.erase(3);
 	int mtr = atoi(replystr.c_str());
 	size_t i = 0;
-	for (i = 0; i < sizeof(pwrtbl) / sizeof(pwrpair) - 1; i++)
+	for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
 		if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 			break;
 	if (mtr < 0) mtr = 0;
 	if (mtr > 197) mtr = 197;
-	int pwr = (int)ceil(pwrtbl[i].pwr + 
-			  (pwrtbl[i+1].pwr - pwrtbl[i].pwr)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
+	int pwr = (int)ceil(pwrtbl[i].val + 
+			  (pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr) / (pwrtbl[i+1].mtr - pwrtbl[i].mtr));
 
 	if (pwr > 200) pwr = 200;
 

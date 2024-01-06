@@ -311,7 +311,6 @@ double RIG_FLEX1500::get_power_control()
 	return pctrl;
 }
 
-struct meterpair {float mtr; float val;};
 static meterpair swr_tbl[] = {
 	{ 1,   0  },
 	{ 1.5,  12.5  },
