@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------------
 // Copyright (C) 2023
 //              David Freese, W1HKJ
+//              Dominik, DB1RUF
 //
 // This file is part of flrig.
 //
@@ -17,7 +18,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // ----------------------------------------------------------------------------
-// 20201224
+// 20230106
 
 #ifndef TMD710_H
 #define TMD710_H
@@ -46,20 +47,10 @@ public:
 
 	void selectA();
 	void selectB();
-//	void set_attenuator(int val);
-//	int  get_attenuator();
-//	void set_preamp(int val);
-//	int  get_preamp();
-//	int  get_smeter();
-//	int  get_swr();
-//	int  get_power_out();
-//	double get_power_control();
-//	void set_volume_control(double val);
-//	void set_power_control(double val);
+	int  get_vfoAorB();
+
 	void set_PTT_control(int val);
 	int  get_PTT();
-//	void tune_rig();
-//	void set_bwA(int val);
 
 	double get_power_control();
 	void set_power_control(double val);
