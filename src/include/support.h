@@ -86,7 +86,7 @@
 #include <FL/fl_ask.H>
 
 
-#define LISTSIZE 200
+#define LISTSIZE 500
 #define ATAGSIZE 128 //21
 
 float interpolate(float raw, const std::vector< std::vector< float > > & table);
