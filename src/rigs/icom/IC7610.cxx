@@ -335,6 +335,8 @@ RIG_IC7610::RIG_IC7610() {
 	can_change_alt_vfo = true;
 	has_a2b = true;
 
+	ICOMmainsub = true;
+
 	can_synch_clock = true;
 };
 
@@ -458,6 +460,8 @@ unsigned long long RIG_IC7610::get_vfoA ()
 	return A.freq;
 }
 
+// 00 XX XX XX XX 00
+
 void RIG_IC7610::set_vfoA (unsigned long long freq)
 {
 	A.freq = freq;
@@ -498,6 +502,8 @@ unsigned long long RIG_IC7610::get_vfoB ()
 	return B.freq;
 }
 
+// 01 xx xx xx xx 00
+
 void RIG_IC7610::set_vfoB (unsigned long long freq)
 {
 	B.freq = freq;
@@ -527,6 +533,8 @@ void RIG_IC7610::set_vfoB (unsigned long long freq)
 //                |                05 - FM
 //                |                07 - CW-R
 //                |                08 - RTTY-R
+//                |                12 - PSK
+//                |                13 - PSK-R
 //                |___________selected vfo, 00 - active, 01 - inactive
 
 int RIG_IC7610::get_modeA()
@@ -553,13 +561,12 @@ int RIG_IC7610::get_modeA()
 				A.imode = md;
 				if (replystr[p+7] == 0x01 && A.imode < 4)
 					A.imode += 10;
-				if (replystr[p+7] == 0x02 && A.imode < 4)
+				else if (replystr[p+7] == 0x02 && A.imode < 4)
 					A.imode += 14;
-				if (replystr[p+7] == 0x03 && A.imode < 4)
+				else if (replystr[p+7] == 0x03 && A.imode < 4)
 					A.imode += 18;
-				if (A.imode > 21)
+				else
 					A.imode = 1;
-				break;
 			}
 			A.filter = replystr[p+8];
 		}
@@ -630,13 +637,12 @@ int RIG_IC7610::get_modeB()
 				B.imode = md;
 				if (replystr[p+7] == 0x01 && B.imode < 4)
 					B.imode += 10;
-				if (replystr[p+7] == 0x02 && B.imode < 4)
+				else if (replystr[p+7] == 0x02 && B.imode < 4)
 					B.imode += 14;
-				if (replystr[p+7] == 0x03 && B.imode < 4)
+				else if (replystr[p+7] == 0x03 && B.imode < 4)
 					B.imode += 18;
-				if (B.imode > 21)
+				else
 					B.imode = 1;
-				break;
 			}
 		}
 		B.filter = replystr[p+8];
@@ -1200,12 +1206,14 @@ void RIG_IC7610::set_break_in()
 		case 2: cmd += '\x02'; break_in_label("FULL"); break;
 		case 1: cmd += '\x01'; break_in_label("SEMI");  break;
 		case 0:
-		default: cmd += '\x00'; break_in_label("BK-IN");
+		default: cmd += '\x00'; break_in_label("qsk");
 	}
 	cmd.append(post);
 	waitFB("SET break-in");
 	set_trace(2, "set_break_in() ", str2hex(cmd.c_str(), cmd.length()));
 }
+
+// FE FE YY YY 16 47 CC FD
 
 int RIG_IC7610::get_break_in()
 {
@@ -1215,10 +1223,11 @@ int RIG_IC7610::get_break_in()
 	if (waitFOR(8, "get break in")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			progStatus.break_in = replystr[p+6];
-			if (progStatus.break_in == 0) break_in_label("qsk");
-			else  if (progStatus.break_in == 1) break_in_label("SEMI");
-			else  break_in_label("FULL");
+			switch (replystr[p+6]) {
+				case 0x00 : progStatus.break_in = 0; break_in_label("qsk"); break;
+				case 0x01 : progStatus.break_in = 1; break_in_label("SEMI"); break;
+				case 0x02 : progStatus.break_in = 2; break_in_label("FULL"); break;
+			}
 		}
 	}
 	return progStatus.break_in;

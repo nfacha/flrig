@@ -137,8 +137,8 @@ status progStatus = {
 	1,			// poll_compression;
 	1,			// poll_tuner;
 	1,			// poll_ptt;
-	4,			// poll_break_in;
-	4,			// int	poll_all;
+	1,			// poll_break_in;
+	1,			// int	poll_all;
 
 	-1,			// int  iBW_A;
 	1,			// int  imode_A;
