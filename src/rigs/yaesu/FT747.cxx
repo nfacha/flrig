@@ -112,8 +112,7 @@ void RIG_FT747::set_split(bool val)
 bool RIG_FT747::check()
 {
 	init_cmd();
-	cmd[3] = 0x01;
-	cmd[4] = 0xFA;
+	cmd[4] = 0x10;
 	int ret = waitN(28, 100, "check", HEX);
 	if (ret >= 28) return true;
 	return false;
