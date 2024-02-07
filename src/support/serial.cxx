@@ -436,8 +436,13 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		timedout = ( (zusec() - tnow) > (size_t)(progStatus.serial_timeout * 1000));
 
 		// test for icom echo
-		if ((buf.length() >= (size_t)nchars) && ((buf[3] & 0xFF) == 0xE0))
-			echo = true;
+		if (buf.length() >= 4) {
+			if ( ((buf[0] & 0xFF) == 0xFE) && 
+				 ((buf[1] & 0xFF) == 0xFE) &&
+				 ((buf[3] & 0xFF) == 0xE0) ) {
+				echo = true;
+			}
+		}
 		if (buf.length() >= (echo ? maxchars : (size_t)nchars)) break;
 
 		if (timedout) break;
