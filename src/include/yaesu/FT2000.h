@@ -85,6 +85,11 @@ public:
 	void set_mic_gain(int val);
 	int  get_mic_gain();
 	void get_mic_min_max_step(int &min, int &max, int &step);
+	void set_rf_gain(int val);
+	int  get_rf_gain();
+	void set_squelch(int val);
+	int  get_squelch();
+
 	int  adjust_bandwidth(int);
 	int  def_bandwidth(int);
 

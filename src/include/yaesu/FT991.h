@@ -149,6 +149,11 @@ public:
 	void set_noise_reduction(int val);
 	int  get_noise_reduction();
 
+	void set_squelch(int val);
+	int  get_squelch();
+	void get_squelch_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 5; }
+
 	void set_xcvr_auto_on();
 	void set_xcvr_auto_off();
 

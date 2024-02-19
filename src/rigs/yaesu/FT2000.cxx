@@ -77,14 +77,22 @@ static const char *vFT2000_US_60m[] = {"", "126", "127", "128", "130"};
 static std::vector<std::string>& Channels_60m = FT2000_US_60m;
 
 static GUI rig_widgets[]= {
-	{ (Fl_Widget *)btnVol,        2, 125,  50 },
-	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
-	{ (Fl_Widget *)btnIFsh,     214, 105,  50 },
-	{ (Fl_Widget *)sldrIFSHIFT, 266, 105, 156 },
-	{ (Fl_Widget *)btnNotch,    214, 125,  50 },
-	{ (Fl_Widget *)sldrNOTCH,   266, 125, 156 },
-	{ (Fl_Widget *)sldrMICGAIN,  54, 145, 156 },
-	{ (Fl_Widget *)sldrPOWER,   266, 145, 156 },
+	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
+	{ (Fl_Widget *)sldrVOLUME,   54, 125, 368 }, // 1
+	{ (Fl_Widget *)sldrRFGAIN,   54, 145, 156 }, // 2
+	{ (Fl_Widget *)sldrSQUELCH, 266, 145, 156 }, // 3
+
+	{ (Fl_Widget *)sldrMICGAIN,  54, 165, 156 }, // 4
+	{ (Fl_Widget *)btnNotch,    214, 165,  50 }, // 5
+	{ (Fl_Widget *)sldrNOTCH,   266, 165, 156 }, // 6
+
+	{ (Fl_Widget *)btnNR,         2, 185,  50 }, // 7
+	{ (Fl_Widget *)sldrNR,       54, 185, 156 }, // 8
+	{ (Fl_Widget *)btnIFsh,     214, 185,  50 }, // 9
+	{ (Fl_Widget *)sldrIFSHIFT, 266, 185, 156 }, // 10
+
+	{ (Fl_Widget *)sldrPOWER,    54, 205, 368 }, // 11
+
 	{ (Fl_Widget *)NULL,          0,   0,   0 }
 };
 
@@ -103,12 +111,16 @@ void RIG_FT2000::initialize()
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
-	rig_widgets[2].W = btnIFsh;
-	rig_widgets[3].W = sldrIFSHIFT;
-	rig_widgets[4].W = btnNotch;
-	rig_widgets[5].W = sldrNOTCH;
-	rig_widgets[6].W = sldrMICGAIN;
-	rig_widgets[7].W = sldrPOWER;
+	rig_widgets[2].W = sldrRFGAIN;
+	rig_widgets[3].W = sldrSQUELCH;
+	rig_widgets[4].W = sldrMICGAIN;
+	rig_widgets[5].W = btnNotch;
+	rig_widgets[6].W = sldrNOTCH;
+	rig_widgets[7].W = btnNR;
+	rig_widgets[8].W = sldrNR;
+	rig_widgets[9].W = btnIFsh;
+	rig_widgets[10].W = sldrIFSHIFT;
+	rig_widgets[11].W = sldrPOWER;
 }
 
 RIG_FT2000::RIG_FT2000() {
@@ -149,6 +161,8 @@ RIG_FT2000::RIG_FT2000() {
 	has_mode_control =
 	has_noise_control =
 	has_bandwidth_control =
+	has_rf_control =
+	has_sql_control =
 	has_micgain_control =
 	has_notch_control =
 	has_attenuator_control =
@@ -1033,4 +1047,138 @@ double RIG_FT2000::get_idd()
 	replystr[6] = '\x00';
 	double mtr = atoi(&replystr[p+3]);
 	return mtr / 10.0;
+}
+
+void RIG_FT2000::set_squelch(int val)
+{
+	cmd = "SQ0000;";
+	if (inuse == onB) {
+		cmd[2] = '1';
+		progStatus.squelch_B = val;
+	} else
+		progStatus.squelch = progStatus.squelch_A = val;
+
+	for (int i = 5; i > 2; i--) {
+		cmd[i] = val % 10 + '0';
+		val /= 10;
+	}
+
+	set_trace(1, "set_squelch()");
+	sendCommand(cmd);
+	sett("");
+	showresp(WARN, ASC, "SET squelch", cmd, replystr);
+}
+
+int  RIG_FT2000::get_squelch()
+{
+	int sqval_A = 0;
+	cmd = rsp = "SQ0";
+	cmd += ';';
+	get_trace(1, "get_squelch() [A]");
+	wait_char(';', 7, 100, "get squelch", ASC);
+	gett("");
+
+	size_t p = replystr.rfind(rsp);
+	if (p == std::string::npos) {
+		if (inuse == onB)
+			return progStatus.squelch_B;
+		return progStatus.squelch_A;
+	}
+	for (int i = 3; i < 6; i++) {
+		sqval_A *= 10;
+		sqval_A += replystr[p+i] - '0';
+	}
+
+	int sqval_B = 0;
+	cmd = rsp = "SQ1";
+	cmd += ';';
+	get_trace(1, "get_squelch() [B]");
+	wait_char(';', 7, 100, "get squelch", ASC);
+	gett("");
+
+	p = replystr.rfind(rsp);
+	if (p == std::string::npos) {
+		if (inuse == onB)
+			return progStatus.squelch_B;
+		return progStatus.squelch_A;
+	}
+	for (int i = 3; i < 6; i++) {
+		sqval_B *= 10;
+		sqval_B += replystr[p+i] - '0';
+	}
+
+	progStatus.squelch_A = ceil(sqval_A);
+	progStatus.squelch_B = ceil(sqval_B);
+
+	if (inuse == onB)
+		return progStatus.squelch_B;
+
+	return progStatus.squelch_A;
+}
+
+void RIG_FT2000::set_rf_gain(int val)
+{
+	cmd = "RG0000;";
+	if (inuse == onB) {
+		cmd[2] = '1';
+		progStatus.rfgain_B = val;
+	} else
+		progStatus.rfgain = progStatus.rfgain_A = val;
+
+	for (int i = 5; i > 2; i--) {
+		cmd[i] = val % 10 + '0';
+		val /= 10;
+	}
+
+	set_trace(1, "set_rfgain()");
+	sendCommand(cmd);
+	sett("");
+	showresp(WARN, ASC, "SET rfgain", cmd, replystr);
+}
+
+int  RIG_FT2000::get_rf_gain()
+{
+	int RGval_A = 0;
+	cmd = rsp = "RG0";
+	cmd += ';';
+	get_trace(1, "get_rfgain() [A]");
+	wait_char(';', 7, 100, "get rfgain", ASC);
+	gett("");
+
+	size_t p = replystr.rfind(rsp);
+	if (p == std::string::npos) {
+		if (inuse == onB)
+			return progStatus.rfgain_B;
+		return progStatus.rfgain_A;
+	}
+	for (int i = 3; i < 6; i++) {
+		RGval_A *= 10;
+		RGval_A += replystr[p+i] - '0';
+	}
+
+	int RGval_B = 0;
+	cmd = rsp = "RG1";
+	cmd += ';';
+	get_trace(1, "get_rfgain() [B]");
+	wait_char(';', 7, 100, "get rfgain", ASC);
+	gett("");
+
+	p = replystr.rfind(rsp);
+	if (p == std::string::npos) {
+		if (inuse == onB)
+			return progStatus.rfgain_B;
+		return progStatus.rfgain_A;
+	}
+	for (int i = 3; i < 6; i++) {
+		RGval_B *= 10;
+		RGval_B += replystr[p+i] - '0';
+	}
+
+	progStatus.rfgain_A = ceil(RGval_A);
+	progStatus.rfgain_B = ceil(RGval_B);
+
+	if (inuse == onB)
+		return progStatus.rfgain_B;
+
+	return progStatus.rfgain_A;
 }

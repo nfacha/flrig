@@ -85,6 +85,11 @@ public:
 	virtual void get_pc_min_max_step(double &min, double &max, double &step) {
 		min = 5; pmax = max = 100; step = 1; }
 
+	void set_squelch(int val);
+	int  get_squelch();
+	void get_squelch_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 5; }
+
 	virtual void set_volume_control(int val);
 	virtual int  get_volume_control();
 	virtual void set_PTT_control(int val);

@@ -166,7 +166,11 @@ status progStatus = {
 	0,			// int  pbt_inner;
 	0,			// int  pbt_outer;
 	100,		// int  rfgain;
+	100,		// int  rfgain_A;
+	100,		// int  rfgain_B;
 	10,			// int  squelch;
+	10,			// int  squelch_A;
+	10,			// int  squelch_B;
 
 	0,			// int  schema;
 	0,			// int	embed_tabs;
@@ -783,7 +787,11 @@ void status::saveLastState()
 	spref.set("pbt_outer", pbt_outer);
 
 	spref.set("rfgain", rfgain);
+	spref.set("rfgain_A", rfgain_A);
+	spref.set("rfgain_B", rfgain_B);
 	spref.set("squelch", squelch);
+	spref.set("squelch_A", squelch_A);
+	spref.set("squelch_B", squelch_B);
 	spref.set("no_txqsy", no_txqsy);
 
 	spref.set("schema", schema);
@@ -1460,7 +1468,11 @@ bool status::loadXcvrState(std::string xcvr)
 		if (spref.get("pbt_outer", i, pbt_outer)) pbt_outer = i;
 
 		spref.get("rfgain", rfgain, rfgain);
+		spref.get("rfgain_A", rfgain_A, rfgain_A);
+		spref.get("rfgain_B", rfgain_B, rfgain_B);
 		spref.get("squelch", squelch, squelch);
+		spref.get("squelch_A", squelch_A, squelch_A);
+		spref.get("squelch_B", squelch_B, squelch_B);
 		spref.get("no_txqsy", no_txqsy, no_txqsy);
 
 		spref.get("schema", schema, schema);

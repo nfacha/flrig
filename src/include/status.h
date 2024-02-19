@@ -152,7 +152,11 @@ struct status {
 	int		pbt_inner;
 	int		pbt_outer;
 	int		rfgain;
+	int		rfgain_A;
+	int		rfgain_B;
 	int		squelch;
+	int		squelch_A;
+	int		squelch_B;
 
 	int		schema;
 	int		embed_tabs;
