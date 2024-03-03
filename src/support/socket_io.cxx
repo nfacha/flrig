@@ -80,7 +80,7 @@ pthread_mutex_t mutex_rcv_socket = PTHREAD_MUTEX_INITIALIZER;
 void *rcv_socket_loop(void *)
 {
 	for (;;) {
-		MilliSleep(500);//5);
+		MilliSleep(5);
 		{
 			guard_lock socket_lock(&mutex_rcv_socket);
 			if (exit_socket_loop) break;
