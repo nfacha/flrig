@@ -137,58 +137,61 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 	size_t pcheck = 0;
 	size_t peor = 0;
 
-	if (progStatus.use_tcpip) {
+	if(!progStatus.use_tcpip && !RigSerial->IsOpen()) {
+		LOG_DEBUG("TEST %s", sz);
+		return false;
+	}
+	   if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
-		MilliSleep(progStatus.tcpip_ping_delay);
-		retnbr = read_from_remote(replystr);
-		LOG_DEBUG ("%s: read %d bytes, %s", sz, retnbr, replystr.c_str());
-	} else {
-		if(!RigSerial->IsOpen()) {
-			LOG_DEBUG("TEST %s", sz);
-			return false;
+	   }
+	   else {
+   		RigSerial->FlushBuffer();
+	  	RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	   }
+
+	tstart = zmsec();
+	tout = tstart + timeout;
+	pcheck = std::string::npos;
+	peor = std::string::npos;
+
+	std::string tempstr;
+	int nret = 0;
+
+	while ( zmsec() < tout ) {
+		tempstr.clear();
+		if (progStatus.use_tcpip) {
+			read_from_remote(tempstr);
 		}
-		RigSerial->FlushBuffer();
-		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-
-		tstart = zmsec();
-		tout = tstart + timeout;
-		pcheck = std::string::npos;
-		peor = std::string::npos;
-
-		std::string tempstr;
-		int nret;
-
-		while ( zmsec() < tout ) {
-			tempstr.clear();
+		else {
 			nret = RigSerial->ReadBuffer(
 				tempstr, 
 				n,
 				check, 
 				eor);
-			replystr.append(tempstr);
-			retnbr += nret;
-
-			if (replystr.rfind(bad) != std::string::npos) {
-				LOG_ERROR("%s: BAD response; %s", sz, str2hex(replystr.c_str(), replystr.length()));
-				return false;
-			}
-			pcheck = replystr.rfind(check);
-			peor = replystr.rfind(eor);
-
-			if ((pcheck != std::string::npos) && 
-				(peor != std::string::npos) &&
-				(peor > pcheck) ) {
-				LOG_DEBUG("%s: read %d bytes in %d msec, %s", 
-						sz,
-						retnbr,
-						(int)(zmsec() - tstart), 
-						str2hex(replystr.c_str(), replystr.length()));
-				return true;
-			}
-			MilliSleep(1);
 		}
+		replystr.append(tempstr);
+		retnbr += nret;
 
+		if (replystr.rfind(bad) != std::string::npos) {
+			LOG_ERROR("%s: BAD response; %s", sz, str2hex(replystr.c_str(), replystr.length()));
+			return false;
+		}
+		pcheck = replystr.rfind(check);
+		peor = replystr.rfind(eor);
+
+		if ((pcheck != std::string::npos) && 
+			(peor != std::string::npos) &&
+			(peor > pcheck) ) {
+			LOG_DEBUG("%s: read %d bytes in %d msec, %s", 
+					sz,
+					retnbr,
+					(int)(zmsec() - tstart), 
+					str2hex(replystr.c_str(), replystr.length()));
+			return true;
+		}
+		MilliSleep(1);
 	}
+
 	LOG_ERROR("%s: FAILED in %d msec; %s", 
 			sz,
 			(int)(zmsec() - tstart),
