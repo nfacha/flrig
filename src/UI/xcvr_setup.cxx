@@ -1223,7 +1223,7 @@ Fl_Group *createXCVR(int X, int Y, int W, int H, const char *label)
 		110, 22, _("Timeout"));
 	cntRigCatTimeout->tooltip(_("Serial port select timeout"));
 	cntRigCatTimeout->minimum(0);
-	cntRigCatTimeout->maximum(500);
+	cntRigCatTimeout->maximum(1000);
 	cntRigCatTimeout->step(1);
 	cntRigCatTimeout->value(10);
 	cntRigCatTimeout->callback((Fl_Callback*)cb_cntRigCatTimeout);

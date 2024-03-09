@@ -94,12 +94,13 @@
 #include "yaesu/FT710.h"
 #include "yaesu/FT736R.h"
 #include "yaesu/FT747.h"
+#include "yaesu/FT747GX.h"
+#include "yaesu/FT757GX2.h"
 #include "yaesu/FT767.h"
 #include "yaesu/FT817.h"
 #include "yaesu/FT817BB.h"
 #include "yaesu/FT818.h"
 #include "yaesu/FT847.h"
-#include "yaesu/FT757GX2.h"
 #include "yaesu/FT857D.h"
 #include "yaesu/FT890.h"
 #include "yaesu/FT891.h"
@@ -136,8 +137,9 @@ extern RIG_FT100D		rig_FT100D;		// 2
 extern RIG_FT450		rig_FT450;		// 3
 extern RIG_FT450D		rig_FT450D;		// 4
 extern RIG_FT710		rig_FT710;		// 5
-extern RIG_FT747		rig_FT747;		// 6
-extern RIG_FT736R		rig_FT736R;		// 7
+extern RIG_FT736R		rig_FT736R;		// 6
+extern RIG_FT747		rig_FT747;		// 7
+extern RIG_FT747GX		rig_FT747GX;	// 7a
 extern RIG_FT757GX2		rig_FT757GX2;	// 8
 extern RIG_FT767		rig_FT767;		// 9
 extern RIG_FT817		rig_FT817;		// 10

@@ -510,14 +510,23 @@ int Cserial::WriteBuffer(const char *buff, int n)
 	}
 
 	FlushBuffer();
-	int ret = write (fd, buff, n);
 
-	bytes_written = n;
+	if (progStatus.serial_write_delay) {
+		size_t ret = 0;
+		for (int i = 0; i < n; i++) {
+			ret = write (fd, &buff[i], 1);
+			bytes_written += ret;
+			MilliSleep(progStatus.serial_write_delay);
+		}
+	} else {
+		size_t ret = write (fd, buff, n);
+		bytes_written = ret;
+	}
 
 	if (progStatus.serial_post_write_delay)
 		MilliSleep(progStatus.serial_post_write_delay);
 
-	return ret;
+	return bytes_written;
 }
 
 ///////////////////////////////////////////////////////
@@ -865,9 +874,21 @@ int Cserial::WriteBuffer(const char *buff, int n)
 			ser_trace(2, "WriteBuffer: ", (hex ? str2hex(sw.c_str(), sw.length()) : sw.c_str()));
 		}
 	}
+
 	FlushBuffer();
-	WriteFile (hComm, buff, n,  &nBytesWritten, NULL);
-	
+
+	if (progStatus.serial_write_delay) {
+		int total = 0;
+		for (int i = 0; i < n; i++) {
+			WriteFile (hComm, &buff[i], 1,  &nBytesWritten, NULL);
+			total += nBytesWritten;
+			MilliSleep(progStatus.serial_write_delay);
+		}
+		nBytesWritten = total;
+	} else {
+		WriteFile (hComm, buff, n,  &nBytesWritten, NULL);
+	}
+
 	if (progStatus.serial_post_write_delay)
 		MilliSleep(progStatus.serial_post_write_delay);
 
