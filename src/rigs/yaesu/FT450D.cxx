@@ -1030,23 +1030,58 @@ void RIG_FT450D::set_noise(bool b)
 
 void RIG_FT450D::set_xcvr_auto_on()
 {
-// send dummy data request for ID (see pg 12 CAT reference book)
 	cmd = "ID;";
-	sendCommand(cmd);
-// wait 1 to 2 seconds
-	MilliSleep(1500);
+	wait_char(';', 7 , 100, "check", ASC);
+	if (replystr.find("ID") != std::string::npos) // xcvr already ON
+		return;
+
+	update_progress(0);
+// wait 1.5 seconds
+	for (int i = 0; i < 10; i++) {
+		MilliSleep(150);
+		update_progress(i * 10);
+		Fl::awake();
+	}
+
 	cmd = "PS1;";
 	sendCommand(cmd);
-// wait for power on status
+	sett("set xcvr auto ON");
+
+	update_progress(0);
+
+// wait up to 10 seconds for normal response
 	cmd = "PS;";
-	waitN(4, 500, "Xcvr ON?", ASC);
+	for (int i = 0; i < 100; i++) {
+		wait_char(';', 4, 100, "Test for xcvr ON", ASC);
+		if (replystr.find("PS1;") != std::string::npos) {
+			update_progress(100);
+			break;
+		}
+		update_progress(i);
+		Fl::awake();
+	}
+	update_progress(0);
+
+	wait_char(';', 4, 100, "Test for xcvr ON", ASC);
+	if (replystr.find("PS1;") == std::string::npos)
+		LOG_ERROR("%s", "Unable to start xcvr");
+
 }
 
 void RIG_FT450D::set_xcvr_auto_off()
 {
 	cmd = "PS0;";
 	sendCommand(cmd);
-	sett("set_xcvr_auto_off");
+	sett("set_xcvr_auto_OFF");
+
+// transceiver does not respond after a power OFF
+
+	for (int i = 0; i < 100; i++) {
+		cmd = "PS;";
+		wait_char(';', 4, 100, "Test for xcvr OFF", ASC);
+		if (replystr.empty()) break;
+		Fl::awake();
+	}
 }
 
 // val 0 .. 100

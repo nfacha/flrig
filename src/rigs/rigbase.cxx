@@ -434,12 +434,12 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 	}
 
 	if (progStatus.use_tcpip) {
-        send_to_remote(cmd);
-    }
-    else {
-	    RigSerial->FlushBuffer();
-	    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-    }
+		send_to_remote(cmd);
+	}
+	else {
+		RigSerial->FlushBuffer();
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	}
 
 	size_t tstart = zmsec();
 	size_t tout = tstart + progStatus.serial_timeout; // minimum of 100 msec
@@ -448,12 +448,12 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 
 	do {
 		tempstr.clear();
-	    if (progStatus.use_tcpip) {
-		    nret = read_from_remote(tempstr);
-        }
-        else {
-		    nret = RigSerial->ReadBuffer(tempstr, n - retnbr);
-        }
+		if (progStatus.use_tcpip) {
+			nret = read_from_remote(tempstr);
+		}
+		else {
+			nret = RigSerial->ReadBuffer(tempstr, n - retnbr);
+		}
 		if (nret) {
 			for (int nc = 0; nc < nret; nc++)
 				replystr += tempstr[nc];
@@ -490,7 +490,6 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 
 	if (progStatus.xmlrpc_rig) {
 		replystr = xml_cat_string(cmd);
-//std::cout << "replystr: " << replystr << std::endl;
 		return replystr.length();
 	}
 
@@ -503,14 +502,14 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
-    }
-    else {
-	    RigSerial->FlushBuffer();
-	    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-    }
+	}
+	else {
+		RigSerial->FlushBuffer();
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	}
 
 	size_t tstart = zmsec();
-	size_t tout = tstart + progStatus.serial_timeout;
+	size_t tout = tstart + timeout;
 	std::string tempstr;
 	int nret;
 
@@ -518,19 +517,18 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 	do  {
 		++tries;
 		tempstr.clear();
-	    if (progStatus.use_tcpip) {
-		    nret = read_from_remote(tempstr);
-        }
-        else {
-		    nret = RigSerial->ReadBuffer(tempstr, n - retnbr, wait_str);
-        }
+		if (progStatus.use_tcpip) {
+			nret = read_from_remote(tempstr);
+		}
+		else {
+			nret = RigSerial->ReadBuffer(tempstr, n - retnbr, wait_str);
+		}
 		if (nret) {
 			for (int nc = 0; nc < nret; nc++)
 				replystr += tempstr[nc];
 			retnbr += nret;
 			tout = zmsec() + progStatus.serial_timeout;
 		}
-			
 		if (retnbr >= n)
 			break;
 
@@ -548,8 +546,7 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 		tries,
 		(pr == HEX ? str2hex(replystr.c_str(), replystr.length()): replystr.c_str()) );
 
-//	if (SERIALDEBUG)
-		ser_trace(1, ctrace);
+	ser_trace(1, ctrace);
 
 	LOG_DEBUG ("%s", ctrace);
 
@@ -577,11 +574,11 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
-    }
-    else {
-	    RigSerial->FlushBuffer();
-	    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-    }
+	}
+	else {
+		RigSerial->FlushBuffer();
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	}
 
 	size_t tstart = zmsec();
 	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
@@ -590,12 +587,12 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 
 	do {
 		tempstr.clear();
-	    if (progStatus.use_tcpip) {
-		    nret = read_from_remote(tempstr);
-        }
-        else {
-		    nret = RigSerial->ReadBuffer(tempstr, nr - retnbr, crlf);
-        }
+		if (progStatus.use_tcpip) {
+			nret = read_from_remote(tempstr);
+		}
+		else {
+			nret = RigSerial->ReadBuffer(tempstr, nr - retnbr, crlf);
+		}
 		if (nret) {
 			replystr.append(tempstr);
 			retnbr += nret;
@@ -651,11 +648,11 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
-    }
-    else {
-	    RigSerial->FlushBuffer();
-	    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-    }
+	}
+	else {
+		RigSerial->FlushBuffer();
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	}
 
 	size_t tstart = zmsec();
 	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
@@ -664,12 +661,12 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 
 	do {
 		tempstr.clear();
-	    if (progStatus.use_tcpip) {
-		    nret = read_from_remote(tempstr);
-        }
-        else {
-		    nret = RigSerial->ReadBuffer(tempstr, nr - retnbr, sz);
-        }
+		if (progStatus.use_tcpip) {
+			nret = read_from_remote(tempstr);
+		}
+		else {
+			nret = RigSerial->ReadBuffer(tempstr, nr - retnbr, sz);
+		}
 		if (nret) {
 			replystr.append(tempstr);
 			retnbr += nret;
@@ -720,11 +717,11 @@ int rigbase::waitfor(int nr, int timeout, int pr)
 
 	if (progStatus.use_tcpip) {
 		send_to_remote(cmd);
-    }
-    else {
-	    RigSerial->FlushBuffer();
-	    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-    }
+	}
+	else {
+		RigSerial->FlushBuffer();
+		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	}
 
 	size_t tstart = zmsec();
 	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
@@ -733,12 +730,12 @@ int rigbase::waitfor(int nr, int timeout, int pr)
 
 	do {
 		tempstr.clear();
-	    if (progStatus.use_tcpip) {
-            nret = read_from_remote(tempstr);
-        }
-        else {
-		    nret = RigSerial->ReadBuffer(tempstr, nr - retnbr);
-        }
+		if (progStatus.use_tcpip) {
+			nret = read_from_remote(tempstr);
+		}
+		else {
+			nret = RigSerial->ReadBuffer(tempstr, nr - retnbr);
+		}
 		if (nret) {
 			replystr.append(tempstr);
 			retnbr += nret;
@@ -785,13 +782,13 @@ bool rigbase::id_OK(std::string ID, int wait)
 	int retn = 0;
 	size_t tout = 0;
 	for (int n = 0; n < progStatus.serial_retries; n++) {
-	    if (progStatus.use_tcpip) {
-            send_to_remote(cmd);
-        }
-        else {
-		    RigSerial->FlushBuffer();
-		    RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-        }
+		if (progStatus.use_tcpip) {
+			send_to_remote(cmd);
+		}
+		else {
+			RigSerial->FlushBuffer();
+			RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+		}
 
 		replystr.clear();
 		tout = zmsec() + wait;
@@ -800,12 +797,12 @@ bool rigbase::id_OK(std::string ID, int wait)
 			MilliSleep(50);
 			buff.clear();
 
-	        if (progStatus.use_tcpip) {
-		        retn = read_from_remote(buff);
-            }
-            else {
-			    retn = RigSerial->ReadBuffer(buff, 10, ID, ";");
-            }
+			if (progStatus.use_tcpip) {
+				retn = read_from_remote(buff);
+			}
+			else {
+				retn = RigSerial->ReadBuffer(buff, 10, ID, ";");
+			}
 			if (retn) {
 				replystr.append(buff);
 				tout = zmsec() + wait;

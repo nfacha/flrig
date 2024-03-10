@@ -293,11 +293,8 @@ void RIG_FT710::set_xcvr_auto_on()
 {
 	cmd = "ID;";
 	wait_char(';', 7 , 100, "check", ASC);
-//std::cout << "check: " << replystr << std::endl;
 	if (replystr.find("ID") != std::string::npos)
 		return;
-
-//std::cout << "Xcvr not ON ... power ON cycle" << std::endl;
 
 // wait 1.2 seconds
 	for (int i = 0; i < 12; i++) {
@@ -306,40 +303,37 @@ void RIG_FT710::set_xcvr_auto_on()
 		Fl::awake();
 	}
 
-	cmd = "PS1;";
-//	std::cout << "power ON" << std::endl;
-	RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+	sendCommand("PS1;");
+	sett("set xcvr auto ON");
 
 	update_progress(0);
 
-// wait 7 seconds
-//	std::cout << "wait 10 seconds" << std::endl;
-	for (int i = 0; i < 140; i++) {
-		MilliSleep(50);
+// wait up to 10 seconds for normal response
+	cmd = "PS;";
+	for (int i = 0; i < 100; i++) {
+		wait_char(';', 4, 100, "Test for xcvr ON", ASC);
+		if (replystr.find("PS1;") != std::string::npos) {
+			update_progress(100);
+			break;
+		}
 		update_progress(i);
 		Fl::awake();
 	}
-	update_progress(0);
-
-//	std::cout << "restart serial port" << std::endl;
-
-	RigSerial->OpenPort();
-	cmd = "PS;";
-	wait_char(';', 4, 100, "closed/reopened port", ASC);
-	if (replystr.find("PS1;") == std::string::npos) {
-//		std::cout << "Reply to reopen port: " << replystr << std::endl;
-		exit(3);
-	}
-
-	return;
-
 }
 
 void RIG_FT710::set_xcvr_auto_off()
 {
-	cmd = "PS0;";
-	sendCommand(cmd);
+	sendCommand("PS0;");
 	sett("set_xcvr_auto_off");
+
+// transceiver does not respond after a power OFF
+
+	for (int i = 0; i < 100; i++) {
+		cmd = "PS;";
+		wait_char(';', 4, 100, "Test for xcvr OFF", ASC);
+		if (replystr.empty()) break;
+		Fl::awake();
+	}
 }
 
 void RIG_FT710::get_band_selection(int v)
