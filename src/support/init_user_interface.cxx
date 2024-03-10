@@ -296,6 +296,10 @@ void TRACED(adjust_small_ui)
 			mnuVoltmeter->clear();
 	}
 
+	Fl_Color clr = fl_rgb_color( progStatus.tab_red, progStatus.tab_green, progStatus.tab_blue);
+	tabsGeneric->selection_color(clr);
+	tabs550->selection_color(clr);
+
 	if (mnuEmbedTabs) {
 		if (progStatus.embed_tabs) mnuEmbedTabs->set();
 		else mnuEmbedTabs->clear();
