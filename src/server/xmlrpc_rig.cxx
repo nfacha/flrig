@@ -47,7 +47,7 @@ XmlRpcClient *flrig_client = (XmlRpcClient *)0;
 bool is_binary(std::string s)
 {
 	for (size_t n = 0; n < s.length(); n++)
-		if (!isprint(s[n]))
+		if (!isalnum(s[n]))
 			return true;
 	return false;
 }

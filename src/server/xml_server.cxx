@@ -3326,7 +3326,6 @@ public:
 
 		result = (std::string)("");
 		std::string command = std::string(params[0]);
-		bool usehex = false;
 
 		if (!progStatus.xmlrpc_rig && (!xcvr_online || disable_xmlrpc->value())) {
 			return;
@@ -3336,27 +3335,22 @@ public:
 
 		std::string cmd = "";
 
-		if (command.find("x") != std::string::npos) { // hex std::strings
-			size_t p = 0;
+		size_t p = command.find("x");
+		if (p != std::string::npos) { // hex std::strings
 			unsigned int val;
-			usehex = true;
-			while (( p = command.find("x", p)) != std::string::npos) {
+			while ( p != std::string::npos) {
 				sscanf(&command[p+1], "%x", &val);
 				cmd += (unsigned char) val;
-				p += 3;
+				p = command.find("x", p + 1);
 			}
 		} else
 			cmd = command;
-
+{
 		guard_lock serial_lock(&mutex_serial, "rig_client_string");
 
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-		waitResponse(10);
-
-		if (usehex)
-			result = to_hex(respstr);
-		else
-			result = respstr;
+		std::cout << "readResponse: " << readResponse();
+}
 
 		xml_trace(2, "xmlrpc command:", command.c_str());
 	}
@@ -3377,10 +3371,12 @@ public:
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
 		}
+
 		std::string command = std::string(params[0]);
-		bool usehex = false;
+
 		if (command.empty()) return;
 
+		bool usehex = false;
 		std::string cmd = "";
 		if (command.find("x") != std::string::npos) { // hex std::strings
 			size_t p = 0;

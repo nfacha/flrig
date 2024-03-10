@@ -194,7 +194,6 @@ int sendCommand (std::string s, int nread, int wait)
 
 	if (progStatus.xmlrpc_rig) {
 		respstr = xml_cat_string(s);
-//std::cout << "respstr: " << respstr << std::endl;
 		return respstr.length();
 	}
 
