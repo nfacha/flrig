@@ -52,7 +52,7 @@ public:
 	bool can_split();
 	void set_split(bool);
 	int  get_split();
-
+	void A2B();
 	bool canswap() { return true; }
 	void swapAB();
 

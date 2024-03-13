@@ -287,6 +287,7 @@ RIG_IC7610::RIG_IC7610() {
 
 	has_micgain_control = true;
 	has_bandwidth_control = true;
+	has_sql_control = true;
 
 	has_smeter = true;
 
@@ -375,7 +376,25 @@ void RIG_IC7610::swapAB()
 	cmd = pre_to;
 	cmd += 0x07; cmd += 0xB0;
 	cmd.append(post);
+
+	set_trace(1, "swap AB");
 	waitFB("Exchange vfos");
+	seth();
+
+	get_modeA(); // get mode to update the filter A / B usage
+	get_modeB();
+}
+
+void RIG_IC7610::A2B()
+{
+	cmd = pre_to;
+	cmd += 0x07; cmd += 0xB1;
+	cmd.append(post);
+
+	set_trace(1, "swap AB");
+	waitFB("Exchange vfos");
+	seth();
+
 	get_modeA(); // get mode to update the filter A / B usage
 	get_modeB();
 }
@@ -520,11 +539,11 @@ void RIG_IC7610::set_vfoB (unsigned long long freq)
 
 // expecting
 //  0  1  2  3  4  5  6  7  8  9
-// FE FE E0 94 26 NN NN NN NN FD
+// FE FE E0 98 26 00 NN NN NN FD
 //                |  |  |  |
 //                |  |  |  |__filter setting, 01, 02, 03
-//                |  |  |_____data mode, 00 - off, 01 - data mode 1
-//                |  |  |_____02 - data mode 2, 03 - data mode 3
+//                |  |  |_____data mode, 00 - off,         01 - data mode 1
+//                |  |  |_____           02 - data mode 2, 03 - data mode 3
 //                |  |________Mode 00 - LSB
 //                |                01 - USB
 //                |                02 - AM
@@ -535,8 +554,11 @@ void RIG_IC7610::set_vfoB (unsigned long long freq)
 //                |                08 - RTTY-R
 //                |                12 - PSK
 //                |                13 - PSK-R
-//                |___________selected vfo, 00 - active, 01 - inactive
+//                |___________selected vfo, 00 - main, 01 - sub
 
+// query
+// FE FE 98 E0 26 00 FD
+ 
 int RIG_IC7610::get_modeA()
 {
 	int md = 0;
@@ -549,12 +571,27 @@ int RIG_IC7610::get_modeA()
 	cmd += '\x00';
 	cmd.append(post);
 
-	if (waitFOR(10, "get mode A")) {
-		p = replystr.rfind(resp);
-		if (p == std::string::npos)
-			goto end_wait_modeA;
+/*
+replystr = resp;
+replystr += '\x00';
+replystr += '\x01';
+replystr += '\x02';
+replystr += '\x01';
+replystr += '\xFD';
+	{
+*/
+//  FE FE E0 98 26 00 03 00 01 FD
 
-		if (replystr[p+6] == -1) { A.imode = A.filter = 0; return A.imode; }
+	if (waitFOR(10, "get_mode A")) {
+		p = replystr.rfind(resp);
+		if (p == std::string::npos) {
+			goto end_wait_modeA;
+		}
+
+		if (replystr[p+6] == '\xFB') {
+			A.imode = A.filter = 0;
+			goto end_wait_modeA;
+		}
 
 		for (md = 0; md < m7610LSBD1; md++) {
 			if (replystr[p+6] == IC7610_mode_nbr[md]) {
@@ -565,8 +602,6 @@ int RIG_IC7610::get_modeA()
 					A.imode += 14;
 				else if (replystr[p+7] == 0x03 && A.imode < 4)
 					A.imode += 18;
-				else
-					A.imode = 1;
 			}
 			A.filter = replystr[p+8];
 		}
@@ -574,7 +609,7 @@ int RIG_IC7610::get_modeA()
 
 end_wait_modeA:
 	get_trace(4, 
-		"get mode A[",
+		"get_mode A[",
 		IC7610modes_[A.imode].c_str(), 
 		"] ", 
 		str2hex(replystr.c_str(), replystr.length()));
@@ -604,14 +639,34 @@ void RIG_IC7610::set_modeA(int val)
 		cmd += '\x00';
 	cmd += mode_filterA[A.imode];		// filter
 	cmd.append( post );
-	waitFB("set mode A");
 
 	set_trace(4, 
-		"set mode A[",
+		"set_mode A[",
 		IC7610modes_[A.imode].c_str(), 
 		"] ", 
 		str2hex(cmd.c_str(), cmd.length()));
+
+	waitFB("set_mode A");
 }
+
+// expecting
+//  0  1  2  3  4  5  6  7  8  9
+// FE FE E0 98 26 01 NN NN NN FD
+//                |  |  |  |
+//                |  |  |  |__filter setting, 01, 02, 03
+//                |  |  |_____data mode, 00 - off,         01 - data mode 1
+//                |  |  |_____           02 - data mode 2, 03 - data mode 3
+//                |  |________Mode 00 - LSB
+//                |                01 - USB
+//                |                02 - AM
+//                |                03 - CW
+//                |                04 - RTTY
+//                |                05 - FM
+//                |                07 - CW-R
+//                |                08 - RTTY-R
+//                |                12 - PSK
+//                |                13 - PSK-R
+//                |___________selected vfo, 00 - main, 01 - sub
 
 int RIG_IC7610::get_modeB()
 {
@@ -625,12 +680,22 @@ int RIG_IC7610::get_modeB()
 	cmd += '\x01';
 	cmd.append(post);
 
-	if (waitFOR(10, "get mode B")) {
+//replystr = resp;
+//replystr += '\x01';
+//replystr += '\x03';
+//replystr += '\x00';
+//replystr += '\x02';
+//replystr += '\xFD';
+//	{
+	if (waitFOR(10, "get_mode_B")) {
 		p = replystr.rfind(resp);
 		if (p == std::string::npos)
 			goto end_wait_modeB;
 
-		if (replystr[p+6] == -1) { B.imode = B.filter = 0; return B.imode; }
+		if (replystr[p+6] == -1) {
+			B.imode = B.filter = 0; 
+			goto end_wait_modeB;
+		}
 
 		for (md = 0; md < m7610LSBD1; md++) {
 			if (replystr[p+6] == IC7610_mode_nbr[md]) {
@@ -641,8 +706,6 @@ int RIG_IC7610::get_modeB()
 					B.imode += 14;
 				else if (replystr[p+7] == 0x03 && B.imode < 4)
 					B.imode += 18;
-				else
-					B.imode = 1;
 			}
 		}
 		B.filter = replystr[p+8];
@@ -650,7 +713,7 @@ int RIG_IC7610::get_modeB()
 
 end_wait_modeB:
 	get_trace(4, 
-		"get mode B[",
+		"get_mode_B[",
 		IC7610modes_[B.imode].c_str(), 
 		"] ", 
 		str2hex(replystr.c_str(), replystr.length()));
@@ -677,13 +740,14 @@ void RIG_IC7610::set_modeB(int val)
 		cmd += '\x00';
 	cmd += mode_filterB[B.imode];		// filter
 	cmd.append( post );
-	waitFB("set mode B");
 
 	set_trace(4, 
-		"set mode B[",
+		"set_mode B[",
 		IC7610modes_[B.imode].c_str(), 
 		"] ", 
 		str2hex(cmd.c_str(), cmd.length()));
+
+	waitFB("set_mode B");
 }
 
 int RIG_IC7610::get_FILT(int mode)
@@ -711,10 +775,10 @@ void RIG_IC7610::set_FILT(int filter)
 			cmd += '\x00';
 		cmd += filter;						// filter
 		cmd.append( post );
-		waitFB("set mode/filter B");
+		waitFB("set_mode/filter B");
 
 		set_trace(4, 
-			"set mode/filter B[",
+			"set_mode/filter B[",
 			IC7610modes_[B.imode].c_str(), 
 			"] ", 
 			str2hex(cmd.c_str(), cmd.length()));
@@ -735,9 +799,9 @@ void RIG_IC7610::set_FILT(int filter)
 			cmd += '\x00';
 		cmd += filter;						// filter
 		cmd.append( post );
-		waitFB("set mode/filter A");
+		waitFB("set_mode/filter A");
 
-		set_trace(4, "set mode/filter A[",
+		set_trace(4, "set_mode/filter A[",
 			IC7610modes_[A.imode].c_str(), 
 			"] ", 
 			str2hex(cmd.c_str(), cmd.length()));
@@ -1203,36 +1267,42 @@ void RIG_IC7610::set_break_in()
 	cmd.assign(pre_to).append("\x16\x47");
 
 	switch (progStatus.break_in) {
-		case 2: cmd += '\x02'; break_in_label("FULL"); break;
+		default:
+		case 0: cmd += '\x00'; break_in_label("BK-IN"); break;
 		case 1: cmd += '\x01'; break_in_label("SEMI");  break;
-		case 0:
-		default: cmd += '\x00'; break_in_label("qsk");
+		case 2: cmd += '\x02'; break_in_label("FULL"); break;
 	}
-	cmd.append(post);
-	waitFB("SET break-in");
-	set_trace(2, "set_break_in() ", str2hex(cmd.c_str(), cmd.length()));
-}
 
-// FE FE YY YY 16 47 CC FD
+	cmd.append(post);
+	set_trace(1, "set QSK");
+	waitFB("SET break-in");
+	seth();
+}
 
 int RIG_IC7610::get_break_in()
 {
 	cmd.assign(pre_to).append("\x16\x47").append(post);
 	std::string resp;
 	resp.assign(pre_fm);
-	if (waitFOR(8, "get break in")) {
+
+	get_trace(1, "get_break_in()");
+	int ret = waitFOR(8, "get break in");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			switch (replystr[p+6]) {
-				case 0x00 : progStatus.break_in = 0; break_in_label("qsk"); break;
-				case 0x01 : progStatus.break_in = 1; break_in_label("SEMI"); break;
-				case 0x02 : progStatus.break_in = 2; break_in_label("FULL"); break;
+			progStatus.break_in = replystr[p+6];
+			switch (progStatus.break_in) {
+				default:
+				case 0 : break_in_label("BK-IN"); break;
+				case 1 : break_in_label("SEMI"); break;
+				case 2 : break_in_label("FULL"); break;
 			}
 		}
 	}
 	return progStatus.break_in;
 }
-
 
 void RIG_IC7610::get_cw_qsk_min_max_step(double &min, double &max, double &step)
 {

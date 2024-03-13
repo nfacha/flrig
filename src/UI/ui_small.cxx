@@ -149,7 +149,7 @@ Fl_Group *small_main_group(int X, int Y, int W, int H)
 	sldrSQUELCH->labelcolor(FL_FOREGROUND_COLOR);
 	sldrSQUELCH->maximum(100);
 	sldrSQUELCH->step(1);
-	sldrSQUELCH->value(15);
+	sldrSQUELCH->value(progStatus.squelch);
 	sldrSQUELCH->textsize(12);
 	sldrSQUELCH->callback((Fl_Callback*)cb_sldrSQUELCH);
 	sldrSQUELCH->align(Fl_Align(FL_ALIGN_LEFT));

@@ -168,9 +168,9 @@ status progStatus = {
 	100,		// int  rfgain;
 	100,		// int  rfgain_A;
 	100,		// int  rfgain_B;
-	10,			// int  squelch;
-	10,			// int  squelch_A;
-	10,			// int  squelch_B;
+	0,			// int  squelch;
+	0,			// int  squelch_A;
+	0,			// int  squelch_B;
 
 	0,			// int  schema;
 	0,			// int	embed_tabs;

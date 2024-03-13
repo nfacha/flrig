@@ -2576,12 +2576,13 @@ void execute_A2B()
 		FreqDispB->value(vfoB.freq);
 	}
 	if (selrig->ICOMmainsub) {
+		trace(1, "execute A2B() 2");
 		selrig->selectA();
 		selrig->A2B();
 		vfoB = vfoA;
 		vfo = &vfoA;
 	} else if (selrig->has_a2b) {
-		trace(1,"execute A2B() 2");
+		trace(1,"execute A2B() 3");
 		selrig->A2B();
 		if (selrig->inuse == onB) {
 			vfoA = vfoB;
@@ -2591,6 +2592,7 @@ void execute_A2B()
 			FreqDispB->value(vfoB.freq);
 		}
 	} else {
+		trace(1,"execute A2B() 4");
 		if (selrig->inuse == onB) {
 			vfoA = vfoB;
 			if (selrig->name_ == rig_FT891.name_) {
