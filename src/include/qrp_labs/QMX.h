@@ -86,6 +86,7 @@ public:
 	void setRit(int val);
 	int  getRit();
 
+	void sync_clock(char *tm);
 };
 
 

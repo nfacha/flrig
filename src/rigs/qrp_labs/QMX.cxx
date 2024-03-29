@@ -86,6 +86,8 @@ RIG_QMX::RIG_QMX() {
 	has_split =
 	can_change_alt_vfo = true;
 
+	can_synch_clock = true;
+
 	precision = 1;
 	ndigits = 8;
 
@@ -618,4 +620,19 @@ int RIG_QMX::getRit()
 {
 	get_IF();
 	return rit_;
+}
+
+// ---------------------------------------------------------------------
+// tm formated as HH:MM:SS
+// ---------------------------------------------------------------------
+void RIG_QMX::sync_clock(char *tm)
+{
+	cmd.assign("Tm");
+	cmd += tm[0]; cmd += tm[1];
+	cmd += tm[3]; cmd += tm[4];
+	cmd += tm[6]; cmd += tm[7];
+	cmd += ';';
+	sendCommand(cmd);
+	showresp(WARN, ASC, "sync_time", cmd, replystr);
+	sett("sync_time");
 }
