@@ -281,7 +281,7 @@ void MilliSleep(long msecs)
 {
 	struct timespec tv;
 	tv.tv_sec = msecs / 1000;
-	tv.tv_nsec = (msecs - tv.tv_sec * 1000) * 1000000L;
+	tv.tv_nsec = (msecs - tv.tv_sec * 1000) * 1000000LL;
 	nanosleep(&tv, NULL);
 }
 

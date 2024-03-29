@@ -50,14 +50,14 @@ size_t zmsec()
 {
 	static struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000L + (tv.tv_usec / 1000L));
+	return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
 }
 
 size_t zusec()
 {
 	static struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000000L + tv.tv_usec);
+	return (tv.tv_sec * 1000000LL + tv.tv_usec);
 }
 
 char *ztime()
