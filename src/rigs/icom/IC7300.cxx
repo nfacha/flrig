@@ -42,11 +42,11 @@ const char IC7300name_[] = "IC-7300";
 #define NUM_FILTERS 3
 #define NUM_MODES  12
 
-static int mode_filterA[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1};
-static int mode_filterB[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1};
+static int mode_filterA[NUM_MODES] = {1,1,1,1,1, 1,1,1,1,1, 1,1};
+static int mode_filterB[NUM_MODES] = {1,1,1,1,1, 1,1,1,1,1, 1,1};
 
-static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1};
+static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1};
 
 static const char *szfilter[NUM_FILTERS] = {"1", "2", "3"};
 
@@ -61,6 +61,21 @@ static const char *vIC7300modes_[] =
 	"LSB", "USB", "AM", "FM",
 	"CW", "CW-R", "RTTY", "RTTY-R",
 	"LSB-D", "USB-D", "AM-D", "FM-D"};
+
+//static void show_filter_bws()
+//{
+//	std::cout << "     FL: ";
+//	std::cout << vIC7300modes_[FM7300] << ":" << mode_filterA[FM7300] << ", ";
+//	std::cout << vIC7300modes_[USB7300] << ":" << mode_filterA[USB7300] << ", ";
+//	std::cout << vIC7300modes_[USBD7300] << ":" << mode_filterA[USBD7300] << ", ";
+//	std::cout << std::endl;
+//
+//	std::cout << "     BW: ";
+//	std::cout << vIC7300modes_[FM7300] << ":" << mode_bwA[FM7300] << ", ";
+//	std::cout << vIC7300modes_[USB7300] << ":" << mode_bwA[USB7300] << ", ";
+//	std::cout << vIC7300modes_[USBD7300] << ":" << mode_bwA[USBD7300] << ", ";
+//	std::cout << std::endl;
+//}
 
 char IC7300_mode_type[] = {
 	'L', 'U', 'U', 'U',
@@ -117,8 +132,8 @@ WVALS_LIMIT};
 
 static std::vector<std::string>IC7300_fm_bws;
 static const char *vIC7300_fm_bws[] =
-{ "FIXED" };
-static int IC7300_bw_vals_FM[] = { 1, WVALS_LIMIT};
+{ "7000", "10000", "15000" };
+static int IC7300_bw_vals_FM[] = { 0, 1, 2, WVALS_LIMIT};
 
 static GUI IC7300_widgets[]= {
 	{ btnVol,        2, 125,  50 },	//0
@@ -602,6 +617,7 @@ void RIG_IC7300::set_vfoB (unsigned long long freq)
 //                |                08 - RTTY-R
 //                |___________selected vfo, 00 - active, 01 - inactive
 
+bool changed = false;
 int RIG_IC7300::get_modeA()
 {
 	int md = 0;
@@ -642,6 +658,12 @@ int RIG_IC7300::get_modeA()
 			if (A.filter > 0 && A.filter < 4)
 				mode_filterA[A.imode] = A.filter;
 		}
+//if (changed) {
+//std::cout << "get_modeA " << str2hex(replystr.c_str(), replystr.length()) << std::endl;
+//show_filter_bws();
+//std::cout << std::endl;
+//changed = false;
+//}
 	}
 
 end_wait_modeA:
@@ -698,6 +720,17 @@ void RIG_IC7300::set_modeA(int val)
 	set_trace(1, "set mode A");
 	waitFB("set mode A");
 	seth();
+
+	A.filter = mode_filterA[A.imode];
+	if (A.imode == FM7300 || A.imode == FMD7300) 
+		A.iBW = 3 - A.filter;
+	else
+		A.iBW = mode_bwA[A.imode];
+
+//std::cout << std::endl;
+//std::cout << "set_modeA: " << vIC7300modes_[val] << std::endl;
+//show_filter_bws();
+//changed = true;
 }
 
 int RIG_IC7300::get_modeB()
@@ -737,6 +770,12 @@ int RIG_IC7300::get_modeB()
 			}
 			B.filter = replystr[p+8];
 		}
+//if (changed) {
+//std::cout << "get_modeB " << str2hex(replystr.c_str(), replystr.length()) << std::endl;
+//show_filter_bws();
+//std::cout << std::endl;
+//changed = false;
+//}
 	}
 
 end_wait_modeB:
@@ -793,6 +832,18 @@ void RIG_IC7300::set_modeB(int val)
 	set_trace(1, "set mode B");
 	waitFB("set mode B");
 	seth();
+
+	B.filter = mode_filterB[B.imode];
+	if (B.imode == FM7300 || B.imode == FMD7300) 
+		B.iBW = 3 - B.filter; // FM, FM-D
+	else
+		B.iBW = mode_bwB[B.imode];
+
+//std::cout << std::endl;
+//std::cout << "set_modeB: " << vIC7300modes_[val] << std::endl;
+//show_filter_bws();
+//changed = true;
+
 }
 
 int RIG_IC7300::get_FILT(int mode)
@@ -803,11 +854,10 @@ int RIG_IC7300::get_FILT(int mode)
 
 void RIG_IC7300::set_FILT(int filter)
 {
-	if (filter < 1 || filter > 3)
-		return;
-
 	if (inuse == onB) {
 		B.filter = filter;
+		if (B.imode == FM7300 || B.imode == FMD7300)
+			mode_bwA[B.imode] = 3 - filter;
 		mode_filterB[B.imode] = filter;
 		cmd.assign(pre_to);
 		cmd += '\x26';
@@ -823,6 +873,8 @@ void RIG_IC7300::set_FILT(int filter)
 		seth();
 	} else {
 		A.filter = filter;
+		if (A.imode == FM7300 || A.imode == FMD7300)
+			mode_bwA[A.imode] = 3 - filter;
 		mode_filterA[A.imode] = filter;
 		cmd.assign(pre_to);
 		cmd += '\x26';
@@ -838,6 +890,10 @@ void RIG_IC7300::set_FILT(int filter)
 		seth();
 
 	}
+
+//std::cout << "set_FILT: " << filter << std::endl;
+//show_filter_bws();
+
 }
 
 const char *RIG_IC7300::FILT(int val)
@@ -849,11 +905,15 @@ const char *RIG_IC7300::FILT(int val)
 
 const char * RIG_IC7300::nextFILT()
 {
-	int val = A.filter;
-	if (inuse == onB) val = B.filter;
+	int val = (inuse == onB) ? B.filter : A.filter;
 	val++;
 	if (val > 3) val = 1;
+
+//std::cout << "nextFILT() " << val << std::endl;
+
 	set_FILT(val);
+//std::cout << "set to: " << szfilter[val - 1] << std::endl;
+
 	return szfilter[val - 1];
 }
 
@@ -953,7 +1013,9 @@ int RIG_IC7300::get_split()
 
 int RIG_IC7300::get_bwA()
 {
-	if (A.imode == 3 || A.imode == 11) return 0; // FM, FM-D
+	if (A.imode == FM7300 || A.imode == FMD7300) {
+		return (mode_bwA[A.imode] = 3 - mode_filterA[A.imode]);
+	}
 
 	int current_vfo = inuse;
 	if (current_vfo == onB) selectA();
@@ -985,9 +1047,12 @@ int RIG_IC7300::get_bwA()
 
 void RIG_IC7300::set_bwA(int val)
 {
-//	set_trace(1, "set_bwA()");
-
-	if (A.imode == 3 || A.imode == 11) return; // FM, FM-D
+	if (A.imode == FM7300 || A.imode == FMD7300) {
+//std::cout << "set_bwA(" << val << ")" << std::endl;
+		set_FILT(3 - val);
+		A.iBW = val;
+		return; // FM, FM-D
+	}
 
 	A.iBW = val;
 
@@ -1012,7 +1077,10 @@ void RIG_IC7300::set_bwA(int val)
 
 int RIG_IC7300::get_bwB()
 {
-	if (B.imode == 3 || B.imode == 11) return 0; // FM, FM-D
+	if (B.imode == FM7300 || B.imode == FMD7300) {
+		return (mode_bwB[B.imode] = 3 - mode_filterB[B.imode]);
+	}
+
 
 	int current_vfo = inuse;
 	if (current_vfo == onA) selectB();
@@ -1044,8 +1112,14 @@ int RIG_IC7300::get_bwB()
 
 void RIG_IC7300::set_bwB(int val)
 {
-//	set_trace(1, "set_bwB()");
-	if (B.imode == 3 || B.imode == 11) return; // FM, FM-D
+	if (B.imode == FM7300 || B.imode == FMD7300) {
+//std::cout << "set_bwB(" << val << ")" << std::endl;
+		set_FILT(3 - val);
+		return; // FM, FM-D
+	}
+
+
+
 	B.iBW = val;
 
 	int current_vfo = inuse;
@@ -2522,27 +2596,5 @@ void RIG_IC7300::set_band_selection(int v)
 	seth();
 }
 
-/*
-
-rn - register number 1/2/3
-f5..f1 - frequency BCD reverse
-mo - mode
-fi - filter #
-fg flags: x01 use Tx tone, x02 use Rx tone, x10 data mode
-t1..t3 - tx tone BCD fwd
-r1..r3 - rx tone BCD fwd
-
-FE FE 94 E0 1A 01 05 01 FD 
-
-FE FE E0 94 1A 01 
-05 
-01 
-00 00 07 14 00 
-01 
-03
-10 
-00 10 00
-00 08 85 
-FD
-
-*/
+#undef NUM_FILTERS
+#undef NUM_MODES

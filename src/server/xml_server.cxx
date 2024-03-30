@@ -2794,9 +2794,16 @@ public:
 
 		try {
 			size_t i = 0;
-			for (i = 0; i < selrig->bandwidths_.size(); i++)
-				if (atol (selrig->bandwidths_.at(i).c_str()) > bw) break;
-			if (--i < 0) i = 0;
+			for (i = 0; i < selrig->bandwidths_.size(); i++) {
+				if (atol (selrig->bandwidths_.at(i).c_str()) >= bw) break;
+			}
+			if (i == selrig->bandwidths_.size()) --i;
+
+			if (i > 0) {
+				if ( (bw - atol(selrig->bandwidths_.at(i-1).c_str())) <
+					(atol(selrig->bandwidths_.at(i).c_str()) - bw) )   --i;
+			}
+
 			bw = atol(selrig->bandwidths_.at(i).c_str());
 			nuvals.iBW = i;
 			std::ostringstream s;

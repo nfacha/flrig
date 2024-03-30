@@ -394,7 +394,7 @@ void TRACED(setModeControl, void *)
 
 	if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
 		return;
-	if (vfo->iBW != opBW->index())
+//	if (vfo->iBW != opBW->index())
 		opBW->index(vfo->iBW);
 	opBW->redraw();
 	opBW->show();
@@ -423,6 +423,7 @@ void setFILTER(void *)
 		else
 			btnFILT->label(selrig->FILT(vfoA.filter));
 		btnFILT->redraw_label();
+//std::cout << "setFILTER(): " << (selrig->inuse == onB ? "B" : "A") << btnFILT->label() << std::endl;
 trace(3, "Filter", (selrig->inuse == onB ? "B" : "A"), btnFILT->label());
 	}
 }
@@ -478,7 +479,7 @@ rig_trace(1, resp);
 			vfoA.filter = selrig->get_FILT(vfoA.imode);
 		}
 
-		vfoB.filter = selrig->get_FILT(vfoA.imode);
+		vfoB.filter = selrig->get_FILT(vfoB.imode);
 		Fl::awake(setFILTER);
 	}
 }
@@ -1448,7 +1449,6 @@ void find_bandwidth(XCVR_STATE &nuvals)
 
 void serviceA(XCVR_STATE nuvals)
 {
-//	bool A_changed;
 	if (nuvals.freq == 0) nuvals.freq = vfoA.freq;
 	if (nuvals.imode == -1) nuvals.imode = vfoA.imode;
 	if (nuvals.iBW == 255) nuvals.iBW = vfoA.iBW;
@@ -1463,20 +1463,23 @@ void serviceA(XCVR_STATE nuvals)
 					yaesu891UpdateA(&nuvals);
 					vfoA = nuvals;
 				} else {
-					selrig->set_modeA(nuvals.imode);
+					selrig->set_modeA(vfoA.imode = nuvals.imode);
 					selrig->get_modeA();
+					selrig->set_bwA(nuvals.iBW);
+					selrig->get_bwA();
+					selrig->set_vfoA(nuvals.freq);
+					selrig->get_vfoA();
+					Fl::awake(setFreqDispA);
+					return;
 				}
-//				A_changed = true;
 			}
 			if (vfoA.iBW != nuvals.iBW) {
 				selrig->set_bwA(nuvals.iBW);
 				selrig->get_bwA();
-//				A_changed = true;
 			}
 			if (vfoA.freq != nuvals.freq) {
 				selrig->set_vfoA(nuvals.freq);
 				selrig->get_vfoA();
-//				A_changed = true;
 			}
 			vfoA = nuvals;
 		} else if (xcvr_name != rig_TT550.name_) {
@@ -1486,31 +1489,26 @@ void serviceA(XCVR_STATE nuvals)
 			if (vfoA.imode != nuvals.imode) {
 				selrig->set_modeA(nuvals.imode);
 				selrig->get_modeA();
-//				A_changed = true;
 				Fl::awake(updateUI);
 			}
 			if (vfoA.iBW != nuvals.iBW) {
 				selrig->set_bwA(nuvals.iBW);
 				selrig->get_bwA();
-//				A_changed = true;
 			}
 			if (vfoA.freq != nuvals.freq) {
 				selrig->set_vfoA(nuvals.freq);
 				selrig->get_vfoA();
-//				A_changed = true;
 			}
 			selrig->selectB();
 			vfoA = nuvals;
 		}
-//		if (A_changed) {
-			Fl::awake(setFreqDispA);
-//		}
+		Fl::awake(setFreqDispA);
 		return;
 	}
 
 	trace(2, "service VFO A", printXCVR_STATE(nuvals).c_str());
 
-	if ((nuvals.imode != -1) ) {//&& (vfoA.imode != nuvals.imode)) {
+	if (nuvals.imode != -1)  {
 		if (selrig->name_ == rig_FT891.name_) {
 			// Mode change on ft891 can change frequency, so set all values
 			yaesu891UpdateA(&nuvals);
@@ -1519,29 +1517,32 @@ void serviceA(XCVR_STATE nuvals)
 		} else {
 			selrig->set_modeA(vfoA.imode = nuvals.imode);
 			selrig->get_modeA();
-			set_bandwidth_control();
+			selrig->set_bwA(nuvals.iBW);
+			selrig->get_bwA();
+			selrig->set_vfoA(nuvals.freq);
+			selrig->get_vfoA();
+			vfo = &vfoA;
+			Fl::awake(setModeControl);
+			Fl::awake(setFreqDispA);
+			return;
 		}
 	}
 	if (vfoA.iBW != nuvals.iBW) {
 		selrig->set_bwA(vfoA.iBW = nuvals.iBW);
 		selrig->get_bwA();
-//		A_changed = true;
 	}
 	if (vfoA.freq != nuvals.freq) {
 		trace(1, "change vfoA frequency");
 		selrig->set_vfoA(vfoA.freq = nuvals.freq);
 		selrig->get_vfoA();
-//		A_changed = true;
 	}
 	vfo = &vfoA;
 
-//	if (A_changed)
-		Fl::awake(setFreqDispA);
+	Fl::awake(setFreqDispA);
 }
 
 void serviceB(XCVR_STATE nuvals)
 {
-//	bool B_changed;
 	if (nuvals.freq == 0) nuvals.freq = vfoB.freq;
 	if (nuvals.imode == -1) nuvals.imode = vfoB.imode;
 	if (nuvals.iBW == 255) nuvals.iBW = vfoB.iBW;
@@ -1555,20 +1556,23 @@ void serviceB(XCVR_STATE nuvals)
 					yaesu891UpdateB(&nuvals);
 					vfoB = nuvals;
 				} else {
-					selrig->set_modeB(nuvals.imode);
+					selrig->set_modeB(vfoB.imode = nuvals.imode);
 					selrig->get_modeB();
+					selrig->set_bwB(nuvals.iBW);
+					selrig->get_bwB();
+					selrig->set_vfoB(nuvals.freq);
+					selrig->get_vfoB();
+					Fl::awake(setFreqDispB);
+					return;
 				}
-//				B_changed = true;
 			}
 			if (vfoB.iBW != nuvals.iBW) {
 				selrig->set_bwB(nuvals.iBW);
 				selrig->get_bwB();
-//				B_changed = true;
 			}
 			if (vfoB.freq != nuvals.freq) {
 				selrig->set_vfoB(nuvals.freq);
 				selrig->get_vfoB();
-//				B_changed = true;
 			}
 			vfoB = nuvals;
 		} else if (xcvr_name != rig_TT550.name_) {
@@ -1577,52 +1581,66 @@ void serviceB(XCVR_STATE nuvals)
 			if (vfoB.imode != nuvals.imode) {
 				selrig->set_modeB(nuvals.imode);
 				selrig->get_modeB();
-//				B_changed = true;
 			}
 			if (vfoB.iBW != nuvals.iBW) {
 				selrig->set_bwB(nuvals.iBW);
 				selrig->get_bwB();
-//				B_changed = true;
 			}
 			if (vfoB.freq != nuvals.freq) {
 				selrig->set_vfoB(nuvals.freq);
 				selrig->get_vfoB();
-//				B_changed = true;
 			}
 			selrig->selectA();
 			vfoB = nuvals;
 		}
-//		if (B_changed)
-			Fl::awake(setFreqDispB);
+		Fl::awake(setFreqDispB);
 		return;
 	}
 
 	trace(2, "service VFO B", printXCVR_STATE(nuvals).c_str());
 
-	if ((nuvals.imode != -1) && (vfoB.imode != nuvals.imode)) {
-		std::string m1, m2;
-		m1 = selrig->modes_[nuvals.imode];
-		m2 = selrig->modes_[vfoB.imode];
-		selrig->set_modeB(vfoB.imode = nuvals.imode);
-		selrig->get_modeB();
-		set_bandwidth_control();
-		vfoB.iBW = selrig->get_bwB();
+//	if ((nuvals.imode != -1) && (vfoB.imode != nuvals.imode)) {
+//		std::string m1, m2;
+//		m1 = selrig->modes_[nuvals.imode];
+//		m2 = selrig->modes_[vfoB.imode];
+//		selrig->set_modeB(vfoB.imode = nuvals.imode);
+//		selrig->get_modeB();
+//		set_bandwidth_control();
+//		vfoB.iBW = selrig->get_bwB();
+//	}
+
+	if (nuvals.imode != -1) {
+		if (selrig->name_ == rig_FT891.name_) {
+			// Mode change on ft891 can change frequency, so set all values
+			yaesu891UpdateB(&nuvals);
+			vfoB = nuvals;
+			set_bandwidth_control();
+		} else {
+			selrig->set_modeB(vfoB.imode = nuvals.imode);
+			selrig->get_modeB();
+			selrig->set_bwB(nuvals.iBW);
+			selrig->get_bwB();
+			selrig->set_vfoB(nuvals.freq);
+			selrig->get_vfoB();
+			Fl::awake(setFreqDispB);
+			Fl::awake(setModeControl);
+			vfo = &vfoB;
+			return;
+		}
 	}
+
 	if (vfoB.iBW != nuvals.iBW) {
 		selrig->set_bwB(vfoB.iBW = nuvals.iBW);
 		selrig->get_bwB();
-//		B_changed = true;
 	}
 	if (vfoB.freq != nuvals.freq) {
 		selrig->set_vfoB(vfoB.freq = nuvals.freq);
 		selrig->get_vfoB();
-//		B_changed = true;
 	}
 
 	vfo = &vfoB;
 
-//	if (B_changed)
-		Fl::awake(setFreqDispB);
+	Fl::awake(setFreqDispB);
 
 }
 
