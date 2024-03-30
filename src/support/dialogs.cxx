@@ -122,25 +122,24 @@ void set_combo_value()
 #ifdef __WIN32__
 static bool open_serial(const char* dev)
 {
-	bool ret = false;
-	HANDLE fd = CreateFile(dev, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
-	if (fd != INVALID_HANDLE_VALUE) {
-		CloseHandle(fd);
-		ret = true;
-	}
-	return ret;
+	char targetPath[1024];
+	DWORD result = QueryDosDevice(dev, targetPath, sizeof(targetPath)/sizeof(targetPath[0]));	
+	return result != 0;
 }
 
-#  define TTY_MAX 255
+#  define TTY_MAX 256
 void init_port_combos()
 {
 	clear_combos();
 
 	char ttyname[21];
-	const char tty_fmt[] = "//./COM%u";
+	const char tty_fmt[] = "COM%u";
 
-	for (unsigned j = 0; j < TTY_MAX; j++) {
+	for (unsigned j = 1; j < TTY_MAX; j++) {
+		char sztr[1024];
 		snprintf(ttyname, sizeof(ttyname), tty_fmt, j);
+		snprintf(sztr, sizeof(sztr), "Looking for %s", ttyname);
+		ser_trace(1, sztr);
 		if (!open_serial(ttyname))
 			continue;
 		snprintf(ttyname, sizeof(ttyname), "COM%u", j);
