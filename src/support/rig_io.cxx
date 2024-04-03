@@ -167,10 +167,14 @@ std::string respstr;
 int readResponse(std::string req1, std::string req2)
 {
 	int numread = 0;
+    std::string expect = req1;
 	respstr.clear();
+    if (req1.find(req2)) expect = req2; 
 
 	if (progStatus.use_tcpip)
-		numread = read_from_remote(respstr);
+        do {
+		    numread = read_from_remote(respstr);
+        } while(!respstr.find(expect));
 	else {
 		numread = RigSerial->ReadBuffer(respstr, RXBUFFSIZE, req1, req2);
 	}

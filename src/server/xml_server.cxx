@@ -35,6 +35,7 @@
 #include <fcntl.h>
 #include <vector>
 #include <pthread.h>
+#include <algorithm>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Box.H>
@@ -3383,6 +3384,8 @@ public:
 
 		if (command.empty()) return;
 
+		for (size_t n = 0; n < command.length(); n++) command[n] = tolower(command[n]);
+
 		bool usehex = false;
 		std::string cmd = "";
 		if (command.find("x") != std::string::npos) { // hex std::strings
@@ -3401,9 +3404,12 @@ public:
 			guard_lock lock1(&mutex_srvc_reqs);
 			guard_lock lock2(&mutex_serial, "xml 39");
 
-			RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
+			if (progStatus.use_tcpip) 
+				send_to_remote(cmd);
+			else
+				RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 
-			waitResponse(10);//(100);
+			waitResponse(progStatus.serial_timeout);
 			if (!respstr.empty()) {
 				result = usehex ?
 					str2hex(respstr.c_str(), respstr.length()) :
