@@ -2792,8 +2792,8 @@ public:
 		guard_lock lock(&mutex_srvc_reqs, "xml rig_set_bandwidth");
 		guard_lock serial_lock(&mutex_serial, "xml rig_set_bandwidth");
 
-		XCVR_STATE nuvals;
-
+//		XCVR_STATE nuvals;
+		int iBW = 0;
 		try {
 			size_t i = 0;
 			for (i = 0; i < selrig->bandwidths_.size(); i++) {
@@ -2807,23 +2807,25 @@ public:
 			}
 
 			bw = atol(selrig->bandwidths_.at(i).c_str());
-			nuvals.iBW = i;
+
+			iBW = i;
+
 			std::ostringstream s;
 			s << "nearest bandwidth " << selrig->bandwidths_[i];
 			xml_trace(2,"Set to ", s.str().c_str());
+
+			if (selrig->inuse == onB) {
+				vfoB.iBW = iBW;
+				selrig->set_bwB(iBW);
+			} else {
+				vfoA.iBW = iBW;
+				selrig->set_bwA(iBW);
+			}
+
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
 
-		if (selrig->inuse == onB) {
-			nuvals.freq = vfoB.freq;
-			nuvals.imode = vfoB.imode;
-			serviceB(nuvals);
-		} else {
-			nuvals.freq = vfoA.freq;
-			nuvals.imode = vfoA.imode;
-			serviceA(nuvals);
-		}
 		result = 1;
 	}
 	std::string help() { return std::string("set_bw to nearest requested"); }

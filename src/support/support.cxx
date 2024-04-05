@@ -1867,11 +1867,14 @@ serial_bypass_loop: ;
 
 void setBW()
 {
-	XCVR_STATE fm = *vfo;
-	fm.src = UI;
-	fm.iBW = opBW->index();
-	guard_lock que_lock( &mutex_srvc_reqs, "setBW" );
-	srvc_reqs.push( VFOQUEUE((selrig->inuse == onB ? vB : vA), fm));
+	guard_lock serlock( &mutex_serial );
+	if (selrig->inuse == onB) {
+		vfo->iBW = vfoB.iBW = opBW->index();
+		selrig->set_bwB(vfo->iBW);
+	} else {
+		vfo->iBW = vfoA.iBW = opBW->index();
+		selrig->set_bwA(vfo->iBW);
+	}
 }
 
 void setDSP()
@@ -1905,6 +1908,11 @@ void selectFILT()
 	guard_lock lock(&mutex_serial, "9");
 	btnFILT->label(selrig->nextFILT());
 	btnFILT->redraw_label();
+	if (selrig->inuse == onB)
+		vfoB.iBW = vfo->iBW = selrig->get_bwB();
+	else
+		vfoA.iBW = vfo->iBW = selrig->get_bwA();
+	setBWControl(NULL);
 }
 
 void selectCENTER()
