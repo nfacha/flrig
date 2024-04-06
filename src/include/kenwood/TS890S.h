@@ -32,18 +32,18 @@ enum TS590MODES { LSB, USB, CW, FM, AM, FSK, CWR, FSKR, LSBD, USBD, FMD };
 	void initialize();
 	void shutdown();
 
-//	unsigned long long get_vfoA();
-//	void set_vfoA(unsigned long long);
-//	unsigned long long get_vfoB();
-//	void set_vfoB(unsigned long long);
+	unsigned long long get_vfoA();
+    void set_vfoA(unsigned long long);
+  	unsigned long long get_vfoB();
+  	void set_vfoB(unsigned long long);
 
 //	void selectA();
 //	void selectB();
 
-//	bool can_split() { return true;}
-//	void set_split(bool val);
-//	int  get_split();
-//	bool twovfos() {return true;}
+  	bool can_split() { return true;}
+  	void set_split(bool val);
+  	int  get_split();
+  	bool twovfos() {return true;}
 
 	void set_PTT_control(int val);
 	int  get_PTT();
@@ -70,8 +70,8 @@ enum TS590MODES { LSB, USB, CW, FM, AM, FSK, CWR, FSKR, LSBD, USBD, FMD };
 	int  get_power_out();
 	double get_power_control();
 
-//	void set_volume_control(int val);
-//	int  get_volume_control();
+	void set_volume_control(int val);
+	int  get_volume_control();
 	void set_power_control(double val);
 
 //	void tune_rig();
@@ -89,13 +89,13 @@ enum TS590MODES { LSB, USB, CW, FM, AM, FSK, CWR, FSKR, LSBD, USBD, FMD };
 	void set_noise(bool b);
 	int  get_noise();
 
-//	void set_mic_gain(int val);
-//	int  get_mic_gain();
-//	void get_mic_min_max_step(int &min, int &max, int &step);
+	void set_mic_gain(int val);
+    int  get_mic_gain();
+	void get_mic_min_max_step(int &min, int &max, int &step);
 
-//	void set_squelch(int val);
-//	int  get_squelch();
-//	void get_squelch_min_max_step(int &min, int &max, int &step);
+	void set_squelch(int val);
+	int  get_squelch();
+	void get_squelch_min_max_step(int &min, int &max, int &step);
 
 	void set_rf_gain(int val);
 	int  get_rf_gain();

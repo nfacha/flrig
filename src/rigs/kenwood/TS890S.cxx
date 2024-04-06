@@ -28,14 +28,14 @@ static const char TS890Sname_[] = "TS-890S";
 static std::vector<std::string>TS890Smodes_;
 static const char *vTS890Smodes_[] = {
 "LSB", "USB",  "CW", "FM", "AM", "FSK", "CW-R", "FSK-R", 
-"LSB-D", "USB-D", "FM-D"};
+"LSB-D", "USB-D", "FM-D", "AM-D"};
 
 static const char TS890S_mode_chr[] =  { 
 '1', '2', '3', '4', '5', '6', '7', '9',
-'1', '2', '4' };
+'C', 'D', 'E', 'F' };
 static const char TS890S_mode_type[] = { 
 'L', 'U', 'U', 'U', 'U', 'L', 'L', 'U', 
-'L', 'U', 'U' };
+'L', 'U', 'U', 'U' };
 
 //----------------------------------------------------------------------
 static std::vector<std::string>TS890S_empty;
@@ -47,27 +47,37 @@ static std::vector<std::string>TS890S_SSB_SL;
 static const char *vTS890S_SSB_SL[] = {
   "0",   "50", "100", "200", "300", 
 "400",  "500", "600", "700", "800", 
-"900", "1000" };
+"900", "1000", "1100", "1200", "1300",
+"1400", "1500", "1600", "1700", "1800",
+"1900", "2000" };
 
 static std::vector<std::string>TS890S_CAT_ssb_SL;
 static const char *vTS890S_CAT_ssb_SL[] = {
 "SL00;", "SL01;", "SL02;", "SL03;", "SL04;", 
 "SL05;", "SL06;", "SL07;", "SL08;", "SL09;",
-"SL10;", "SL11;" };
+"SL10;", "SL11;", "SL12;", "SL13;", "SL14",
+"SL15;", "SL16;", "SL17;", "SL18;", "SL19",
+"SL20;", "SL21;" };
 static const char *TS890S_SSB_SL_tooltip = "lo cut";
 static const char *TS890S_SSB_btn_SL_label = "L";
 
 static std::vector<std::string>TS890S_SSB_SH;
 static const char *vTS890S_SSB_SH[] = {
-"1000", "1200", "1400", "1600", "1800", 
-"2000", "2200", "2400", "2600", "2800", 
-"3000", "3400", "4000", "5000" };
+"600", "700", "800", "900", "1000", 
+"1100", "1200", "1300", "1400", "1500", 
+"1600", "1700", "1800", "1900", "2000", 
+"2100", "2200", "2300", "2400", "2500", 
+"2600", "2700", "2800", "2900", "3000", 
+"3400", "4000", "5000" };
 
 static std::vector<std::string>TS890S_CAT_ssb_SH;
 static const char *vTS890S_CAT_ssb_SH[] = {
 "SH00;", "SH01;", "SH02;", "SH03;", "SH04;", 
 "SH05;", "SH06;", "SH07;", "SH08;", "SH09;",
-"SH10;", "SH11;", "SH12;", "SH13;" };
+"SH10;", "SH11;", "SH12;", "SH13;", "SH14;",
+"SH15;", "SH16;", "SH17;", "SH18;", "SH19;",
+"SH20;", "SH21;", "SH22;", "SH23;", "SH24;",
+"SH25;", "SH26;", "SH27;" };
 static const char *TS890S_SSB_SH_tooltip = "hi cut";
 static const char *TS890S_SSB_btn_SH_label = "H";
 
@@ -105,7 +115,7 @@ static const char *TS890S_DATA_S_btn_label = "S";
 static int DEF_am = 0x8201;
 static std::vector<std::string>TS890S_AM_SL;
 static const char *vTS890S_AM_SL[] = {
-"10", "100", "200", "500" };
+"10", "100", "200", "300" };
 
 static std::vector<std::string>TS890S_CAT_am_SL;
 static const char *vTS890S_CAT_am_SL[] = {
@@ -115,11 +125,17 @@ static const char *TS890S_AM_btn_SL_label = "L";
 
 static std::vector<std::string>TS890S_AM_SH;
 static const char *vTS890S_AM_SH[] = {
-"2500", "3000", "4000", "5000" };
+"2000", "2100", "2200", "2300",
+"2400", "2500", "2600", "2700",
+"2800", "2900", "3000", "3500",
+"4000", "5000" };
 
 static std::vector<std::string>TS890S_CAT_am_SH;
 static const char *vTS890S_CAT_am_SH[] = {
-"SH00;", "SH01;", "SH02;", "SH03;"}; 
+"SH00;", "SH01;", "SH02;", "SH03;",
+"SH04;", "SH05;", "SH06;", "SH07;",
+"SH08;", "SH09;", "SH10;", "SH11;",
+"SH12;", "SH13;" }; 
 static const char *TS890S_AM_SH_tooltip = "hi cut";
 static const char *TS890S_AM_btn_SH_label = "H";
 
@@ -128,24 +144,28 @@ static int  DEF_cw = 7;
 static std::vector<std::string>TS890S_CWwidths;
 static const char *vTS890S_CWwidths[] = {
   "50",   "80",  "100",  "150", "200", 
- "250",  "300",  "400",  "500", "600", 
-"1000", "1500", "2000", "2500"};
+ "250",  "300",  "350",  "400", "450", 
+ "500",  "600",  "700",  "800", "900",
+"1000", "1500", "2000", "2500" };
 
 static std::vector<std::string>TS890S_CWbw;
 static const char *vTS890S_CWbw[] = {
-"FW0050;", "FW0080;", "FW0100;", "FW0150;", "FW0200;",
-"FW0250;", "FW0300;", "FW0400;", "FW0500;", "FW0600;", 
-"FW1000;", "FW1500;", "FW2000;", "FW2500;"};
+"SL00;", "SL01;", "SL02;", "SL03;", "SL04;",
+"SL05;", "SL06;", "SL07;", "SL08;", "SL09;",
+"SL10;", "SL11;", "SL12;", "SL13;", "SL14;",
+"SL15;", "SL16;", "SL17;", "SL18;" };
 
 //----------------------------------------------------------------------
 static int  DEF_fsk = 1;
 static std::vector<std::string>TS890S_FSKwidths;
 static const char *vTS890S_FSKwidths[] = {
-"250", "500", "1000", "1500"};
+"250", "300", "350", "400"
+"450", "500", "1000", "1500" };
 
 static std::vector<std::string>TS890S_FSKbw;
 static const char *vTS890S_FSKbw[] = {
-"FW0250;", "FW0500;", "FW1000;", "FW1500;" };
+"SL00;", "SL01;", "SL02;", "SL03;"
+"SL04;", "SL05;", "SL06;", "SL07;" };
 
 //----------------------------------------------------------------------
 // Button labels
@@ -153,13 +173,13 @@ static std::vector<std::string>TS890S_nr_labels;
 static const char *vTS890S_nr_labels[] = { "NR", "NR1", "NR2" };
 
 static std::vector<std::string>TS890S_att_labels;
-static const char *vTS890S_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+static const char *vTS890S_att_labels[] = { "ATT", "6dB", "12dB", "18dB" };
 
 static std::vector<std::string>TS890S_pre_labels;
-static const char *vTS890S_pre_labels[] = { "PRE", "Pre 1", "Pre 2" };
+static const char *vTS890S_pre_labels[] = { "PRE", "Pre1", "Pre2" };
 
 static std::vector<std::string>TS890S_nb_labels;
-static const char *vTS890S_nb_labels[] = { "NB", "NB 1", "NB 2", "NB 3" };
+static const char *vTS890S_nb_labels[] = { "NB", "NB1", "NB2", "NB1/2" };
 //----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
@@ -352,10 +372,10 @@ const char * RIG_TS890S::get_bwname_(int n, int md)
 int RIG_TS890S::get_smeter()
 {
 	int mtr = 0;
-	cmd = "SM0;";
+	cmd = "SM;";
 	if (wait_char(';', 8, 100, "get", ASC) < 8) return 0;
 
-	size_t p = replystr.find("SM0");
+	size_t p = replystr.find("SM");
 	if (p == std::string::npos) return 0;
 
 	replystr[p + 7] = 0;
@@ -412,7 +432,7 @@ void RIG_TS890S::set_attenuator(int val)
 {
 	if (val >= 0 && val <= 2) {
 		atten_state = val;
-		cmd = "RA0";
+		cmd = "RA0;";
 		cmd[2] = '0' + atten_state;
 		sendCommand(cmd, 0);
 	}
@@ -1017,21 +1037,24 @@ void RIG_TS890S::set_noise_reduction(int val)
 		noise_reduction_label(nr_label(), true);
 	} else if (nr_state == 1) {
 		nr_state = 2;
+        if (inuse == onA && A.imode == FM) nr_state = 0; // NR2 not valid in FM
+        else if (inuse == onB && B.imode == FM) nr_state = 0; // NR2 not valid in FM
 		noise_reduction_label(nr_label(), true);
-	} else if (nr_state == 2) {
+	} else {
 		nr_state = 0;
 		noise_reduction_label(nr_label(), false);
 	}
 	cmd.assign("NR");
-	cmd += '0' + nr_state;
+    printf("NR#1=%s\n", cmd.c_str());
+	cmd = cmd.append(nr_state + ";");
+    printf("NR#2=%s\n", cmd.c_str());
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
 }
 
 int  RIG_TS890S::get_noise_reduction()
 {
-	cmd = rsp = "NR";
-	cmd.append(";");
+	cmd = rsp = "NR;";
 	if (wait_char(';', 4, 100, "GET noise reduction", ASC) == 4 ) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) return nr_state;
@@ -1051,7 +1074,7 @@ int  RIG_TS890S::get_noise_reduction()
 
 void RIG_TS890S::set_noise_reduction_val(int val)
 {
-	cmd.assign("RL").append(to_decimal(val, 2)).append(";");
+	cmd.assign("RL1").append(to_decimal(val, 2)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET_noise_reduction_val", cmd, "");
 }
@@ -1060,7 +1083,7 @@ int  RIG_TS890S::get_noise_reduction_val()
 {
 	if (nr_state == 0) return 0;
 	nr_level = 1;
-	cmd = rsp = "RL";
+	cmd = rsp = "RL1";
 	cmd.append(";");
 	if (wait_char(';', 5, 100, "GET noise reduction val", ASC) == 5) {
 		size_t p = replystr.rfind(rsp);
@@ -1072,7 +1095,7 @@ int  RIG_TS890S::get_noise_reduction_val()
 
 void RIG_TS890S::set_auto_notch(int v)
 {
-	cmd.assign("NT").append(v ? "1" : "0" ).append("0;");
+	cmd.assign("NT").append(v ? "1" : "0" );
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET Auto Notch", cmd, "");
 }
@@ -1137,38 +1160,42 @@ void RIG_TS890S::set_noise(bool val)
 {
 	if (nb_state == 0) {
 		nb_state = 1;
+        cmd = "NB11;NB20;";
 		noise_blanker_label(nb_label(), true);
 	} else if (nb_state == 1) {
 		nb_state = 2;
+        cmd = "NB10;NB21;";
 		noise_blanker_label(nb_label(), true);
 	} else if (nb_state == 2) {
 		nb_state = 3;
+        cmd = "NB11;NB21;";
 		noise_blanker_label(nb_label(), true);
 	} else if (nb_state == 3) {
 		nb_state = 0;
+        cmd = "NB10;NB20;";
 		noise_blanker_label(nb_label(), false);
 	}
-	cmd = "NB0;";
-	cmd[2] += nb_state;
 	LOG_INFO("%s", cmd.c_str());
 	sendCommand(cmd, 0);
 }
 
 int RIG_TS890S::get_noise()
 {
-	cmd = "NB;";
+    int nb1 = 0, nb2 = 0;
+	cmd = "NB1;";
+	wait_char(';', 4, 100, "get Noise Blanker", ASC);
+    sscanf(replystr.c_str(), "NB1%d", &nb1);
+    
+	cmd = "NB2;";
 	if (wait_char(';', 4, 100, "get Noise Blanker", ASC) == 4) {
-		size_t p = replystr.rfind("NB");
-		if (p == std::string::npos) return 0;
-		if (replystr[p+2] == '0') return 0;
-		nb_state = replystr[p+2] - '0';
+        sscanf(replystr.c_str(), "NB2%d", &nb2);
+        if (nb1 && nb2) nb_state = 3;
+        else if (nb1) nb_state = 1;
+        else if (nb2) nb_state = 2;
+        else nb_state = 0;
 		if (nb_state == 0) {
 			noise_blanker_label(nb_label(), false);
-		} else if (nb_state == 1) {
-			noise_blanker_label(nb_label(), true);
-		} else if (nb_state == 2) {
-			noise_blanker_label(nb_label(), true);
-		} else if (nb_state == 3) {
+		} else  {
 			noise_blanker_label(nb_label(), true);
 		}
 	}
@@ -1305,57 +1332,23 @@ void RIG_TS890S::selectB()
 	rxtxa = false;
 	inuse = onB;
 }
+*/
 
 void RIG_TS890S::set_split(bool val) 
 {
 	split = val;
-	if (inuse == onB) {
-		if (val) {
-			cmd = "FR1;FT0;";
-			sendCommand(cmd);
-			showresp(WARN, ASC, "Rx on B, Tx on A", cmd, "");
-		} else {
-			cmd = "FR1;FT1;";
-			sendCommand(cmd);
-			showresp(WARN, ASC, "Rx on B, Tx on B", cmd, "");
-		}
-	} else {
-		if (val) {
-			cmd = "FR0;FT1;";
-			sendCommand(cmd);
-			showresp(WARN, ASC, "Rx on A, Tx on B", cmd, "");
-		} else {
-			cmd = "FR0;FT0;";
-			sendCommand(cmd);
-			showresp(WARN, ASC, "Rx on A, Tx on A", cmd, "");
-		}
-	}
+	cmd = "TB0;";
+	if (val) cmd = "TB1;";
+	sendCommand(cmd);
 }
 
 int RIG_TS890S::get_split()
 {
-	size_t p;
 	int split = 0;
-	char rx = 0, tx = 0;
-// tx vfo
-	cmd = rsp = "FT";
-	cmd.append(";");
+	cmd = "TB;";
 	if (wait_char(';', 4, 100, "get split tx vfo", ASC) == 4) {
-		p = replystr.rfind(rsp);
-		if (p == std::string::npos) return split;
-		tx = replystr[p+2];
+        sscanf(replystr.c_str(),"TB%d", &split);
 	}
-// rx vfo
-	cmd = rsp = "FR";
-	cmd.append(";");
-	if (wait_char(';', 4, 100, "get split rx vfo", ASC) == 4) {
-		p = replystr.rfind(rsp);
-		if (p == std::string::npos) return split;
-		rx = replystr[p+2];
-// split test
-		split = (tx == '1' ? 2 : 0) + (rx == '1' ? 1 : 0);
-	}
-
 	return split;
 }
 
@@ -1420,17 +1413,13 @@ void RIG_TS890S::set_vfoB (unsigned long long freq)
 	showresp(WARN, ASC, "set vfo B", cmd, "");
 }
 
-// Volume control return 0 ... 100
+// Volume control return 0 ... 255
 int RIG_TS890S::get_volume_control()
 {
-	cmd = "AG0;";
+    int val=0;
+	cmd = "AG;";
 	if (wait_char(';', 7, 100, "get vol ctrl", ASC) < 7) return 0;
-
-	size_t p = replystr.rfind("AG");
-	if (p == std::string::npos) return 0;
-
-	replystr[p + 6] = 0;
-	int val = atoi(&replystr[p + 3]);
+    sscanf(replystr.c_str(),"AG%d", &val);
 	return (int)(val / 2.55);
 }
 
@@ -1445,11 +1434,13 @@ void RIG_TS890S::set_volume_control(int val)
 	sendCommand(cmd, 0);
 }
 
+/*
 void RIG_TS890S::tune_rig()
 {
 	cmd = "AC111;";
 	sendCommand(cmd, 0);
 }
+*/
 
 // val 0 .. 100
 void RIG_TS890S::set_mic_gain(int val)
@@ -1467,10 +1458,7 @@ int RIG_TS890S::get_mic_gain()
 	int val = 0;
 	cmd = "MG;";
 	if (wait_char(';', 6, 100, "get mic ctrl", ASC) >= 6) {
-		size_t p = replystr.rfind("MG");
-		if (p == std::string::npos) return val;
-		replystr[p + 5] = 0;
-		val = atoi(&replystr[p + 2]);
+        sscanf(replystr.c_str(), "MG%d", &val);
 	}
 	return val;
 }
@@ -1484,7 +1472,7 @@ void RIG_TS890S::get_mic_min_max_step(int &min, int &max, int &step)
 
 void RIG_TS890S::set_squelch(int val)
 {
-	cmd = "SQ0";
+	cmd = "SQ";
 	cmd.append(to_decimal(abs(val),3)).append(";");
 	sendCommand(cmd,0);
 	showresp(WARN, ASC, "set squelch", cmd, "");
@@ -1493,19 +1481,15 @@ void RIG_TS890S::set_squelch(int val)
 int  RIG_TS890S::get_squelch()
 {
 	int val = 0;
-	cmd = "SQ0;";
+	cmd = "SQ;";
 	if (wait_char(';', 7, 100, "get squelch", ASC) >= 7) {
-		size_t p = replystr.rfind("SQ0");
-		if (p == std::string::npos) return val;
-		replystr[p + 6] = 0;
-		val = atoi(&replystr[p + 3]);
+        sscanf(replystr.c_str(), "SQ%d", &val);
 	}
 	return val;
 }
+
 
 void RIG_TS890S::get_squelch_min_max_step(int &min, int &max, int &step)
 {
 	min = 0; max = 255; step = 1;
 }
-
-*/
