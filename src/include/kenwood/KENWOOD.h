@@ -28,10 +28,6 @@
 class KENWOOD : public rigbase {
 protected:
 	bool notch_on;
-	int  preamp_level;
-	int  att_level;
-	int  nb_level;
-	int  noise_reduction_level;
 	bool data_mode;
 	int  active_mode;
 	int  active_bandwidth;

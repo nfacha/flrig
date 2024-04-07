@@ -122,6 +122,14 @@ static const char *vIC705_fm_bws[] =
 { "FIXED" };
 static int IC705_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC705_att_labels;
+static const char *vIC705_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>IC705_pre_labels;
+static const char *vIC705_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC705_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -152,6 +160,12 @@ void RIG_IC705::initialize()
 	modes_ = IC705modes_;
 	bandwidths_ = IC705_ssb_bws;
 	bw_vals_ = IC705_bw_vals_SSB;
+
+	VECTOR (IC705_att_labels, vIC705_att_labels);
+	VECTOR (IC705_pre_labels, vIC705_pre_labels);
+
+	att_labels_ = IC705_att_labels;
+	pre_labels_ = IC705_pre_labels;
 
 	_mode_type = IC705_mode_type;
 
@@ -1527,9 +1541,9 @@ void RIG_IC705::get_rf_min_max_step(double &min, double &max, double &step)
 
 int RIG_IC705::next_preamp()
 {
-	if (atten_level == 1)
-		return preamp_level;
-	switch (preamp_level) {
+	if (atten_state == 1)
+		return preamp_state;
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1543,12 +1557,12 @@ void RIG_IC705::set_preamp(int val)
 	cmd += '\x16';
 	cmd += '\x02';
 
-	preamp_level = val;
+	preamp_state = val;
 
-	cmd += (unsigned char)preamp_level;
+	cmd += (unsigned char)preamp_state;
 	cmd.append( post );
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 }
 
@@ -1563,30 +1577,30 @@ int RIG_IC705::get_preamp()
 	if (waitFOR(8, "get Preamp Level")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
-	return preamp_level;
+	return preamp_state;
 }
 
 void RIG_IC705::set_attenuator(int val)
 {
 	if (val) {
-		atten_level = 1;
+		atten_state = 1;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x20' : '\x00';
+	cmd += atten_state ? '\x20' : '\x00';
 	cmd.append( post );
 	waitFB("set att");
 }
 
 int RIG_IC705::next_attenuator()
 {
-	if (atten_level) return 0;
+	if (atten_state) return 0;
 	return 1;
 }
 
@@ -1601,34 +1615,15 @@ int RIG_IC705::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x20) {
-				atten_level = 1;
+				atten_state = 1;
 				return 1;
 			} else {
-				atten_level = 0;
+				atten_state = 0;
 				return 0;
 			}
 		}
 	}
 	return 0;
-}
-
-const char *RIG_IC705::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC705::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 void RIG_IC705::set_noise(bool val)
@@ -1784,12 +1779,14 @@ int  RIG_IC705::get_squelch()
 
 void RIG_IC705::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
 	waitFB("set AN");
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC705::get_auto_notch()
@@ -1803,13 +1800,8 @@ int RIG_IC705::get_auto_notch()
 	if (waitFOR(8, "get AN")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;
@@ -1933,7 +1925,7 @@ void RIG_IC705::get_notch_min_max_step(int &min, int &max, int &step)
 			break;
 	}
 }
-static int agcval = 3;
+
 int  RIG_IC705::get_agc()
 {
 	cmd = pre_to;

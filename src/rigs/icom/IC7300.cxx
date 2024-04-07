@@ -120,20 +120,40 @@ static const char *vIC7300_am_bws[] =
 "200",   "400",  "600",  "800", "1000", "1200", "1400", "1600", "1800", "2000",
 "2200", "2400", "2600", "2800", "3000", "3200", "3400", "3600", "3800", "4000",
 "4200", "4400", "4600", "4800", "5000", "5200", "5400", "5600", "5800", "6000",
-"6200", "6400", "6600", "6800", "7000", "7300", "7400", "7300", "7800", "8000",
+"6200", "6400", "6600", "6800", "7000", "7200", "7400", "7600", "7800", "8000",
 "8200", "8400", "8600", "8800", "9000", "9200", "9400", "9600", "9800", "10000" };
 static int IC7300_bw_vals_AM[] = {
  0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 10,11,12,13,14,15,16,17,18,19,
 20,21,22,23,24,25,26,27,28,29,
 30,31,32,33,34,35,36,37,38,39,
-40,41,42,43,44,45,46,47,48,49
+40,41,42,43,44,45,46,47,48,49,
+50,
 WVALS_LIMIT};
 
 static std::vector<std::string>IC7300_fm_bws;
 static const char *vIC7300_fm_bws[] =
 { "7000", "10000", "15000" };
 static int IC7300_bw_vals_FM[] = { 0, 1, 2, WVALS_LIMIT};
+
+static std::vector<std::string>IC7300_agc_labels;
+static const char *vIC7300_agc_labels[] = {"AGC", "FST", "MED", "SLO"};
+
+static std::vector<std::string>IC7300_att_labels;
+static const char *vIC7300_att_labels[] = {"ATT", "20 dB"};
+
+static std::vector<std::string>IC7300_pre_labels;
+static const char *vIC7300_pre_labels[] = {"PRE", "Amp 1", "Amp 2"};
+
+static std::vector<std::string>IC7300_bk_labels;
+static const char *vIC7300_bk_labels[] = {"BK-IN", "SEMI", "FULL"};
+
+// use generic
+//static std::vector<std::string>IC7300_an_labels;
+//static const char *vIC7300_an_labels[] = {"AN off", "AN on"};
+
+static std::vector<std::string>IC7300_nb_labels;
+static const char *vIC7300_nb_labels[] = {"NB", "on"};
 
 static GUI IC7300_widgets[]= {
 	{ btnVol,        2, 125,  50 },	//0
@@ -161,6 +181,24 @@ void RIG_IC7300::initialize()
 	VECTOR (IC7300_rtty_bws, vIC7300_rtty_bws);
 	VECTOR (IC7300_am_bws, vIC7300_am_bws);
 	VECTOR (IC7300_fm_bws, vIC7300_fm_bws);
+
+	VECTOR (IC7300_agc_labels, vIC7300_agc_labels);
+	agc_labels_ = IC7300_agc_labels;
+
+	VECTOR (IC7300_att_labels, vIC7300_att_labels);
+	att_labels_ = IC7300_att_labels;
+
+	VECTOR (IC7300_pre_labels, vIC7300_pre_labels);
+	pre_labels_ = IC7300_pre_labels;
+
+	VECTOR (IC7300_bk_labels, vIC7300_bk_labels);
+	bk_labels_  = IC7300_bk_labels;
+
+	VECTOR (IC7300_nb_labels, vIC7300_nb_labels);
+	nb_labels_  = IC7300_nb_labels;
+
+//	VECTOR (IC7300_an_labels, vIC7300_an_labels);
+//	an_labels_  = IC7300_an_labels;
 
 	name_ = IC7300name_;
 	modes_ = IC7300modes_;
@@ -1409,12 +1447,15 @@ void RIG_IC7300::set_break_in()
 
 	cmd.assign(pre_to).append("\x16\x47");
 
-	switch (progStatus.break_in) {
-		case 2: cmd += '\x02'; break_in_label("FULL"); break;
-		case 1: cmd += '\x01'; break_in_label("SEMI");  break;
+	bk_state = progStatus.break_in;
+	switch (bk_state) {
+		case 2: cmd += '\x02'; break;
+		case 1: cmd += '\x01'; break;
 		case 0:
-		default: cmd += '\x00'; break_in_label("BK-IN");
+		default: cmd += '\x00';
 	}
+	break_in_label( bk_label() );
+
 	cmd.append(post);
 	set_trace(1, "set QSK");
 	waitFB("SET break-in");
@@ -1434,10 +1475,8 @@ int RIG_IC7300::get_break_in()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			progStatus.break_in = replystr[p+6];
-			if (progStatus.break_in == 0) break_in_label("qsk");
-			else  if (progStatus.break_in == 1) break_in_label("SEMI");
-			else  break_in_label("FULL");
+			bk_state = progStatus.break_in = replystr[p+6];
+			break_in_label( bk_label() );
 		}
 	}
 	return progStatus.break_in;
@@ -1853,24 +1892,11 @@ void RIG_IC7300::get_rf_min_max_step(double &min, double &max, double &step)
 	min = 0; max = 100; step = 1;
 }
 
-const char *RIG_IC7300::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Amp 1"; break;
-		case 2:
-			return "Amp 2"; break;
-	}
-	return "PRE";
-}
-
 int RIG_IC7300::next_preamp()
 {
-	if (atten_level == 1)
-		return preamp_level;
-	switch (preamp_level) {
+	if (atten_state == 1)
+		return preamp_state;
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		
@@ -1882,7 +1908,7 @@ int RIG_IC7300::next_preamp()
 void RIG_IC7300::set_preamp(int val)
 {
 	if (val) {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
@@ -1892,8 +1918,8 @@ void RIG_IC7300::set_preamp(int val)
 	cmd += (unsigned char)val;
 	cmd.append( post );
 	set_trace(1, "set_preamp");
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 	seth();
 	int tries = 50;
@@ -1919,30 +1945,24 @@ int RIG_IC7300::get_preamp()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
-	return preamp_level;
-}
-
-const char *RIG_IC7300::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
+	return preamp_state;
 }
 
 void RIG_IC7300::set_attenuator(int val)
 {
 	if (val) {
-		atten_level = 1;
-		preamp_level = 0;
+		atten_state = 1;
+		preamp_state = 0;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x20' : '\x00';
+	cmd += atten_state ? '\x20' : '\x00';
 	cmd.append( post );
 	set_trace(1, "set attenuator");
 	waitFB("set att");
@@ -1951,7 +1971,7 @@ void RIG_IC7300::set_attenuator(int val)
 
 int RIG_IC7300::next_attenuator()
 {
-	if (atten_level) return 0;
+	if (atten_state) return 0;
 	return 1;
 }
 
@@ -1971,13 +1991,13 @@ int RIG_IC7300::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x20) {
-				atten_level = 1;
+				atten_state = 1;
 			} else {
-				atten_level = 0;
+				atten_state = 0;
 			}
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 void RIG_IC7300::set_noise(bool val)
@@ -1993,7 +2013,7 @@ void RIG_IC7300::set_noise(bool val)
 
 int RIG_IC7300::get_noise()
 {
-	int val = progStatus.noise;
+	nb_state = progStatus.noise;
 	std::string cstr = "\x16\x22";
 	std::string resp = pre_fm;
 	resp.append(cstr);
@@ -2001,17 +2021,17 @@ int RIG_IC7300::get_noise()
 	cmd.append(cstr);
 	cmd.append(post);
 
-	get_trace(1, "get_noice()");
+	get_trace(1, "get_noise()");
 	ret = waitFOR(8, "get noise");
 	geth();
 
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			val = replystr[p+6];
+			nb_state = replystr[p+6];
 		}
 	}
-	return val;
+	return nb_state;
 }
 
 void RIG_IC7300::set_nb_level(int val)
@@ -2027,7 +2047,7 @@ void RIG_IC7300::set_nb_level(int val)
 
 int  RIG_IC7300::get_nb_level()
 {
-	int val = progStatus.nb_level;
+	nb_level = progStatus.nb_level;
 	std::string cstr = "\x14\x12";
 	std::string resp = pre_fm;
 	resp.append(cstr);
@@ -2042,13 +2062,14 @@ int  RIG_IC7300::get_nb_level()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos)
-			val = num100(replystr.substr(p+6));
+			nb_level = num100(replystr.substr(p+6));
 	}
-	return val;
+	return nb_level;
 }
 
 void RIG_IC7300::set_noise_reduction(int val)
 {
+	nr_level = progStatus.noise_reduction = val;
 	cmd = pre_to;
 	cmd.append("\x16\x40");
 	cmd += val ? 1 : 0;
@@ -2076,7 +2097,7 @@ int RIG_IC7300::get_noise_reduction()
 		if (p != std::string::npos)
 			return (replystr[p+6] ? 1 : 0);
 	}
-	return progStatus.noise_reduction;
+	return nr_level = progStatus.noise_reduction;
 }
 
 /*
@@ -2169,6 +2190,7 @@ int  RIG_IC7300::get_squelch()
 
 void RIG_IC7300::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
@@ -2177,6 +2199,7 @@ void RIG_IC7300::set_auto_notch(int val)
 	set_trace(1, "set auto notch");
 	waitFB("set AN");
 	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7300::get_auto_notch()
@@ -2195,13 +2218,8 @@ int RIG_IC7300::get_auto_notch()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;
@@ -2336,7 +2354,7 @@ void RIG_IC7300::get_notch_min_max_step(int &min, int &max, int &step)
 			break;
 	}
 }
-static int agcval = 3;
+
 int  RIG_IC7300::get_agc()
 {
 	std::string cstr = "\x16\x12";
@@ -2369,13 +2387,6 @@ int RIG_IC7300::incr_agc()
 	waitFB("set AGC");
 	seth();
 	return agcval;
-}
-
-
-static const char *agcstrs[] = {"AGC", "FST", "MED", "SLO"};
-const char *RIG_IC7300::agc_label()
-{
-	return agcstrs[agcval];
 }
 
 int  RIG_IC7300::agc_val()

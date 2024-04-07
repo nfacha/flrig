@@ -107,6 +107,17 @@ static const char *vUK_60m_label[] = {"VFO","U51","U52","U53","U54","U55","U56",
 static std::vector<std::string>& Channels_60m = US_60m_chan;
 static std::vector<std::string>& label_60m    = US_60m_label;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT950_att_labels;
+static const char *vFT950_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>FT950_pre_labels;
+static const char *vFT950_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
+
+static std::vector<std::string>FT950_nb_labels;
+static const char *vFT950_nb_labels[] = { "NB", "NB 1", "NB 2" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -203,8 +214,8 @@ RIG_FT950::RIG_FT950() {
 	has_tune_control = true;
 
 // derived specific
-	atten_level = 3;
-	preamp_level = 2;
+	atten_state = 3;
+	preamp_state = 2;
 	notch_on = false;
 	m_60m_indx = 0;
 
@@ -226,6 +237,15 @@ void RIG_FT950::initialize()
 	VECTOR (US_60m_label, vUS_60m_label);
 	VECTOR (UK_60m_chan, vUK_60m_chan);
 	VECTOR (UK_60m_label, vUK_60m_label);
+
+	VECTOR (FT950_att_labels, vFT950_att_labels);
+	att_labels_ = FT950_att_labels;
+
+	VECTOR (FT950_pre_labels, vFT950_pre_labels);
+	pre_labels_ = FT950_pre_labels;
+
+	VECTOR (FT950_nb_labels, vFT950_nb_labels);
+	nb_labels_ = FT950_nb_labels;
 
 	modes_ = FT950modes_;
 	bandwidths_ = FT950_widths_SSB;
@@ -737,7 +757,7 @@ void RIG_FT950::tune_rig(int)
 
 int  RIG_FT950::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -748,9 +768,9 @@ int  RIG_FT950::next_attenuator()
 
 void RIG_FT950::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = "RA00;";
-	cmd[3] += atten_level;
+	cmd[3] += atten_state;
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET att", cmd, replystr);
 
@@ -767,13 +787,13 @@ int RIG_FT950::get_attenuator()
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.attenuator;
 	if (p + 3 >= replystr.length()) return progStatus.attenuator;
-	atten_level = replystr[p+3] - '0';
-	return atten_level;
+	atten_state = replystr[p+3] - '0';
+	return atten_state;
 }
 
 int RIG_FT950::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -783,9 +803,9 @@ int RIG_FT950::next_preamp()
 
 void RIG_FT950::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = "PA00;";
-	cmd[3] = '0' + preamp_level;
+	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET preamp", cmd, replystr);
 
@@ -801,28 +821,8 @@ int RIG_FT950::get_preamp()
 
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos)
-		preamp_level = replystr[p+3] - '0';
-	return preamp_level;
-}
-
-const char *RIG_FT950::ATT_label()
-{
-	if (atten_level == 1)
-		return "6 dB";
-	if (atten_level == 2)
-		return "12 dB";
-	if (atten_level == 3)
-		return "18 dB";
-	return "ATT";
-}
-
-const char *RIG_FT950::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	return "IPO";
+		preamp_state = replystr[p+3] - '0';
+	return preamp_state;
 }
 
 int RIG_FT950::adjust_bandwidth(int val)
@@ -1295,22 +1295,20 @@ int  RIG_FT950::get_auto_notch()
 	return 0;
 }
 
-int FT950_blanker_level = 2;
-
 void RIG_FT950::set_noise(bool b)
 {
 	cmd = "NB00;";
-	if (FT950_blanker_level == 0) {
-		FT950_blanker_level = 1;
-		nb_label("NB 1", true);
-	} else if (FT950_blanker_level == 1) {
-		FT950_blanker_level = 2;
-		nb_label("NB 2", true);
-	} else if (FT950_blanker_level == 2) {
-		FT950_blanker_level = 0;
-		nb_label("NB", false);
+	if (nb_state == 0) {
+		nb_state = 1;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 1) {
+		nb_state = 2;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		nb_state = 0;
+		noise_blanker_label(nb_label(), false);
 	}
-	cmd[3] = '0' + FT950_blanker_level;
+	cmd[3] = '0' + nb_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET NB", cmd, replystr);
 
@@ -1325,18 +1323,18 @@ int RIG_FT950::get_noise()
 	wait_char(';',5, FL950_WAIT_TIME, "get NB", ASC);
 
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return FT950_blanker_level;
+	if (p == std::string::npos) return nb_state;
 
-	FT950_blanker_level = replystr[p+3] - '0';
-	if (FT950_blanker_level == 1) {
-		nb_label("NB 1", true);
-	} else if (FT950_blanker_level == 2) {
-		nb_label("NB 2", true);
+	nb_state = replystr[p+3] - '0';
+	if (nb_state == 1) {
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		noise_blanker_label(nb_label(), true);
 	} else {
-		nb_label("NB", false);
-		FT950_blanker_level = 0;
+		noise_blanker_label(nb_label(), false);
+		nb_state = 0;
 	}
-	return FT950_blanker_level;
+	return nb_state;
 }
 
 // val 0 .. 100

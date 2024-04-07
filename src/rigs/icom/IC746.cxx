@@ -40,6 +40,14 @@ static const char *vIC746_widths[] =
 { "NORM", "NARR"};
 static int IC746_bw_vals[] = { 1, 2, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC746_att_labels;
+static const char *vIC746_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>IC746_pre_labels;
+static const char *vIC746_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC746_widgetsdgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -68,6 +76,12 @@ void RIG_IC746::initialize()
 	bandwidths_ = IC746_widths;
 	bw_vals_ = IC746_bw_vals;
 	_mode_type = IC746_mode_type;
+
+	VECTOR (IC746_att_labels, vIC746_att_labels);
+	VECTOR (IC746_pre_labels, vIC746_pre_labels);
+
+	att_labels_ = IC746_att_labels;
+	pre_labels_ = IC746_pre_labels;
 
 	IC746_widgetsdgets[0].W = btnVol;
 	IC746_widgetsdgets[1].W = sldrVOLUME;
@@ -376,25 +390,6 @@ int RIG_IC746::get_preamp()
 			preamp_level = replystr[p+6];
 	}
 	return preamp_level;
-}
-
-const char *RIG_IC746::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC746::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 // changed noise blanker to noise reduction

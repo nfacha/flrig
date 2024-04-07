@@ -52,13 +52,14 @@ static std::vector<std::string>AOR5K_SH;
 static const char *vAOR5K_SH[] =
 { "3000", "4000", "6000", "12000" };
 
+//----------------------------------------------------------------------
+static std::vector<std::string>XCVR_att_labels;
+static const char *vXCVR_att_labels[] = { "AT0", "AT1", "AT2", "ATF" };
+//----------------------------------------------------------------------
+
 static GUI aor5k_widgets[]= {
 	{ (Fl_Widget *)btnVol, 2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME, 54, 125, 156 },
-//	{ (Fl_Widget *)btnAGC, 2, 145, 50 },
-//	{ (Fl_Widget *)sldrSQUELCH, 266, 125, 156 },
-//        { (Fl_Widget *)btnNotch, 214, 145,  50 },
-//        { (Fl_Widget *)sldrNOTCH, 266, 145, 156 },
 	{ (Fl_Widget *)NULL, 0, 0, 0 }
 };
 
@@ -166,7 +167,7 @@ RIG_AOR5K::RIG_AOR5K() {
 
 	precision = 1;
 	ndigits = 10;
-	atten_level = 0;
+	atten_state = 0;
 	agcval = 0;
 }
 
@@ -190,6 +191,9 @@ void RIG_AOR5K::initialize()
 	VECTOR (AOR5K_SL, vAOR5K_SL);
 	VECTOR (AOR5K_SH, vAOR5K_SH);
 
+	VECTOR (XCVR_att_labels, vXCVR_att_labels);
+	att_labels_ = XCVR_att_labels;
+
 	modes_ = AOR5Kmodes_;
 	bandwidths_ = AOR5K_IF_widths;
 	bw_vals_ = AOR5K_IF_bw_vals;
@@ -199,16 +203,6 @@ void RIG_AOR5K::initialize()
 
 	aor5k_widgets[0].W = btnVol;
 	aor5k_widgets[1].W = sldrVOLUME;
-//	aor5k_widgets[2].W = btnAGC;
-
-//	aor5k_widgets[3].W = sldrSQUELCH;
-//	aor5k_widgets[4].W = btnNotch;
-//	aor5k_widgets[5].W = sldrNOTCH;
-//	aor5k_widgets[6].W = sldrPOWER;
-
-//	cmd = "AI0;"; // disable auto-info
-//	sendCommand(cmd);
-//	showresp(INFO, ASC, "disable auto-info", cmd, replystr);
 
 	get_vfoA();
 	get_modeA();
@@ -372,26 +366,26 @@ int RIG_AOR5K::get_modetype(int n)
 
 int  RIG_AOR5K::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
-		case 2: return 22;
-		case 22: return 0;
+		case 2: return 3;
+		case 3: return 0;
 	}
 	return 0;
 }
 
 void RIG_AOR5K::set_attenuator(int val)
 {
-	atten_level = val;
-	switch (atten_level) {
+	atten_state = val;
+	switch (atten_state) {
 		case 1:
 			cmd = "AT1\r";
 			break;
 		case 2:
 			cmd = "AT2\r";
 			break;
-		case 22:
+		case 3:
 			cmd = "ATF\r";
 			break;
 		case 0:
@@ -406,27 +400,15 @@ int RIG_AOR5K::get_attenuator()
 {
 	cmd = "AT\r";
 	int ret = wait_char('\r', 4, AOR5K_WAIT_TIME, "get ATT", ASC);
-	if (ret < 4) return atten_level;
+	if (ret < 4) return atten_state;
 	size_t p = replystr.rfind("AT");
-	if (p == std::string::npos) return atten_level;
+	if (p == std::string::npos) return atten_state;
 	
 	if (replystr[p+2] == '1')
-		atten_level = 22;
-	else atten_level = replystr[p + 3] - '0';
+		atten_state = 3;
+	else atten_state = replystr[p + 3] - '0';
 
-	return atten_level;
-}
-
-const char *RIG_AOR5K::ATT_label()
-{
-	switch (atten_level) {
-		default:
-		case 0:	return "0 dB"; break;
-		case 1: return "10 dB"; break;
-		case 2: return "20 dB"; break;
-		case 22: return "AUTO"; break;
-	}
-	return "0 dB";
+	return atten_state;
 }
 
 //SM $ (S-meter Read; GET only)

@@ -76,6 +76,14 @@ static const char *vFT2000_US_60m[] = {"", "126", "127", "128", "130"};
 
 static std::vector<std::string>& Channels_60m = FT2000_US_60m;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT2000_att_labels;
+static const char *vFT2000_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB"};
+
+static std::vector<std::string>FT2000_pre_labels;
+static const char *vFT2000_pre_labels[] = { "PRE", "Amp 1", "Amp 2"};
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 368 }, // 1
@@ -108,6 +116,12 @@ void RIG_FT2000::initialize()
 	modes_ = FT2000modes_;
 	bandwidths_ = FT2000_SSBwidths;
 	bw_vals_ = FT2000_wvals_SSBwidths;
+
+	VECTOR (FT2000_att_labels, vFT2000_att_labels);
+	VECTOR (FT2000_pre_labels, vFT2000_pre_labels);
+
+	att_labels_ = FT2000_att_labels;
+	pre_labels_ = FT2000_pre_labels;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -461,7 +475,7 @@ int RIG_FT2000::get_tune()
 
 int RIG_FT2000::next_attenuator()
 {
-	switch(atten_level) {
+	switch(atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -472,7 +486,7 @@ int RIG_FT2000::next_attenuator()
 
 void RIG_FT2000::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	switch (val) {
 		case 1 :
 			cmd = "RA01;";
@@ -502,30 +516,30 @@ int RIG_FT2000::get_attenuator()
 	}
 	size_t p = replystr.rfind("RA");
 	if (p == std::string::npos) {
-		atten_level = 0;
+		atten_state = 0;
 		return 0;
 	}
 	int reply = replystr[p + 3];
 	switch (reply) {
 		case '1' :
-			atten_level = 1;
+			atten_state = 1;
 			break;
 		case '2' :
-			atten_level = 2;
+			atten_state = 2;
 			break;
 		case '3' :
-			atten_level = 3;
+			atten_state = 3;
 			break;
 		default :
-			atten_level = 0;
+			atten_state = 0;
 			break;
 	}
-	return atten_level;
+	return atten_state;
 }
 
 int RIG_FT2000::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -535,8 +549,8 @@ int RIG_FT2000::next_preamp()
 
 void RIG_FT2000::set_preamp(int val)
 {
-	preamp_level = val;
-	switch (preamp_level) {
+	preamp_state = val;
+	switch (preamp_state) {
 		case 1 :
 			cmd = "PA01;";
 			break;
@@ -558,47 +572,27 @@ int RIG_FT2000::get_preamp()
 	rig_trace(2, "get_preamp()", replystr.c_str());
 
 	if (ret < 5) {
-		preamp_level = 0;
+		preamp_state = 0;
 		return 0;
 	}
 	size_t p = replystr.rfind("PA");
 	if (p == std::string::npos) {
-		preamp_level = 0;
+		preamp_state = 0;
 		return 0;
 	}
 	int reply = replystr[p + 3];
 	switch (reply) {
 		case '1' :
-			preamp_level = 1;
+			preamp_state = 1;
 			break;
 		case '2' :
-			preamp_level = 2;
+			preamp_state = 2;
 			break;
 		case '0' :
 		default :
-			preamp_level = 0;
+			preamp_state = 0;
 	}
-	return preamp_level;
-}
-
-const char *RIG_FT2000::ATT_label()
-{
-	if (atten_level == 1)
-		return "6 dB";
-	if (atten_level == 2)
-		return "12 dB";
-	if (atten_level == 3)
-		return "18 dB";
-	return "ATT";
-}
-
-const char *RIG_FT2000::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	return "PRE";
+	return preamp_state;
 }
 
 void RIG_FT2000::set_modeA(int val)

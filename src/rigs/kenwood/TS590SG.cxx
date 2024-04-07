@@ -148,6 +148,13 @@ static const char *vTS590SG_FSKbw[] = {
 "FW0250;", "FW0500;", "FW1000;", "FW1500;" };
 
 //----------------------------------------------------------------------
+// Button labels
+static std::vector<std::string>TS590SG_nr_labels;
+static const char *vTS590SG_nr_labels[] = { "NR", "NR1", "NR2" };
+
+static std::vector<std::string>TS590SG_nb_labels;
+static const char *vTS590SG_nb_labels[] = { "NB", "NB 1", "NB 2" };
+//----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
@@ -188,11 +195,18 @@ void RIG_TS590SG::initialize()
 	VECTOR (TS590SG_FSKwidths, vTS590SG_FSKwidths);
 	VECTOR (TS590SG_FSKbw, vTS590SG_FSKbw);
 
-	modes_ = TS590SGmodes_;
+// button labels
+	VECTOR (TS590SG_nr_labels, vTS590SG_nr_labels);
+	nr_labels_  = TS590SG_nr_labels;
+
+	VECTOR (TS590SG_nb_labels, vTS590SG_nb_labels);
+	nb_labels_ = TS590SG_nb_labels;
+
+	modes_      = TS590SGmodes_;
 	bandwidths_ = TS590SG_SSB_SH;
 
-	dsp_SL     = TS590SG_SSB_SL;
-	dsp_SH     = TS590SG_SSB_SH;
+	dsp_SL      = TS590SG_SSB_SL;
+	dsp_SH      = TS590SG_SSB_SH;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -263,7 +277,7 @@ RIG_TS590SG::RIG_TS590SG() {
 	B.freq = A.freq = 14070000ULL;
 	can_change_alt_vfo = true;
 
-	nb_level = 2;
+	nb_state = 2;
 
 	has_micgain_control =
 	has_ifshift_control = false;
@@ -298,9 +312,9 @@ RIG_TS590SG::RIG_TS590SG() {
 	precision = 1;
 	ndigits = 8;
 
-	att_level = 0;
-	preamp_level = 0;
-	noise_reduction_level = 0;
+	atten_state = 0;
+	preamp_state = 0;
+	nr_state = 0;
 }
 
 static int ret = 0;
@@ -395,7 +409,7 @@ double RIG_TS590SG::get_power_control()
 
 void RIG_TS590SG::set_attenuator(int val)
 {
-	att_level = val;
+	atten_state = val;
 	if (val) cmd = "RA01;";
 	else     cmd = "RA00;";
 	sendCommand(cmd, 0);
@@ -414,16 +428,16 @@ int RIG_TS590SG::get_attenuator()
 
 	if (replystr[p + 2] == '0' && 
 		replystr[p + 3] == '0')
-		att_level = 0;
+		atten_state = 0;
 	else
-		att_level = 1;
+		atten_state = 1;
 
-	return att_level;
+	return atten_state;
 }
 
 void RIG_TS590SG::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	if (val) cmd = "PA1;";
 	else     cmd = "PA0;";
 	sendCommand(cmd, 0);
@@ -441,10 +455,10 @@ int RIG_TS590SG::get_preamp()
 	if (p == std::string::npos) return 0;
 
 	if (replystr[p  + 2] == '1') 
-		preamp_level = 1;
+		preamp_state = 1;
 	else
-		preamp_level = 0;
-	return preamp_level;
+		preamp_state = 0;
+	return preamp_state;
 }
 
 //======================================================================
@@ -1041,25 +1055,25 @@ void RIG_TS590SG::get_if_min_max_step(int &min, int &max, int &step)
 void RIG_TS590SG::set_noise_reduction(int val)
 {
 	if (val == -1) {
-		if (noise_reduction_level == 1) {
-			nr_label("NR1", true);
-		} else if (noise_reduction_level == 2) {
-			nr_label("NR2", true);
+		if (nr_state == 1) {
+			noise_reduction_label(nr_label(), true);
+		} else if (nr_state == 2) {
+			noise_reduction_label(nr_label(), true);
 		}
 		return;
 	}
-	if (noise_reduction_level == 0) {
-		noise_reduction_level = 1;
-		nr_label("NR1", true);
-	} else if (noise_reduction_level == 1) {
-		noise_reduction_level = 2;
-		nr_label("NR2", true);
-	} else if (noise_reduction_level == 2) {
-		noise_reduction_level = 0;
-		nr_label("NR", false);
+	if (nr_state == 0) {
+		nr_state = 1;
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 1) {
+		nr_state = 2;
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		nr_state = 0;
+		noise_reduction_label(nr_label(), false);
 	}
 	cmd.assign("NR");
-	cmd += '0' + noise_reduction_level;
+	cmd += '0' + nr_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
 }
@@ -1073,23 +1087,24 @@ int  RIG_TS590SG::get_noise_reduction()
 	gett("");
 	if (ret == 4 ) {
 		size_t p = replystr.rfind(rsp);
-		if (p == std::string::npos) return noise_reduction_level;
-		noise_reduction_level = replystr[p+2] - '0';
+		if (p == std::string::npos) return nr_state;
+		nr_state = replystr[p+2] - '0';
 
-		if (noise_reduction_level == 1) {
-			nr_label("NR1", true);
-		} else if (noise_reduction_level == 2) {
-			nr_label("NR2", true);
+		if (nr_state == 1) {
+			noise_reduction_label(nr_label(), true);
+		} else if (nr_state == 2) {
+			noise_reduction_label(nr_label(), true);
 		} else {
-			nr_label("NR", false);
+			noise_reduction_label(nr_label(), false);
 		}
 	}
 
-	return noise_reduction_level;
+	return nr_state;
 }
 
 void RIG_TS590SG::set_noise_reduction_val(int val)
 {
+	nr_level = val;
 	cmd.assign("RL").append(to_decimal(val, 2)).append(";");
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET_noise_reduction_val", cmd, "");
@@ -1097,8 +1112,8 @@ void RIG_TS590SG::set_noise_reduction_val(int val)
 
 int  RIG_TS590SG::get_noise_reduction_val()
 {
-	if (noise_reduction_level == 0) return 0;
-	int val = 1;
+	if (nr_state == 0) return 0;
+	nr_level = 0;
 	cmd = rsp = "RL";
 	cmd.append(";");
 	get_trace(1, "get_noise_reduction_val");
@@ -1107,9 +1122,9 @@ int  RIG_TS590SG::get_noise_reduction_val()
 	if (ret == 5) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) return progStatus.noise_reduction_val;
-		val = atoi(&replystr[p+2]);
+		nr_level = atoi(&replystr[p+2]);
 	}
-	return val;
+	return nr_level;
 }
 
 void RIG_TS590SG::set_auto_notch(int v)
@@ -1186,21 +1201,21 @@ void RIG_TS590SG::get_notch_min_max_step(int &min, int &max, int &step)
 
 void RIG_TS590SG::set_noise(bool val)
 {
-	if (nb_level == 0) {
-		nb_level = 1;
-		nb_label("NB 1", true);
-	} else if (nb_level == 1) {
-		nb_level = 2;
-		nb_label("NB 2", true);
-	} else if (nb_level == 2) {
-		nb_level = 3;
-		nb_label("NB 3", true);
-	} else if (nb_level == 3) {
-		nb_level = 0;
-		nb_label("NB", false);
+	if (nb_state == 0) {
+		nb_state = 1;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 1) {
+		nb_state = 2;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		nb_state = 3;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 3) {
+		nb_state = 0;
+		noise_blanker_label(nb_label(), false);
 	}
 	cmd = "NB0;";
-	cmd[2] += nb_level;
+	cmd[2] += nb_state;
 	LOG_INFO("%s", cmd.c_str());
 	sendCommand(cmd, 0);
 }
@@ -1215,18 +1230,18 @@ int RIG_TS590SG::get_noise()
 		size_t p = replystr.rfind("NB");
 		if (p == std::string::npos) return 0;
 		if (replystr[p+2] == '0') return 0;
-		nb_level = replystr[p+2] - '0';
-		if (nb_level == 0) {
-			nb_label("NB", false);
-		} else if (nb_level == 1) {
-			nb_label("NB 1", true);
-		} else if (nb_level == 2) {
-			nb_label("NB 2", true);
-		} else if (nb_level == 3) {
-			nb_label("NB 3", true);
+		nb_state = replystr[p+2] - '0';
+		if (nb_state == 0) {
+			noise_blanker_label(nb_label(), false);
+		} else if (nb_state == 1) {
+			noise_blanker_label(nb_label(), true);
+		} else if (nb_state == 2) {
+			noise_blanker_label(nb_label(), true);
+		} else if (nb_state == 3) {
+			noise_blanker_label(nb_label(), true);
 		}
 	}
-	return nb_level;
+	return nb_state;
 }
 
 void RIG_TS590SG::set_rf_gain(int val)

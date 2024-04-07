@@ -96,9 +96,6 @@ public:
 	void set_preamp(int val);
 	int  get_preamp();
 
-	const char * ATT_label();
-	const char * PRE_label();
-
 	void set_if_shift(int val);
 	bool get_if_shift(int &val);
 	void get_if_min_max_step(int &min, int &max, int &step);

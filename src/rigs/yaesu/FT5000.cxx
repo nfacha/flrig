@@ -109,6 +109,17 @@ static const char *vFT5000_US_60m[] = {"", "126", "127", "128", "130"};
 
 static std::vector<std::string>& Channels_60m = FT5000_US_60m;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT5000_att_labels;
+static const char *vFT5000_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>FT5000_pre_labels;
+static const char *vFT5000_pre_labels[] = { "IPO", "Amp 1", "Amp 2", "IPO2" };
+
+static std::vector<std::string>FT5000_nb_labels;
+static const char *vFT5000_nb_labels[] = { "NB", "NB 1", "NB 2" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,	 2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -134,6 +145,15 @@ void RIG_FT5000::initialize()
 	VECTOR (FT5000_widths_FMwide, vFT5000_widths_FMwide);
 	VECTOR (FT5000_widths_FMpkt, vFT5000_widths_FMpkt);
 	VECTOR (FT5000_US_60m, vFT5000_US_60m);
+
+	VECTOR (FT5000_att_labels, vFT5000_att_labels);
+	att_labels_ = FT5000_att_labels;
+
+	VECTOR (FT5000_pre_labels, vFT5000_pre_labels);
+	pre_labels_ = FT5000_pre_labels;
+
+	VECTOR (FT5000_nb_labels, vFT5000_nb_labels);
+	nb_labels_ = FT5000_nb_labels;
 
 	modes_ = FT5000modes_;
 	bandwidths_ = FT5000_widths_SSB;
@@ -717,28 +737,6 @@ int RIG_FT5000::get_preamp()
 	return preamp_level;
 }
 
-const char *RIG_FT5000::ATT_label()
-{
-	if (atten_level == 1)
-		return "6 dB";
-	if (atten_level == 2)
-		return "12 dB";
-	if (atten_level == 3)
-		return "18 dB";
-	return "ATT";
-}
-
-const char *RIG_FT5000::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	if (preamp_level == 3)
-		return "IPO2";
-	return "IPO1";
-}
-
 int RIG_FT5000::adjust_bandwidth(int val)
 {
 	int bw = 0;
@@ -1140,22 +1138,20 @@ int  RIG_FT5000::get_auto_notch()
 	return 0;
 }
 
-int FT5000_blanker_level = 0;
-
 void RIG_FT5000::set_noise(bool b)
 {
 	cmd = "NB00;";
-	if (FT5000_blanker_level == 0) {
-		FT5000_blanker_level = 1;
-		nb_label("NB 1", true);
-	} else if (FT5000_blanker_level == 1) {
-		FT5000_blanker_level = 2;
-		nb_label("NB 2", true);
-	} else if (FT5000_blanker_level == 2) {
-		FT5000_blanker_level = 0;
-		nb_label("NB", false);
+	if (nb_state == 0) {
+		nb_state = 1;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 1) {
+		nb_state = 2;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		nb_state = 0;
+		noise_blanker_label(nb_label(), false);
 	}
-	cmd[3] = '0' + FT5000_blanker_level;
+	cmd[3] = '0' + nb_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET NB", cmd, replystr);
 }
@@ -1169,18 +1165,18 @@ int RIG_FT5000::get_noise()
 	gett("get_noise");
 
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return FT5000_blanker_level;
+	if (p == std::string::npos) return nb_state;
 
-	FT5000_blanker_level = replystr[p+3] - '0';
-	if (FT5000_blanker_level == 1) {
-		nb_label("NB 1", true);
-	} else if (FT5000_blanker_level == 2) {
-		nb_label("NB 2", true);
+	nb_state = replystr[p+3] - '0';
+	if (nb_state == 1) {
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		noise_blanker_label(nb_label(), true);
 	} else {
-		nb_label("NB", false);
-		FT5000_blanker_level = 0;
+		noise_blanker_label(nb_label(), false);
+		nb_state = 0;
 	}
-	return FT5000_blanker_level;
+	return nb_state;
 }
 
 // val 0 .. 100

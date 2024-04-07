@@ -102,6 +102,14 @@ static const char *vIC9100_fixed_bws[] =
 { "FIXED" };
 static int IC9100_bw_vals_fixed[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC9100_att_labels;
+static const char *vIC9100_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>IC9100_pre_labels;
+static const char *vIC9100_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC9100_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -135,6 +143,12 @@ void RIG_IC9100::initialize()
 	bw_vals_ = IC9100_bw_vals_SSB;
 
 	_mode_type = IC9100_mode_type;
+
+	VECTOR (IC9100_att_labels, vIC9100_att_labels);
+	VECTOR (IC9100_pre_labels, vIC9100_pre_labels);
+
+	att_labels_ = IC9100_att_labels;
+	pre_labels_ = IC9100_pre_labels;
 
 	IC9100_widgets[0].W = btnVol;
 	IC9100_widgets[1].W = sldrVOLUME;
@@ -1179,13 +1193,16 @@ void RIG_IC9100::get_notch_min_max_step(int &min, int &max, int &step)
 
 void RIG_IC9100::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
-	cmd += val ? 0x01 : 0x00;
+	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
-	set_trace(2, "set_auto_notch()", str2hex(replystr.c_str(), replystr.length()));
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC9100::get_auto_notch()
@@ -1196,17 +1213,16 @@ int RIG_IC9100::get_auto_notch()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(8, "get AN")) {
-		get_trace(2, "get_auto_notch()", str2hex(replystr.c_str(), replystr.length()));
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;
@@ -1228,7 +1244,6 @@ int  RIG_IC9100::get_split()
 	return split;
 }
 
-static int agcval = 1;
 int  RIG_IC9100::get_agc()
 {
 	cmd = pre_to;
@@ -1271,15 +1286,15 @@ int  RIG_IC9100::agc_val()
 void RIG_IC9100::set_attenuator(int val)
 {
 	if (val) {
-		atten_level = 1;
+		atten_state = 1;
 		set_preamp(0);
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x20' : '\x00';
+	cmd += atten_state ? '\x20' : '\x00';
 	cmd.append( post );
 	waitFB("set att");
 	std::stringstream ss;
@@ -1290,7 +1305,7 @@ void RIG_IC9100::set_attenuator(int val)
 
 int RIG_IC9100::next_attenuator()
 {
-	if (atten_level) return 0;
+	if (atten_state) return 0;
 	return 1;
 }
 
@@ -1305,10 +1320,10 @@ int RIG_IC9100::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (!replystr[p+5]) {
-				atten_level = 0;
+				atten_state = 0;
 				return 0;
 			} else {
-				atten_level = 1;
+				atten_state = 1;
 				return 1;
 			}
 		}
@@ -1319,7 +1334,7 @@ int RIG_IC9100::get_attenuator()
 
 int RIG_IC9100::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		default:
@@ -1335,13 +1350,13 @@ void RIG_IC9100::set_preamp(int val)
 	cmd += '\x02';
 
 	if (val == 0) {
-		preamp_level = 0;
+		preamp_state = 0;
 	} else if (val == 1) {
-		preamp_level = 1;
+		preamp_state = 1;
 	} else {
-		preamp_level = 2;
+		preamp_state = 2;
 	}
-	cmd += preamp_level;
+	cmd += preamp_state;
 
 	cmd.append( post );
 	waitFB("set Pre");
@@ -1367,41 +1382,17 @@ int RIG_IC9100::get_preamp()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+6] == 0x01) {
-				preamp_level = 1;
+				preamp_state = 1;
 			} else if (replystr[p+6] == 0x02) {
-				preamp_level = 2;
+				preamp_state = 2;
 			} else {
-				preamp_level = 0;
+				preamp_state = 0;
 			}
 		}
 	}
 	get_trace(2, "get_preamp()", str2hex(replystr.c_str(), replystr.length()));
 
-	return preamp_level;
-}
-
-const char *RIG_IC9100::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Amp 1"; break;
-		case 2:
-			return "Amp 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC9100::ATT_label()
-{
-	if (atten_level == 0x06)
-		return("6 dB");
-	if (atten_level == 0x12)
-		return("12 dB");
-	if (atten_level == 0x18)
-		return("18 dB");
-	return "ATT";
+	return preamp_state;
 }
 
 // Tranceiver PTT on/off

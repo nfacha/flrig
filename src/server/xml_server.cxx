@@ -1514,6 +1514,7 @@ public:
 
 } rig_get_SWR(&rig_server);
 
+
 //==============================================================================
 // set interface
 //==============================================================================
@@ -3600,6 +3601,689 @@ public:
 
 //------------------------------------------------------------------------------
 
+class rig_get_agc : public XmlRpcServerMethod {
+public:
+	rig_get_agc(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_agc", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_agc_control)
+			result = "0";
+		else {
+			guard_lock serial_lock(&mutex_serial);
+			int val = selrig->get_agc();
+
+			char szagc[20];
+			snprintf(szagc, sizeof(szagc), "%d", val);
+
+			result = std::string(szagc);
+		}
+	}
+
+	std::string help() { return std::string("returns agc"); }
+
+} rig_get_agc(&rig_server);
+
+
+class rig_incr_agc : public XmlRpcServerMethod {
+public:
+	rig_incr_agc(XmlRpcServer* s) : XmlRpcServerMethod("rig.incr_agc", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) {
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_agc_control)
+			result = "0";
+		else {
+			guard_lock serial_lock(&mutex_serial);
+			selrig->incr_agc();
+
+			int val = selrig->get_agc();
+			char szagc[20];
+			snprintf(szagc, sizeof(szagc), "%d", val);
+
+			result = std::string(szagc);
+		}
+	}
+
+	std::string help() { return std::string("increment agc, returns agc value"); }
+
+} rig_incr_agc(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request for AGC string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_agc_label : public XmlRpcServerMethod {
+public:
+	rig_get_agc_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_agc_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_agc_label");
+
+			str_val = selrig->agc_label();
+
+			xml_trace(2, "get_agc_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns agc string descriptor"); }
+
+} rig_get_agc_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of agc descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_agc_labels : public XmlRpcServerMethod {
+public :
+	rig_get_agc_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_agc_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue agc_labels;
+
+		if (!xcvr_online) {
+			agc_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_agc_labels");
+
+		xml_trace(1, "rig_get_agc_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->agc_labels_.size(); i++)
+				if (!selrig->agc_labels_.at(i).empty())
+					agc_labels[n++] = selrig->agc_labels_.at(i);
+			result = agc_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			agc_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of agc_labels"); }
+
+} rig_get_agc_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for ATT string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_att_label : public XmlRpcServerMethod {
+public:
+	rig_get_att_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_att_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_att_label");
+
+			str_val = selrig->att_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns att string descriptor"); }
+
+} rig_get_att_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of ATT descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_att_labels : public XmlRpcServerMethod {
+public :
+	rig_get_att_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_att_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue att_labels;
+
+		if (!xcvr_online) {
+			att_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_att_labels");
+
+		xml_trace(1, "rig_get_att_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->att_labels_.size(); i++)
+				if (!selrig->att_labels_.at(i).empty())
+					att_labels[n++] = selrig->att_labels_.at(i);
+			result = att_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			att_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of att_labels"); }
+
+} rig_get_att_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for PRE string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_pre_label : public XmlRpcServerMethod {
+public:
+	rig_get_pre_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_pre_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_pre_label");
+
+			str_val = selrig->pre_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns pre string descriptor"); }
+
+} rig_get_pre_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of PRE descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_pre_labels : public XmlRpcServerMethod {
+public :
+	rig_get_pre_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_pre_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue pre_labels;
+
+		if (!xcvr_online) {
+			pre_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_pre_labels");
+
+		xml_trace(1, "rig_get_pre_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->pre_labels_.size(); i++)
+				if (!selrig->pre_labels_.at(i).empty())
+					pre_labels[n++] = selrig->pre_labels_.at(i);
+			result = pre_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			pre_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of pre_labels"); }
+
+} rig_get_pre_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for NB string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_nb_label : public XmlRpcServerMethod {
+public:
+	rig_get_nb_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_nb_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_nb_label");
+
+			str_val = selrig->nb_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns nb string descriptor"); }
+
+} rig_get_nb_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of NB descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_nb_labels : public XmlRpcServerMethod {
+public :
+	rig_get_nb_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_nb_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue nb_labels;
+
+		if (!xcvr_online) {
+			nb_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_nb_labels");
+
+		xml_trace(1, "rig_get_nb_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->nb_labels_.size(); i++)
+				if (!selrig->nb_labels_.at(i).empty())
+					nb_labels[n++] = selrig->nb_labels_.at(i);
+			result = nb_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			nb_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of nb_labels"); }
+
+} rig_get_nb_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for NR string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_nr_label : public XmlRpcServerMethod {
+public:
+	rig_get_nr_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_nr_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_nr_label");
+
+			str_val = selrig->nr_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns nr string descriptor"); }
+
+} rig_get_nr_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of NR descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_nr_labels : public XmlRpcServerMethod {
+public :
+	rig_get_nr_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_nr_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue nr_labels;
+
+		if (!xcvr_online) {
+			nr_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_nr_labels");
+
+		xml_trace(1, "rig_get_nr_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->nr_labels_.size(); i++)
+				if (!selrig->nr_labels_.at(i).empty())
+					nr_labels[n++] = selrig->nr_labels_.at(i);
+			result = nr_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			nr_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of nr_labels"); }
+
+} rig_get_nr_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for BK string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_bk_label : public XmlRpcServerMethod {
+public:
+	rig_get_bk_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_bk_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_bk_label");
+
+			str_val = selrig->bk_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns bk string descriptor"); }
+
+} rig_get_bk_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of BK descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_bk_labels : public XmlRpcServerMethod {
+public :
+	rig_get_bk_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_bk_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue bk_labels;
+
+		if (!xcvr_online) {
+			bk_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_bk_labels");
+
+		xml_trace(1, "rig_get_bk_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->bk_labels_.size(); i++)
+				if (!selrig->bk_labels_.at(i).empty())
+					bk_labels[n++] = selrig->bk_labels_.at(i);
+			result = bk_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			bk_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of bk_labels"); }
+
+} rig_get_bk_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for 60M string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_60M_label : public XmlRpcServerMethod {
+public:
+	rig_get_60M_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_60M_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_60M_label");
+
+			str_val = selrig->m60_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns m60 string descriptor"); }
+
+} rig_get_60M_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of 60M descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_60M_labels : public XmlRpcServerMethod {
+public :
+	rig_get_60M_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_60M_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue m60_labels;
+
+		if (!xcvr_online) {
+			m60_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_60M_labels");
+
+		xml_trace(1, "rig_get_60M_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->m60_labels_.size(); i++)
+				if (!selrig->m60_labels_.at(i).empty())
+					m60_labels[n++] = selrig->m60_labels_.at(i);
+			result = m60_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			m60_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of m60_labels"); }
+
+} rig_get_60M_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
+// Request for AN string descriptor
+//------------------------------------------------------------------------------
+
+class rig_get_an_label : public XmlRpcServerMethod {
+public:
+	rig_get_an_label(XmlRpcServer* s) : XmlRpcServerMethod("rig.get_an_label", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		if (!xcvr_online || !selrig->has_agc_control) {
+			result = "";
+			return;
+		}
+
+		std::string str_val;
+		wait();
+		try {
+			guard_lock serial_lock(&mutex_serial, "xml rig_get_an_label");
+
+			str_val = selrig->an_label();
+
+			xml_trace(2, "get_label ", str_val.c_str());
+
+			result = str_val;
+
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			result = "";
+		}
+
+	}
+
+	std::string help() { return std::string("returns an string descriptor"); }
+
+} rig_get_an_label(&rig_server);
+
+//------------------------------------------------------------------------------
+// Request list of AN descriptors
+//------------------------------------------------------------------------------
+
+class rig_get_an_labels : public XmlRpcServerMethod {
+public :
+	rig_get_an_labels(XmlRpcServer *s) : XmlRpcServerMethod("rig.get_an_labels", s) {}
+
+		void execute(XmlRpcValue& params, XmlRpcValue& result) { 
+		Fl::awake(connection_ON);
+
+		XmlRpcValue an_labels;
+
+		if (!xcvr_online) {
+			an_labels[0] = "";
+			return;
+		}
+
+		wait();
+		guard_lock serial_lock(&mutex_serial, "xml rig_get_an_labels");
+
+		xml_trace(1, "rig_get_an_labels");
+		try {
+			int n = 0;
+			for (size_t i = 0; i < selrig->an_labels_.size(); i++)
+				if (!selrig->an_labels_.at(i).empty())
+					an_labels[n++] = selrig->an_labels_.at(i);
+			result = an_labels;
+		} catch (const std::exception& e) {
+			LOG_ERROR("%s", e.what());
+			an_labels[0] = "";
+			return;
+		}
+
+		}
+
+	std::string help() { return std::string("returns list of an_labels"); }
+
+} rig_get_an_labels(&rig_server);
+
+
+//------------------------------------------------------------------------------
 
 static void shutdown(void *)
 {
@@ -3667,109 +4351,127 @@ public:
 struct MLIST {
 	std::string name; std::string signature; std::string help;
 } mlist[] = {
-	{ "main.set_frequency", "d:d", "set current VFO in Hz" },
-	{ "main.get_version", "s:n", "returns version std::string" },
-	{ "rig.get_AB",       "s:n", "returns vfo in use A or B" },
-	{ "rig.get_bw",       "A:n", "return BW of current VFO" },
-	{ "rig.get_bws",      "A:n", "return table of BW values" },
-	{ "rig.get_bwA",      "A:n", "return BW of vfo A" },
-	{ "rig.get_bwB",      "A:n", "return BW of vfo B" },
-	{ "rig.get_pbt",      "A:n", "return passband tuning"},
-	{ "rig.get_pbt_inner","i:i", "return passband inner"},
-	{ "rig.get_pbt_outer","i:i", "return passband outer"},
-	{ "rig.get_info",     "s:n", "return an info std::string" },
-	{ "rig.get_mode",     "s:n", "return MODE of current VFO" },
-	{ "rig.get_modeA",    "s:n", "return MODE of current VFO A" },
-	{ "rig.get_modeB",    "s:n", "return MODE of current VFO B" },
-	{ "rig.get_modes",    "A:n", "return table of MODE values" },
-	{ "rig.get_sideband", "s:n", "return sideband (U/L)" },
-	{ "rig.get_notch",    "i:n", "return notch value" },
-	{ "rig.get_ptt",      "i:n", "return PTT state" },
-	{ "rig.get_power",    "i:n", "return power level control value" },
-	{ "rig.get_pwrmeter", "s:n", "return PWR out" },
-	{ "rig.get_pwrmeter_scale", "s:n", "return scale for power meter" },
-	{ "rig.get_pwrmax",   "s:n", "return maximum power available" },
-	{ "rig.get_swrmeter", "s:n", "return SWR meter reading" },
-	{ "rig.get_SWR",      "s:n", "return SWR value" },
-	{ "rig.get_smeter",   "s:n", "return Smeter" },
-	{ "rig.get_DBM",      "s:n", "return Smeter in dBm" },
-	{ "rig.get_Sunits",   "s:n", "return Smeter in S units" },
-	{ "rig.get_split",    "i:n", "return split state" },
-	{ "rig.get_update",   "s:n", "return update to info" },
-	{ "rig.get_vfo",      "s:n", "return current VFO in Hz" },
-	{ "rig.get_vfoA",     "s:n", "return vfo A in Hz" },
-	{ "rig.get_vfoB",     "s:n", "return vfo B in Hz" },
-	{ "rig.get_xcvr",     "s:n", "returns name of transceiver" },
-	{ "rig.get_volume",   "i:n", "returns volume control value" },
-	{ "rig.get_rfgain",   "i:n", "returns rf gain control value" },
-	{ "rig.get_micgain",  "i:n", "returns mic gain control value" },
+	{ "main.set_frequency",       "d:d", "set current VFO in Hz" },
+	{ "main.get_version",         "s:n", "returns version std::string" },
+	{ "rig.get_AB",               "s:n", "returns vfo in use A or B" },
+	{ "rig.get_agc",              "s:n", "return AGC meter reading" },
+	{ "rig.get_bw",               "A:n", "return BW of current VFO" },
+	{ "rig.get_bws",              "A:n", "return table of BW values" },
+	{ "rig.get_bwA",              "A:n", "return BW of vfo A" },
+	{ "rig.get_bwB",              "A:n", "return BW of vfo B" },
+	{ "rig.get_pbt",              "A:n", "return passband tuning"},
+	{ "rig.get_pbt_inner",        "i:i", "return passband inner"},
+	{ "rig.get_pbt_outer",        "i:i", "return passband outer"},
+	{ "rig.get_info",             "s:n", "return an info std::string" },
+	{ "rig.get_mode",             "s:n", "return MODE of current VFO" },
+	{ "rig.get_modeA",            "s:n", "return MODE of current VFO A" },
+	{ "rig.get_modeB",            "s:n", "return MODE of current VFO B" },
+	{ "rig.get_modes",            "A:n", "return table of MODE values" },
+	{ "rig.get_sideband",         "s:n", "return sideband (U/L)" },
+	{ "rig.get_notch",            "i:n", "return notch value" },
+	{ "rig.get_ptt",              "i:n", "return PTT state" },
+	{ "rig.get_power",            "i:n", "return power level control value" },
+	{ "rig.get_pwrmeter",         "s:n", "return PWR out" },
+	{ "rig.get_pwrmeter_scale",   "s:n", "return scale for power meter" },
+	{ "rig.get_pwrmax",           "s:n", "return maximum power available" },
+	{ "rig.get_swrmeter",         "s:n", "return SWR meter reading" },
+	{ "rig.get_SWR",              "s:n", "return SWR value" },
+	{ "rig.get_smeter",           "s:n", "return Smeter" },
+	{ "rig.get_DBM",              "s:n", "return Smeter in dBm" },
+	{ "rig.get_Sunits",           "s:n", "return Smeter in S units" },
+	{ "rig.get_split",            "i:n", "return split state" },
+	{ "rig.get_update",           "s:n", "return update to info" },
+	{ "rig.get_vfo",              "s:n", "return current VFO in Hz" },
+	{ "rig.get_vfoA",             "s:n", "return vfo A in Hz" },
+	{ "rig.get_vfoB",             "s:n", "return vfo B in Hz" },
+	{ "rig.get_xcvr",             "s:n", "returns name of transceiver" },
+	{ "rig.get_volume",           "i:n", "returns volume control value" },
+	{ "rig.get_rfgain",           "i:n", "returns rf gain control value" },
+	{ "rig.get_micgain",          "i:n", "returns mic gain control value" },
 
-	{ "rig.set_AB",       "n:s", "set VFO A/B" },
-	{ "rig.set_bw",       "i:i", "set BW iaw BW table" },
-	{ "rig.set_bandwidth","i:i", "set bandwidth to nearest requested value" },
-	{ "rig.set_BW",       "i:i", "set L/U pair" },
-	{ "rig.set_pbt",      "i:A", "set pbt inner/outer" },
-	{ "rig.set_pbt_inner","i:i", "set pbt inner"},
-	{ "rig.set_pbt_outer","i:i", "set pbt outer"},
-	{ "rig.set_frequency","d:d", "set current VFO in Hz" },
-	{ "rig.set_mode",     "i:s", "set MODE iaw MODE table" },
-	{ "rig.set_modeA",    "i:s", "set MODE A iaw MODE table" },
-	{ "rig.set_modeB",    "i:s", "set MODE B iaw MODE table" },
-	{ "rig.set_notch",    "n:i", "set NOTCH value in Hz" },
-	{ "rig.set_power",    "n:i", "set power control level, watts" },
-	{ "rig.set_ptt",      "n:i", "set PTT 1/0 (on/off)" },
-	{ "rig.set_vfo",      "d:d", "set current VFO in Hz" },
-	{ "rig.set_vfoA",     "d:d", "set vfo A in Hz" },
-	{ "rig.set_vfoB",     "d:d", "set vfo B in Hz" },
-	{ "rig.set_split",    "n:i", "set split 1/0 (on/off)" },
-	{ "rig.set_volume",   "n:i", "set volume control" },
-	{ "rig.set_rfgain",   "n:i", "set rf gain control" },
-	{ "rig.set_micgain",  "n:i", "set mic gain control" },
+	{ "rig.get_agc_label",        "s:n", "return agc string descriptor" },
+	{ "rig.get_agc_labels",       "s:n", "return agc string label list" },
+	{ "rig.get_an_label",         "s:n", "return an string descriptor" },
+	{ "rig.get_an_labels",        "s:n", "return an string label list" },
+	{ "rig.get_att_label",        "s:n", "return att string descriptor" },
+	{ "rig.get_att_labels",       "s:n", "return att string label list" },
+	{ "rig.get_nb_label",         "s:n", "return nb string descriptor" },
+	{ "rig.get_nb_labels",        "s:n", "return nb string label list" },
+	{ "rig.get_nr_label",         "s:n", "return nr string descriptor" },
+	{ "rig.get_nr_labels",        "s:n", "return nr string label list" },
+	{ "rig.get_pre_label",        "s:n", "return pre string descriptor" },
+	{ "rig.get_pre_labels",       "s:n", "return pre string label list" },
+	{ "rig.get_60M_label",        "s:n", "return 60M string descriptor" },
+	{ "rig.get_60M_labels",       "s:n", "return 60M string label list" },
 
-	{ "rig.set_ptt_fast",        "n:i", "deprecated; use set_ptt" },
-	{ "rig.set_vfoA_fast",       "d:d", "deprecated; use set_vfoA" },
-	{ "rig.set_vfoB_fast",       "d:d", "deprecated; use set_vfoB" },
+	{ "rig.incr_agc",           "s:n", "increment agc value, return new value" },
 
-	{ "rig.set_verify_AB",       "n:s", "set & verify VFO A/B" },
-	{ "rig.set_verify_bw",       "i:i", "set & verify BW iaw BW table" },
-	{ "rig.set_verify_bandwidth","i:i", "set & verify bandwidth to nearest requested value" },
-	{ "rig.set_verify_BW",       "i:i", "set & verify L/U pair" },
-	{ "rig.set_verify_frequency","d:d", "set & verify current VFO in Hz" },
-	{ "rig.set_verify_mode",     "i:s", "set & verify MODE iaw MODE table" },
-	{ "rig.set_verify_modeA",    "i:s", "set & verify MODE A iaw MODE table" },
-	{ "rig.set_verify_modeB",    "i:s", "set & verify MODE B iaw MODE table" },
-	{ "rig.set_verify_notch",    "n:i", "set & verify NOTCH value in Hz" },
-	{ "rig.set_verify_power",    "n:i", "set & verify power control level, watts" },
-	{ "rig.set_verify_ptt",      "n:i", "set & verify PTT 1/0 (on/off)" },
-	{ "rig.set_verify_vfoA",     "d:d", "set & verify vfo A in Hz" },
-	{ "rig.set_verify_vfoB",     "d:d", "set & verify vfo B in Hz" },
-	{ "rig.set_verify_split",    "n:i", "set & verify split 1/0 (on/off)" },
-	{ "rig.set_verify_volume",   "n:i", "set & verify volume control" },
-	{ "rig.set_verify_rfgain",   "n:i", "set & verify rf gain control" },
-	{ "rig.set_verify_micgain",  "n:i", "set & verify mic gain control" },
+	{ "rig.set_AB",               "n:s", "set VFO A/B" },
+	{ "rig.set_bw",               "i:i", "set BW iaw BW table" },
+	{ "rig.set_bandwidth",        "i:i", "set bandwidth to nearest requested value" },
+	{ "rig.set_BW",               "i:i", "set L/U pair" },
+	{ "rig.set_pbt",              "i:A", "set pbt inner/outer" },
+	{ "rig.set_pbt_inner",        "i:i", "set pbt inner"},
+	{ "rig.set_pbt_outer",        "i:i", "set pbt outer"},
+	{ "rig.set_frequency",        "d:d", "set current VFO in Hz" },
+	{ "rig.set_mode",             "i:s", "set MODE iaw MODE table" },
+	{ "rig.set_modeA",            "i:s", "set MODE A iaw MODE table" },
+	{ "rig.set_modeB",            "i:s", "set MODE B iaw MODE table" },
+	{ "rig.set_notch",            "n:i", "set NOTCH value in Hz" },
+	{ "rig.set_power",            "n:i", "set power control level, watts" },
+	{ "rig.set_ptt",              "n:i", "set PTT 1/0 (on/off)" },
+	{ "rig.set_vfo",              "d:d", "set current VFO in Hz" },
+	{ "rig.set_vfoA",             "d:d", "set vfo A in Hz" },
+	{ "rig.set_vfoB",             "d:d", "set vfo B in Hz" },
+	{ "rig.set_split",            "n:i", "set split 1/0 (on/off)" },
+	{ "rig.set_volume",           "n:i", "set volume control" },
+	{ "rig.set_rfgain",           "n:i", "set rf gain control" },
+	{ "rig.set_micgain",          "n:i", "set mic gain control" },
 
-	{ "rig.swap",         "n:n", "execute vfo swap" },
-	{ "rig.tune",         "n:n", "enable transceiver tune function"},
-	{ "rig.cat_string",   "s:s", "execute CAT std::string" },
-	{ "rig.cat_priority", "s:s", "priority CAT std::string" },
-	{ "rig.shutdown",     "i:n", "shutdown xcvr & flrig" },
-	{ "rig.cwio_set_wpm", "n:i", "set cwio WPM" },
-	{ "rig.cwio_text",    "i:s", "send text via cwio interface" },
-	{ "rig.cwio_send",    "n:i", "cwio transmit 1/0 (on/off)"},
-	{ "rig.fskio_text",   "i:s", "send text via fskio interface" },
+	{ "rig.set_ptt_fast",         "n:i", "deprecated; use set_ptt" },
+	{ "rig.set_vfoA_fast",        "d:d", "deprecated; use set_vfoA" },
+	{ "rig.set_vfoB_fast",        "d:d", "deprecated; use set_vfoB" },
 
-	{ "rig.mod_vfoA",     "d:d", "modify vfo A +/- NNN Hz" },
-	{ "rig.mod_vfoB",     "d:d", "modify vfo B +/- NNN Hz" },
-	{ "rig.mod_vol",      "n:i", "modify volume control +/- NNN %" },
-	{ "rig.mod_pwr",      "n:i", "modify power control level +/- NNN watts" },
-	{ "rig.mod_rfg",      "n:i", "modify rf gain by +/- NNN units" },
-	{ "rig.mod_cwio_wpm", "n:i", "modify cwio WPM by +/- NNN wpm" },
-	{ "rig.mod_bw",       "i:i", "modify bandwidth +- to nearest new value" },
-	{ "rig.vfoA2B",       "n:n", "set vfo B to vfo A freq/mode" },
-	{ "rig.freqA2B",      "n:n", "set freq B to freq A" },
-	{ "rig.modeA2B",      "n:n", "set mode B to mode A" },
+	{ "rig.set_verify_AB",        "n:s", "set & verify VFO A/B" },
+	{ "rig.set_verify_bw",        "i:i", "set & verify BW iaw BW table" },
+	{ "rig.set_verify_bandwidth", "i:i", "set & verify bandwidth to nearest requested value" },
+	{ "rig.set_verify_BW",        "i:i", "set & verify L/U pair" },
+	{ "rig.set_verify_frequency", "d:d", "set & verify current VFO in Hz" },
+	{ "rig.set_verify_mode",      "i:s", "set & verify MODE iaw MODE table" },
+	{ "rig.set_verify_modeA",     "i:s", "set & verify MODE A iaw MODE table" },
+	{ "rig.set_verify_modeB",     "i:s", "set & verify MODE B iaw MODE table" },
+	{ "rig.set_verify_notch",     "n:i", "set & verify NOTCH value in Hz" },
+	{ "rig.set_verify_power",     "n:i", "set & verify power control level, watts" },
+	{ "rig.set_verify_ptt",       "n:i", "set & verify PTT 1/0 (on/off)" },
+	{ "rig.set_verify_vfoA",      "d:d", "set & verify vfo A in Hz" },
+	{ "rig.set_verify_vfoB",      "d:d", "set & verify vfo B in Hz" },
+	{ "rig.set_verify_split",     "n:i", "set & verify split 1/0 (on/off)" },
+	{ "rig.set_verify_volume",    "n:i", "set & verify volume control" },
+	{ "rig.set_verify_rfgain",    "n:i", "set & verify rf gain control" },
+	{ "rig.set_verify_micgain",   "n:i", "set & verify mic gain control" },
 
-	{ "rig.cmd",          "n:i", "execute command button 1..24; 25..48(shift)"}
+	{ "rig.swap",                 "n:n", "execute vfo swap" },
+	{ "rig.tune",                 "n:n", "enable transceiver tune function"},
+	{ "rig.cat_string",           "s:s", "execute CAT std::string" },
+	{ "rig.cat_priority",         "s:s", "priority CAT std::string" },
+	{ "rig.shutdown",             "i:n", "shutdown xcvr & flrig" },
+	{ "rig.cwio_set_wpm",         "n:i", "set cwio WPM" },
+	{ "rig.cwio_text",            "i:s", "send text via cwio interface" },
+	{ "rig.cwio_send",            "n:i", "cwio transmit 1/0 (on/off)"},
+	{ "rig.fskio_text",           "i:s", "send text via fskio interface" },
+
+	{ "rig.mod_vfoA",             "d:d", "modify vfo A +/- NNN Hz" },
+	{ "rig.mod_vfoB",             "d:d", "modify vfo B +/- NNN Hz" },
+	{ "rig.mod_vol",              "n:i", "modify volume control +/- NNN %" },
+	{ "rig.mod_pwr",              "n:i", "modify power control level +/- NNN watts" },
+	{ "rig.mod_rfg",              "n:i", "modify rf gain by +/- NNN units" },
+	{ "rig.mod_cwio_wpm",         "n:i", "modify cwio WPM by +/- NNN wpm" },
+	{ "rig.mod_bw",               "i:i", "modify bandwidth +- to nearest new value" },
+	{ "rig.vfoA2B",               "n:n", "set vfo B to vfo A freq/mode" },
+	{ "rig.freqA2B",              "n:n", "set freq B to freq A" },
+	{ "rig.modeA2B",              "n:n", "set mode B to mode A" },
+
+	{ "rig.cmd",                  "n:i", "execute command button 1..24; 25..48(shift)"}
 };
 
 class rig_list_methods : public XmlRpcServerMethod {

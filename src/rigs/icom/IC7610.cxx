@@ -175,6 +175,17 @@ static const char *vIC7610_fm_bws[] =
 { "FIXED" };
 static int IC7610_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7610_att_labels;
+static const char *vIC7610_att_labels[] = {
+"ATT","3db","6db","9db","12db","15db","18db","21db",
+"24db","27db","30db","33db","36db","39db","42db","45db"
+};
+
+static std::vector<std::string>IC7610_pre_labels;
+static const char *vIC7610_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7610_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -207,6 +218,12 @@ void RIG_IC7610::initialize()
 	bw_vals_ = IC7610_bw_vals_SSB;
 
 	_mode_type = IC7610_mode_type;
+
+	VECTOR (IC7610_att_labels, vIC7610_att_labels);
+	VECTOR (IC7610_pre_labels, vIC7610_pre_labels);
+
+	att_labels_ = IC7610_att_labels;
+	pre_labels_ = IC7610_pre_labels;
 
 	IC7610_widgets[0].W = btnVol;
 	IC7610_widgets[1].W = sldrVOLUME;
@@ -1664,7 +1681,7 @@ void RIG_IC7610::get_rf_min_max_step(double &min, double &max, double &step)
 
 int RIG_IC7610::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1678,12 +1695,12 @@ void RIG_IC7610::set_preamp(int val)
 	cmd += '\x16';
 	cmd += '\x02';
 
-	preamp_level = val;
+	preamp_state = val;
 
-	cmd += (unsigned char)preamp_level;
+	cmd += (unsigned char)preamp_state;
 	cmd.append( post );
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 	set_trace(2, "set_preamp() ", str2hex(cmd.c_str(), cmd.length()));
 }
@@ -1699,11 +1716,11 @@ int RIG_IC7610::get_preamp()
 	if (waitFOR(8, "get Preamp Level")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
 	get_trace(2, "get_preamp() ", str2hex(replystr.c_str(), replystr.length()));
-	return preamp_level;
+	return preamp_state;
 }
 
 static char attval[] = {
@@ -1711,11 +1728,6 @@ static char attval[] = {
 '\x15', '\x18', '\x21', '\x24', '\x27',
 '\x30', '\x33', '\x36', '\x39', '\x42',
 '\x45' };
-
-std::string attstr[] = {
-"OFF","3db","6db","9db","12db","15db","18db","21db",
-"24db","27db","30db","33db","36db","39db","42db","45db"
-};
 
 void RIG_IC7610::set_index_att(int v)
 {
@@ -1741,10 +1753,10 @@ int RIG_IC7610::get_attenuator()
 	if (waitFOR(7, "get ATT")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			atten_level = replystr[p+5];
+			atten_state = replystr[p+5];
 			size_t i = 0;
 			for (i = 0; i < sizeof(attval); i++) {
-				if (attval[i] == atten_level) {
+				if (attval[i] == atten_state) {
 					progStatus.index_ic7610att = i;
 					break;
 				}
@@ -1753,24 +1765,6 @@ int RIG_IC7610::get_attenuator()
 	}
 	get_trace(2, "get_attenuator() ", str2hex(replystr.c_str(), replystr.length()));
 	return progStatus.index_ic7610att;
-}
-
-const char *RIG_IC7610::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Amp 1"; break;
-		case 2:
-			return "Amp 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC7610::ATT_label()
-{
-	return attstr[progStatus.index_ic7610att].c_str();
 }
 
 void RIG_IC7610::set_noise(bool val)
@@ -1936,13 +1930,16 @@ int  RIG_IC7610::get_squelch()
 
 void RIG_IC7610::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
-	set_trace(2, "set_auto_notch() ", str2hex(cmd.c_str(), cmd.length()));
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7610::get_auto_notch()
@@ -1953,17 +1950,16 @@ int RIG_IC7610::get_auto_notch()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(8, "get AN")) {
-		get_trace(2, "get_auto_notch() ", str2hex(replystr.c_str(), replystr.length()));
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;
@@ -2034,7 +2030,6 @@ void RIG_IC7610::get_notch_min_max_step(int &min, int &max, int &step)
 	step = 20;
 }
 
-static int agcval = 3;
 int  RIG_IC7610::get_agc()
 {
 	cmd = pre_to;

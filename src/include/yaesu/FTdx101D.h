@@ -99,9 +99,6 @@ public:
 	virtual void set_preamp(int val);
 	virtual int  get_preamp();
 
-	const char * ATT_label();
-	const char * PRE_label();
-
 	virtual void set_if_shift(int val);
 	virtual bool get_if_shift(int &val);
 	virtual void get_if_min_max_step(int &min, int &max, int &step);

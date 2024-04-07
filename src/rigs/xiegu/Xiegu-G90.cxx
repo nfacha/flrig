@@ -67,6 +67,14 @@ static std::vector<std::string>Xiegu_G90_ssb_bws;
 static const char *vXiegu_G90_ssb_bws[] = { "N/A" };
 static int Xiegu_G90_vals_ssb_bws[] = { 1, WVALS_LIMIT };
 
+//----------------------------------------------------------------------
+static std::vector<std::string>Xiegu_G90_att_labels;
+static const char *vXiegu_G90_att_labels[] = { "ATT", "Att ON" };
+
+static std::vector<std::string>Xiegu_G90_pre_labels;
+static const char *vXiegu_G90_pre_labels[] = { "PRE", "Pre ON" };
+//----------------------------------------------------------------------
+
 struct bpair {Fl_Widget *widget; std::string lbl;};
 static bpair bpcomp;
 
@@ -101,6 +109,12 @@ void RIG_Xiegu_G90::initialize()
 {
 	VECTOR (Xiegu_G90modes_, vXiegu_G90modes_);
 	VECTOR (Xiegu_G90_ssb_bws, vXiegu_G90_ssb_bws);
+
+	VECTOR (Xiegu_G90_att_labels, vXiegu_G90_att_labels);
+	att_labels_ = Xiegu_G90_att_labels;
+
+	VECTOR (Xiegu_G90_pre_labels, vXiegu_G90_pre_labels);
+	pre_labels_ = Xiegu_G90_pre_labels;
 
 	modes_ = Xiegu_G90modes_;
 	bandwidths_ = Xiegu_G90_ssb_bws;
@@ -491,14 +505,14 @@ int RIG_Xiegu_G90::get_modeB()
 void RIG_Xiegu_G90::set_attenuator(int val)
 {
    if (val) {
-		atten_level = 1;
+		atten_state = 1;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x01' : '\x00';
+	cmd += atten_state ? '\x01' : '\x00';
 	cmd.append( post );
 	set_trace(1, "set_attenuator()");
 	waitFB("set att");
@@ -517,12 +531,12 @@ int RIG_Xiegu_G90::get_attenuator()
 		igett("");
 		size_t p = replystr.rfind(resp);
 		if (replystr[p+5] == 0x00) {
-			atten_level = 0;
+			atten_state = 0;
 		} else {
-			atten_level = 1;
+			atten_state = 1;
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 void RIG_Xiegu_G90::set_preamp(int val)
@@ -557,27 +571,9 @@ int RIG_Xiegu_G90::get_preamp()
 		igett("");
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos)
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 	}
-	return preamp_level;
-}
-
-const char *RIG_Xiegu_G90::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "ON"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_Xiegu_G90::ATT_label()
-{
-	if (atten_level)
-		return "ON";
-	return "ATT";
+	return preamp_state;
 }
 
 static int compon = 0;
@@ -1022,7 +1018,6 @@ void RIG_Xiegu_G90::set_band_selection(int v)
 	set_trace(1, "set_band_selection()");
 }
 
-static int agcval = 0;
 int  RIG_Xiegu_G90::get_agc()
 {
 	cmd = pre_to;

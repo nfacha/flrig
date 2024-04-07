@@ -82,6 +82,14 @@ static std::vector<std::string>FT450D_US_60m = {"", "126", "127", "128", "130"};
 static std::vector<std::string>& Channels_60m = FT450D_US_60m;
 */
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT450D_att_labels;
+static const char *vFT450D_att_labels[] = { "ATT", "12 dB" };
+
+static std::vector<std::string>FT450D_pre_labels;
+static const char *vFT450D_pre_labels[] = { "IPO", "Amp 1" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -192,6 +200,12 @@ void RIG_FT450D::initialize()
 	VECTOR( FT450D_data_widths, vFT450D_data_widths);
 	VECTOR( FT450D_am_widths, vFT450D_am_widths);
 	VECTOR( FT450D_fm_widths, vFT450D_fm_widths);
+
+	VECTOR (FT450D_att_labels, vFT450D_att_labels);
+	att_labels_ = FT450D_att_labels;
+
+	VECTOR (FT450D_pre_labels, vFT450D_pre_labels);
+	pre_labels_ = FT450D_pre_labels;
 
 	modes_ = FT450Dmodes_;
 	bandwidths_ = FT450D_ssb_widths;
@@ -620,10 +634,10 @@ int RIG_FT450D::get_attenuator()
 	gett("get_attenuator");
 
 	size_t p = replystr.rfind(rsp);
-	atten_level = 0;
+	atten_state = 0;
 	if (p != std::string::npos)
-		atten_level = (replystr[p+3] == '3' ? 1 : 0);
-	return atten_level;
+		atten_state = (replystr[p+3] == '3' ? 1 : 0);
+	return atten_state;
 }
 
 static int preval = 0;
@@ -656,20 +670,6 @@ int RIG_FT450D::get_preamp()
 	if (p != std::string::npos)
 		preval = 1;
 	return preval;
-}
-
-const char *RIG_FT450D::ATT_label()
-{
-	if (atten_level == 1)
-		return "12 dB";
-	return "ATT";
-}
-
-const char *RIG_FT450D::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	return "IPO";
 }
 
 int RIG_FT450D::adjust_bandwidth(int val)
@@ -1474,7 +1474,6 @@ void RIG_FT450D::get_band_selection(int v)
 	sett("get band");
 }
 
-static int agcval = 0;
 int  RIG_FT450D::get_agc()
 {
     cmd = "GT0;";

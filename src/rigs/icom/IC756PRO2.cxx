@@ -70,6 +70,14 @@ static const char *vIC756PRO2_AMFMwidths[] =
 { "FILT-1", "FILT-2", "FILT-3" };
 static int IC756PRO2_bw_vals_AMFM[] = { 0, 1, 2, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC756PRO2_att_labels;
+static const char *vIC756PRO2_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>IC756PRO2_pre_labels;
+static const char *vIC756PRO2_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC756PRO2_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -99,6 +107,12 @@ void RIG_IC756PRO2::initialize()
 	modes_ = IC756PRO2modes_;
 	bandwidths_ = IC756PRO2_SSBwidths;
 	bw_vals_ = IC756PRO2_bw_vals_SSB;
+
+	VECTOR (IC756PRO2_att_labels, vIC756PRO2_att_labels);
+	VECTOR (IC756PRO2_pre_labels, vIC756PRO2_pre_labels);
+
+	att_labels_ = IC756PRO2_att_labels;
+	pre_labels_ = IC756PRO2_pre_labels;
 
 	IC756PRO2_widgets[0].W = btnVol;
 	IC756PRO2_widgets[1].W = sldrVOLUME;
@@ -142,8 +156,8 @@ RIG_IC756PRO2::RIG_IC756PRO2() {
 	def_mode = modeA = modeB = B.imode = 1;
 	def_bw = bwA = bwB = A.iBW = B.iBW = 32;
 
-	atten_level = 3;
-	preamp_level = 2;
+	atten_state = 3;
+	preamp_state = 2;
 
 	adjustCIV(defaultCIV);
 
@@ -1030,7 +1044,7 @@ void RIG_IC756PRO2::get_notch_min_max_step(int &min, int &max, int &step)
 
 int  RIG_IC756PRO2::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -1041,16 +1055,16 @@ int  RIG_IC756PRO2::next_attenuator()
 
 void RIG_IC756PRO2::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 
 	int cmdval = 0;
-	if (atten_level == 1) {
+	if (atten_state == 1) {
 		cmdval = 0x06;
-	} else if (atten_level == 2) {
+	} else if (atten_state == 2) {
 		cmdval = 0x12;
-	} else if (atten_level == 3) {
+	} else if (atten_state == 3) {
 		cmdval = 0x18;
-	} else if (atten_level == 0) {
+	} else if (atten_state == 0) {
 		cmdval = 0x00;
 	}
 
@@ -1073,23 +1087,23 @@ int RIG_IC756PRO2::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x06) {
-				atten_level = 1;
+				atten_state = 1;
 			} else if (replystr[p+5] == 0x12) {
-				atten_level = 2;
+				atten_state = 2;
 			} else if (replystr[p+5] == 0x18) {
-				atten_level = 3;
+				atten_state = 3;
 			} else if (replystr[p+5] == 0x00) {
-				atten_level = 0;
+				atten_state = 0;
 			}
 		}
 	}
 	get_trace(2, "get_ATT()", str2hex(replystr.c_str(), replystr.length()));
-	return atten_level;
+	return atten_state;
 }
 
 int  RIG_IC756PRO2::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1099,12 +1113,12 @@ int  RIG_IC756PRO2::next_preamp()
 
 void RIG_IC756PRO2::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x02';
-	cmd += (unsigned char) preamp_level;
+	cmd += (unsigned char) preamp_state;
 	cmd.append( post );
 	waitFB("set preamp");
 	set_trace(2, "set_preamp()", str2hex(cmd.c_str(), cmd.length()));
@@ -1121,35 +1135,10 @@ int RIG_IC756PRO2::get_preamp()
 	if (waitFOR(8, "get preamp")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos)
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 	}
 	get_trace(2, "get_preamp()", str2hex(replystr.c_str(), replystr.length()));
-	return preamp_level;
-}
-
-const char *RIG_IC756PRO2::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC756PRO2::ATT_label()
-{
-	switch (atten_level) {
-		default:
-		case 0: break;
-		case 1: return "6 dB"; break;
-		case 2: return "12 dB"; break;
-		case 3: return "18 dB"; break;
-	}
-	return "ATT";
+	return preamp_state;
 }
 
 const char *RIG_IC756PRO2::FILT(int &val)

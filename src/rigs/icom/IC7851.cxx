@@ -108,6 +108,15 @@ static const char *vIC7851_fm_bws[] =
 { "FIXED" };
 static int IC7851_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7851_att_labels;
+static const char *vIC7851_att_labels[] = {
+"ATT", "3 dB", "6 dB", "9 dB", "12 dB", "15 dB", "18 dB", "21 dB"};
+
+//static std::vector<std::string>IC7851_pre_labels;
+//static const char *vIC7851_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7851_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -139,6 +148,12 @@ void RIG_IC7851::initialize()
 	bw_vals_ = IC7851_bw_vals_SSB;
 
 	_mode_type = IC7851_mode_type;
+
+	VECTOR (IC7851_att_labels, vIC7851_att_labels);
+//	VECTOR (IC7851_pre_labels, vIC7851_pre_labels);
+
+	att_labels_ = IC7851_att_labels;
+//	pre_labels_ = IC7851_pre_labels;
 
 	IC7851_widgets[0].W = btnVol;
 	IC7851_widgets[1].W = sldrVOLUME;
@@ -807,20 +822,17 @@ void RIG_IC7851::set_mic_gain(int v)
 	waitFB("set mic gain");
 }
 
-static const char *atten_labels[] = {
-"ATT", "3 dB", "6 dB", "9 dB", "12 dB", "15 dB", "18 dB", "21 dB"};
-
 int  RIG_IC7851::next_attenuator()
 {
-	if (atten_level >= 7) return 0;
-	else return (atten_level + 1);
+	if (atten_state >= 7) return 0;
+	else return (atten_state + 1);
 }
 
 void RIG_IC7851::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 
-	int cmdval = atten_level;
+	int cmdval = atten_state;
 	cmd = pre_to;
 	cmd += '\x11';
 	cmd += cmdval;
@@ -836,18 +848,10 @@ int RIG_IC7851::get_attenuator()
 	cmd.append( post );
 	if (sendICcommand(cmd,7)) {
 		if (replystr[4] == 0x06)
-			atten_level = replystr[5];
+			atten_state = replystr[5];
 	}
-	return atten_level;
+	return atten_state;
 }
-
-const char *RIG_IC7851::ATT_label()
-{
-	if (atten_level >= 0 && atten_level <= 7)
-		return atten_labels[atten_level];
-	return atten_labels[0];
-}
-
 
 void RIG_IC7851::set_compression(int on, int val)
 {

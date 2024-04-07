@@ -46,10 +46,21 @@ enum {DT_BINARY, DT_STRING};
 enum {SERIAL, TCPIP, TCI};
 
 extern const char *szNORIG;
+
 extern std::vector<std::string>vNOMODES;
 extern std::vector<std::string>vNOBWS;
 extern std::vector<std::string>vDSPLO;
 extern std::vector<std::string>vDSPHI;
+
+extern std::vector<std::string>vAGC_LABELS;
+extern std::vector<std::string>vATT_LABELS;
+extern std::vector<std::string>vPRE_LABELS;
+extern std::vector<std::string>vNB_LABELS;
+extern std::vector<std::string>vNR_LABELS;
+extern std::vector<std::string>vBK_LABELS;
+extern std::vector<std::string>v60M_LABELS;
+extern std::vector<std::string>vAN_LABELS;
+
 extern const char *szdsptooltip;
 extern const char *szbtnlabel;
 
@@ -171,12 +182,23 @@ public:
 	static std::vector<std::string>& modes_;// = vNOMODES;
 	static std::vector<std::string>& bandwidths_;// = vNOBWS;
 	static std::vector<std::string>& dsp_SL;// = vDSPLO;
+
 	const char *  SL_tooltip;
 	const char *  SL_label;
 	static std::vector<std::string>& dsp_SH;// = vDSPHI;
 	const char *  SH_tooltip;
 	const char *  SH_label;
 	const int  * bw_vals_;
+
+// other labeled control values
+	static std::vector<std::string>& agc_labels_;
+	static std::vector<std::string>& att_labels_;
+	static std::vector<std::string>& pre_labels_;
+	static std::vector<std::string>& nb_labels_;
+	static std::vector<std::string>& nr_labels_;
+	static std::vector<std::string>& bk_labels_;
+	static std::vector<std::string>& m60_labels_;
+	static std::vector<std::string>& an_labels_;
 
 	GUI *widgets;
 
@@ -238,8 +260,16 @@ public:
 	int  if_shift_step;
 	int  if_shift_mid;
 
-	int  atten_level;
-	int  preamp_level;
+	int agcval;
+	int atten_state;
+	int preamp_state;
+	int nb_state;
+	int	nb_level;
+	int nr_state;
+	int nr_level;
+	int bk_state;
+	int an_level;
+	int m60_level;
 
 	int  rTONE;  // index into szTONES, PL_tones arrar of receive PL tones
 	int  tTONE;
@@ -399,9 +429,19 @@ public:
 	virtual int  get_bwB_val() { return bwB_val; }
 	virtual int  adjust_bandwidth(int m) {return 0;}
 	virtual int  def_bandwidth(int m) {return 0;}
+
 	virtual std::vector<std::string>&bwtable(int m) {return vNOBWS;}
 	virtual std::vector<std::string>&lotable(int m) {return vDSPLO;}
 	virtual std::vector<std::string>&hitable(int m) {return vDSPHI;}
+
+	virtual std::vector<std::string>&agctable(int m) {return vAGC_LABELS;}
+	virtual std::vector<std::string>&atttable(int m) {return vATT_LABELS;}
+	virtual std::vector<std::string>&pretable(int m) {return vPRE_LABELS;}
+	virtual std::vector<std::string>&nbtable(int m)  {return vNB_LABELS;}
+	virtual std::vector<std::string>&nrtable(int m)  {return vNR_LABELS;}
+	virtual std::vector<std::string>&bktable(int m)  {return vBK_LABELS;}
+	virtual std::vector<std::string>&m60table(int m) {return v60M_LABELS;}
+	virtual std::vector<std::string>&antable(int m)  {return vAN_LABELS;}
 
 	virtual const char *FILT(int val) { return "1"; }
 	virtual const char *nextFILT() { return "1";}
@@ -425,7 +465,6 @@ public:
 
 	virtual int  get_agc() { return 0; }
 	virtual int  incr_agc() { return 0;}
-	virtual const char *agc_label() { return "";}
 	virtual int  agc_val() { return 0; }
 
 	virtual int  get_smeter(void) {return -1;}
@@ -439,6 +478,63 @@ public:
 	virtual int  get_power_out(void) {return -1;}
 
 	virtual double  get_voltmeter(void) { return -1; }
+
+	virtual const char *agc_label() { 
+		try {
+			return agc_labels_.at(agcval).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *att_label() {
+		try {
+			 return att_labels_.at(atten_state).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *pre_label() {
+		try {
+			 return pre_labels_.at(preamp_state).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *nb_label() {
+		try {
+			 return nb_labels_.at(nb_state).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *nr_label() {
+		try {
+			 return nr_labels_.at(nr_state).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *bk_label() {
+		try {
+			 return bk_labels_.at(bk_state).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *m60_label() {
+		try {
+			 return m60_labels_.at(m60_level).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
+	virtual const char *an_label() {
+		try {
+			 return an_labels_.at(an_level).c_str();
+		} catch (...) {
+			return "";
+		}
+	}
 
 int po_, po_val;
 int pmax;
@@ -460,23 +556,21 @@ int tune_;
 	virtual void tune_rig(int how) {}
 	virtual int  get_tune() { return tune_; }
 
-	virtual void set_attenuator(int val) {atten_level = val;}
+	virtual void set_attenuator(int val) {atten_state = val;}
 	virtual int  next_attenuator() { 
-		if (atten_level == 0) atten_level = 1;
-		else atten_level = 0;
-		return atten_level;
+		if (atten_state == 0) atten_state = 1;
+		else atten_state = 0;
+		return atten_state;
 	}
-	virtual int  get_attenuator() {return atten_level;}
-	virtual const char *ATT_label() { return "ATT"; }
+	virtual int  get_attenuator() {return atten_state;}
 
-	virtual void set_preamp(int val) {preamp_level = val;}
+	virtual void set_preamp(int val) {preamp_state = val;}
 	virtual int  next_preamp() { 
-		if (preamp_level == 0) preamp_level = 1;
-		else preamp_level = 0;
-		return preamp_level;
+		if (preamp_state == 0) preamp_state = 1;
+		else preamp_state = 0;
+		return preamp_state;
 	}
-	virtual int  get_preamp() {return preamp_level;}
-	virtual const char *PRE_label() { return "PRE"; }
+	virtual int  get_preamp() {return preamp_state;}
 
 // CTCSS tones / offset
 	virtual void set_tones(int tx_tone, int rx_tone) { return; }
@@ -497,11 +591,10 @@ int no_, noval_;
 	virtual void get_notch_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
 
-int nb_, nbval_;
-	virtual void set_noise(bool on) {nb_ = on;}
-	virtual int  get_noise(){return nb_;}
-	virtual void set_nb_level(int val) {nbval_ = val;}
-	virtual int  get_nb_level() { return nbval_; }
+	virtual void set_noise(bool on) {nb_state = on;}
+	virtual int  get_noise(){return nb_state;}
+	virtual void set_nb_level(int val) {nb_level = val;}
+	virtual int  get_nb_level() { return nb_level; }
 	virtual void get_nb_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
 

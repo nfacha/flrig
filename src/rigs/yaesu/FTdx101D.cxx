@@ -130,6 +130,17 @@ static const char *vFTdx101D_US_60m[] = {"", "126", "127", "128", "130"};
 
 static std::vector<std::string>& Channels_60m = FTdx101D_US_60m;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FTdx101D_att_labels;
+static const char *vFTdx101D_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB"};
+
+static std::vector<std::string>FTdx101D_pre_labels;
+static const char *vFTdx101D_pre_labels[] = { "IPO", "Amp 1", "Amp 2"};
+
+static std::vector<std::string>FTdx101D_nb_labels;
+static const char *vFTdx101D_nb_labels[] = { "NB", "NB on" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -161,6 +172,15 @@ void RIG_FTdx101D::initialize()
 	modes_ = FTdx101Dmodes_;
 	bandwidths_ = FTdx101D_widths_SSB;
 	bw_vals_ = FTdx101D_wvals_SSB;
+
+	VECTOR (FTdx101D_att_labels, vFTdx101D_att_labels);
+	att_labels_ = FTdx101D_att_labels;
+
+	VECTOR (FTdx101D_pre_labels, vFTdx101D_pre_labels);
+	pre_labels_ = FTdx101D_pre_labels;
+
+	VECTOR (FTdx101D_nb_labels, vFTdx101D_nb_labels);
+	nb_labels_ = FTdx101D_nb_labels;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -255,8 +275,8 @@ RIG_FTdx101D::RIG_FTdx101D() {
 	can_synch_clock = true;
 
 // derived specific
-	atten_level = 0;
-	preamp_level = 0;
+	atten_state = 0;
+	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
 
@@ -672,7 +692,7 @@ int RIG_FTdx101D::get_tune()
 
 int  RIG_FTdx101D::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -683,9 +703,9 @@ int  RIG_FTdx101D::next_attenuator()
 
 void RIG_FTdx101D::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = "RA00;";
-	cmd[3] += atten_level;
+	cmd[3] += atten_state;
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET att", cmd, replystr);
 }
@@ -701,13 +721,13 @@ int RIG_FTdx101D::get_attenuator()
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.attenuator;
 	if (p + 3 >= replystr.length()) return progStatus.attenuator;
-	atten_level = replystr[p+3] - '0';
-	return atten_level;
+	atten_state = replystr[p+3] - '0';
+	return atten_state;
 }
 
 int  RIG_FTdx101D::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -717,9 +737,9 @@ int  RIG_FTdx101D::next_preamp()
 
 void RIG_FTdx101D::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = "PA00;";
-	cmd[3] = '0' + preamp_level;
+	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET preamp", cmd, replystr);
 }
@@ -734,28 +754,8 @@ int RIG_FTdx101D::get_preamp()
 
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos)
-		preamp_level = replystr[p+3] - '0';
-	return preamp_level;
-}
-
-const char *RIG_FTdx101D::ATT_label()
-{
-	if (atten_level == 1)
-		return "6 dB";
-	if (atten_level == 2)
-		return "12 dB";
-	if (atten_level == 3)
-		return "18 dB";
-	return "ATT";
-}
-
-const char *RIG_FTdx101D::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	return "IPO";
+		preamp_state = replystr[p+3] - '0';
+	return preamp_state;
 }
 
 static bool narrow = 0; // 0 - wide, 1 - narrow
@@ -1208,8 +1208,6 @@ int  RIG_FTdx101D::get_auto_notch()
 	return 0;
 }
 
-int FTdx101D_blanker_level = 0;
-
 void RIG_FTdx101D::set_noise(bool b)
 {
 	if (inuse == onB)
@@ -1217,11 +1215,12 @@ void RIG_FTdx101D::set_noise(bool b)
 	else
 		cmd = "NB00;";
 
+	nb_state = b;
 	if (b) {
 		cmd[3] = '1';
-		nb_label("NB on", true);
+		noise_blanker_label(nb_label(), true);
 	} else
-		nb_label("NB", false);
+		noise_blanker_label(nb_label(), false);
 
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET NB", cmd, replystr);
@@ -1239,16 +1238,16 @@ int RIG_FTdx101D::get_noise()
 	gett("get_noise()");
 
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return FTdx101D_blanker_level;
+	if (p == std::string::npos) return nb_state;
 
-	FTdx101D_blanker_level = replystr[p+3] - '0';
+	nb_state = replystr[p+3] - '0';
 
-	if (FTdx101D_blanker_level) {
-		nb_label("NB on", true);
+	if (nb_state) {
+		noise_blanker_label(nb_label(), true);
 	} else
-		nb_label("NB", false);
+		noise_blanker_label(nb_label(), false);
 
-	return FTdx101D_blanker_level;
+	return nb_state;
 }
 
 // val 0 .. 100

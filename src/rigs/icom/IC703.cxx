@@ -36,6 +36,14 @@ static const char *vIC703_widths[] =
 { "NARR", "MED", "WIDE"};
 static int IC703_bw_vals[] = {1,2,3, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC703_att_labels;
+static const char *vIC703_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>IC703_pre_labels;
+static const char *vIC703_pre_labels[] = { "PRE", "Pre 1", "Pre 2" };
+//----------------------------------------------------------------------
+
 static GUI IC703_widgetsdgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -62,6 +70,11 @@ void RIG_IC703::initialize()
  	_mode_type = IC703_mode_type;
 	bandwidths_ = IC703_widths;
 	bw_vals_ = IC703_bw_vals;
+
+	VECTOR (IC703_att_labels, vIC703_att_labels);
+	att_labels_ = IC703_att_labels;
+	VECTOR (IC703_pre_labels, vIC703_pre_labels);
+	pre_labels_ = IC703_pre_labels;
 
 	IC703_widgetsdgets[0].W = btnVol;
 	IC703_widgetsdgets[1].W = sldrVOLUME;
@@ -323,25 +336,6 @@ int RIG_IC703::get_preamp()
 		}
 	}
 	return preamp_level;
-}
-
-const char *RIG_IC703::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC703::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 int RIG_IC703::get_smeter()

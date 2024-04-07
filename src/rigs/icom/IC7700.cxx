@@ -92,6 +92,14 @@ static std::vector<std::string>IC7700_fm_bws;
 static const char *vIC7700_fm_bws[] =
 { "FIXED" };
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7600_att_labels;
+static const char *vIC7600_att_labels[] = { "ATT", "10 dB" };
+
+//static std::vector<std::string>IC7600_pre_labels;
+//static const char *vIC7600_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7700_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -122,6 +130,12 @@ void RIG_IC7700::initialize()
 	modes_ = IC7700modes_;
 	bandwidths_ = IC7700_ssb_bws;
 	_mode_type = IC7700_mode_type;
+
+	VECTOR (IC7600_att_labels, vIC7600_att_labels);
+//	VECTOR (IC7600_pre_labels, vIC7600_pre_labels);
+
+	att_labels_ = IC7600_att_labels;
+//	pre_labels_ = IC7600_pre_labels;
 
 	IC7700_widgets[0].W = btnVol;
 	IC7700_widgets[1].W = sldrVOLUME;
@@ -516,12 +530,6 @@ int RIG_IC7700::get_attenuator()
 		}
 	}
 	return atten_level;
-}
-
-const char *RIG_IC7700::ATT_label()
-{
-	if (atten_level == 1) return "12 dB";
-	return "ATT";
 }
 
 void RIG_IC7700::set_compression(int on, int val)

@@ -68,6 +68,10 @@ static const int TT588_numeric_widths[] = {
 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000, 4500, 5000,
 5500, 6000, 6500, 7000, 7500, 8000, 9000, 12000, 0};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>TT588_att_labels;
+static const char *vTT588_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+//----------------------------------------------------------------------
 
 static char TT588setFREQA[]		= "*Annnn\r";
 static char TT588setFREQB[]		= "*Bnnnn\r";
@@ -155,7 +159,7 @@ RIG_TT588::RIG_TT588() {
 	VfoAdj = progStatus.vfo_adj;
 	vfo_corr = 0;
 
-	atten_level = 0;
+	atten_state = 0;
 	nb_ = 0;
 	an_ = 0;
 
@@ -195,6 +199,9 @@ void RIG_TT588::initialize()
 {
 	VECTOR (TT588modes_, vTT588modes_);
 	VECTOR (TT588_widths, vTT588_widths);
+
+	VECTOR (TT588_att_labels, vTT588_att_labels);
+	att_labels_ = TT588_att_labels;
 
 	modes_ = TT588modes_;
 	bandwidths_ = TT588_widths;
@@ -436,7 +443,7 @@ void RIG_TT588::get_if_min_max_step(int &min, int &max, int &step)
 
 int  RIG_TT588::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -447,10 +454,10 @@ int  RIG_TT588::next_attenuator()
 
 void RIG_TT588::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = TT588setATT;
 
-	cmd[2] = '0' + atten_level;
+	cmd[2] = '0' + atten_state;
 	sendCommand(cmd);
 	showresp(WARN, HEX, "set att", cmd, replystr);
 }
@@ -460,22 +467,13 @@ int RIG_TT588::get_attenuator()
 {
 	cmd = TT588getATT;
 	int ret = waitN(3, 100, "get att");
-	int val = atten_level;
+	int val = atten_state;
 	if (ret >= 3) {
 		size_t p = replystr.rfind("J");
 		if (p != std::string::npos) val = (replystr[p + 1] - '0');
 	}
-	if (atten_level != val) atten_level = val;
-	return atten_level;
-}
-
-const char *RIG_TT588::ATT_label()
-{
-	if (atten_level == 0) return "0 dB";
-	if (atten_level == 1) return "6 dB";
-	if (atten_level == 2) return "12 dB";
-	if (atten_level == 3) return "18 dB";
-	return "ATT";
+	if (atten_state != val) atten_state = val;
+	return atten_state;
 }
 
 int RIG_TT588::get_smeter()
@@ -592,11 +590,11 @@ int  RIG_TT588::get_squelch()
 
 void RIG_TT588::set_noise(bool val)
 {
-	static char nblabel[] = "NB ";
-	nb_++;
+	static std::string nblabel = "NB  ";
+	nb_state ++;
 	if (nb_ == 8) nb_ = 0;
-	nblabel[2] = '0' + nb_;
-	nb_label(nblabel, nb_ ? true : false);
+	if (nb_state) nblabel[3] = '0' + nb_state;
+	noise_blanker_label(nblabel.c_str(), nb_state ? true : false);
 	cmd = TT588setNB;
 	cmd[2] = (unsigned char)nb_;
 	cmd[3] = 0;
@@ -613,45 +611,12 @@ int  RIG_TT588::get_noise()
 	size_t p = replystr.rfind("K");
 	if (p == std::string::npos) return nb_;
 	int val = replystr[p+1];
-	if (nb_ != val) nb_ = val;
-	static char nblabel[] = "NB ";
-	nblabel[2] = '0' + nb_;
-	nb_label(nblabel, nb_ ? true : false);
-	return nb_;
+	nb_state = val;
+	static std::string nblabel = "NB  ";
+	nblabel[3] = '0' + nb_state;
+	noise_blanker_label(nblabel.c_str(), nb_state ? true : false);
+	return nb_state;
 }
-
-/*
-void RIG_TT588::set_auto_notch(int val)
-{
-	static char anlabel[] = "AN ";
-	an_++;
-	if (an_ == 10) an_ = 0;
-	anlabel[2] = '0' + an_;
-	auto_notch_label(anlabel, an_ > 0 ? true : false);
-	cmd = TT588setNB;
-	cmd[2] = (unsigned char)nb_;
-	cmd[3] = 0;
-	cmd[4] = (unsigned char)an_;
-	sendCommand(cmd);
-}
-
-int  RIG_TT588::get_auto_notch()
-{
-	cmd = TT588getNB;
-	int ret = sendCommand(cmd);
-	showresp(WARN, HEX, "get AN", cmd, replystr);
-	int val = an_;
-	if (ret >= 5) {
-		size_t p = replystr.rfind("K");
-		if (p != std::string::npos) val = replystr[p+3];
-	}
-	if (an_ != val) an_ = val;
-	static char anlabel[] = "AN ";
-	anlabel[2] = '0' + an_;
-	auto_notch_label(anlabel, an_ ? true : false);
-	return an_;
-}
-*/
 
 void RIG_TT588::set_split(bool val)
 {
@@ -670,40 +635,3 @@ int RIG_TT588::get_split()
 	return false;
 }
 
-/*
-double  RIG_TT588::get_power_control(void)
-{
-	cmd = TT588getPOWER;
-	int ret = waitN(7, 100, "get pc");
-	if (ret == 7) {
-		int pc = replystr[3] & 0x7F;
-		return (int)ceil(pc / 1.27);
-	}
-	return 0;
-}
-
-void RIG_TT588::set_power_control(double val)
-{
-	cmd = TT588setPOWER;
-	cmd[4] = ((int)(val * 1.27) & 0x7f);
-	sendCommand(cmd);
-	showresp(WARN, HEX, "set pc", cmd, replystr);
-}
-
-int  RIG_TT588::get_preamp()
-{
-	cmd = TT588getPREAMP;
-	int ret = waitN(5, 100, "get preamp");
-	if (ret == 5) 
-		return replystr[3];
-	return 0;
-}
-
-void RIG_TT588::set_preamp(int val)
-{
-	cmd = TT588setPREAMP;
-	cmd[4] = (val == 0 ? 0 : 1);
-	sendCommand(cmd);
-	showresp(WARN, HEX, "set preamp", cmd, replystr);
-}
-*/

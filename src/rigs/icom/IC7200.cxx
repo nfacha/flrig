@@ -106,6 +106,14 @@ static int IC7200_bw_vals_AM[] = {
 31,32,33,34,35,36,37,38,39,40,
 WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7200_att_labels;
+static const char *vIC7200_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>IC7200_pre_labels;
+static const char *vIC7200_pre_labels[] = { "PRE", "Pre on" };
+//----------------------------------------------------------------------
+
 //======================================================================
 // IC7200 unique commands
 //======================================================================
@@ -141,6 +149,12 @@ void RIG_IC7200::initialize()
 	_mode_type = IC7200_mode_type;
 	bandwidths_ = IC7200_SSBwidths;
 	bw_vals_ = IC7200_bw_vals_SSB;
+
+	VECTOR (IC7200_att_labels, vIC7200_att_labels);
+	VECTOR (IC7200_pre_labels, vIC7200_pre_labels);
+
+	att_labels_ = IC7200_att_labels;
+	pre_labels_ = IC7200_pre_labels;
 
 	IC7200_widgets[0].W = btnVol;
 	IC7200_widgets[1].W = sldrVOLUME;
@@ -736,14 +750,14 @@ int RIG_IC7200::get_noise_reduction_val()
 void RIG_IC7200::set_attenuator(int val)
 {
 	if (val) {
-		atten_level = 1;
+		atten_state = 1;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x20' : '\x00';
+	cmd += atten_state ? '\x20' : '\x00';
 	cmd.append( post );
 	set_trace(1, "set att");
 	waitFB("set att");
@@ -752,9 +766,9 @@ void RIG_IC7200::set_attenuator(int val)
 
 int RIG_IC7200::next_attenuator()
 {
-	if (atten_level)
-		atten_level = 0;
-	return atten_level;
+	if (atten_state)
+		atten_state = 0;
+	return atten_state;
 }
 
 int RIG_IC7200::get_attenuator()
@@ -771,19 +785,19 @@ int RIG_IC7200::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (!replystr[p+5]) {
-				atten_level = 0;
+				atten_state = 0;
 			} else {
-				atten_level = 1;
+				atten_state = 1;
 			}
 		}
 		geth();
 	}
-	return atten_level;
+	return atten_state;
 }
 
 int RIG_IC7200::next_preamp()
 {
-	if (preamp_level)
+	if (preamp_state)
 		return 0;
 	return 1;
 }
@@ -791,15 +805,15 @@ int RIG_IC7200::next_preamp()
 void RIG_IC7200::set_preamp(int val)
 {
 	if (val) {
-		preamp_level = 1;
+		preamp_state = 1;
 	} else {
-		preamp_level = 0;
+		preamp_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x02';
-	cmd += preamp_level ? 0x01 : 0x00;
+	cmd += preamp_state ? 0x01 : 0x00;
 	cmd.append( post );
 	set_trace(1, "set Pre");
 	waitFB("set Pre");
@@ -820,29 +834,12 @@ int RIG_IC7200::get_preamp()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+6] == 0x01) {
-				preamp_level = replystr[p+6];
+				preamp_state = replystr[p+6];
 			}
 		}
 	}
 	geth();
-	return preamp_level; //progStatus.preamp;
-}
-
-const char *RIG_IC7200::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "P ON"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC7200::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
+	return preamp_state; //progStatus.preamp;
 }
 
 void RIG_IC7200::set_rf_gain(int val)
@@ -1450,14 +1447,16 @@ int  RIG_IC7200::get_bwB()
 
 void RIG_IC7200::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
-	set_trace(1, "set AN");
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
 	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7200::get_auto_notch()
@@ -1469,22 +1468,17 @@ int RIG_IC7200::get_auto_notch()
 	cmd.append(cstr);
 	cmd.append( post );
 
-	get_trace(1, "get AN");
-	if (waitFOR(8, "get AN")) {
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				geth();
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				geth();
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
-	geth();
 	return progStatus.auto_notch;
 }
 
@@ -1680,7 +1674,6 @@ void RIG_IC7200::get_notch_min_max_step(int &min, int &max, int &step)
 	}
 }
 
-static int agcval = 0;
 int  RIG_IC7200::get_agc()
 {
 	cmd = pre_to;

@@ -1188,7 +1188,7 @@ void RIG_FT450::get_rf_min_max_step(int &min, int &max, int &step)
   3: AGC “SLOW”
   4: AGC “AUTO”
 */
-static int agcval = 0;
+
 int  RIG_FT450::get_agc()
 {
     cmd = "GT0;";

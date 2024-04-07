@@ -145,12 +145,10 @@ public:
 	void set_preamp(int val);
 	int  get_preamp();
 	int  next_preamp();
-	const char * PRE_label();
 
 	void set_attenuator(int val);
 	int  get_attenuator();
 	int  next_attenuator();
-	const char * ATT_label();
 
 	void set_noise(bool val);
 	int  get_noise();
@@ -176,8 +174,8 @@ public:
 
 	int  get_agc();
 	int  incr_agc();
-	const char *agc_label();
 	int  agc_val();
+//	const char *agc_label();
 
 	void setVfoAdj(double v);
 	double getVfoAdj();

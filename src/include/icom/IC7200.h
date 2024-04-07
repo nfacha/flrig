@@ -86,9 +86,6 @@ public:
 	int  next_preamp();
 	int  get_preamp();
 
-	const char * PRE_label();
-	const char * ATT_label();
-
 	void set_rf_gain(int val);
 	int  get_rf_gain();
 	void set_squelch(int val);

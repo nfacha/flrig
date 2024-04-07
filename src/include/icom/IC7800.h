@@ -61,8 +61,6 @@ public:
 	void set_attenuator( int val );	//alh
 	int  get_attenuator();		//alh
 
-	const char * ATT_label();
-
 	void set_mic_gain(int v);
 
 	void set_pbt_inner(int val);

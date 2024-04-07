@@ -85,6 +85,11 @@ static const char *vTS2000_FSKbw[] = {
 "FW0250;", "FW0500;", "FW1000;", "FW1500;" };
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+static std::vector<std::string>TS2000_nr_labels;
+static const char *vTS2000_nr_labels[] = { "NR", "NR 1", "NR 2" };
+//------------------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 }, // 1
@@ -116,6 +121,9 @@ void RIG_TS2000::initialize()
 	VECTOR (TS2000_CWbw, vTS2000_CWbw);
 	VECTOR (TS2000_FSKwidths, vTS2000_FSKwidths);
 	VECTOR (TS2000_FSKbw, vTS2000_FSKbw);
+
+	VECTOR (TS2000_nr_labels, vTS2000_nr_labels);
+	nr_labels_ = TS2000_nr_labels;
 
 	modes_ = TS2000modes_;
 	bandwidths_ = TS2000_empty;
@@ -261,9 +269,9 @@ RIG_TS2000::RIG_TS2000() {
 	precision = 1;
 	ndigits = 9;
 
-	att_level = 0;
-	preamp_level = 0;
-	_noise_reduction_level = 0;
+	atten_state = 0;
+	preamp_state = 0;
+	nr_state = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
 
@@ -361,7 +369,7 @@ double RIG_TS2000::get_power_control()
 
 void RIG_TS2000::set_attenuator(int val)
 {
-	att_level = val;
+	atten_state = val;
 	if (val) cmd = "RA01;";
 	else     cmd = "RA00;";
 	sendCommand(cmd);
@@ -379,17 +387,17 @@ int RIG_TS2000::get_attenuator()
 		size_t p = replystr.rfind("RA");
 		if (p != std::string::npos && (p+3 < replystr.length())) {
 			if (replystr[p+2] == '0' && replystr[p+3] == '0')
-				att_level = 0;
+				atten_state = 0;
 			else
-				att_level = 1;
+				atten_state = 1;
 		}
 	}
-	return att_level;
+	return atten_state;
 }
 
 void RIG_TS2000::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	if (val) cmd = "PA1;";
 	else     cmd = "PA0;";
 	sendCommand(cmd);
@@ -407,12 +415,12 @@ int RIG_TS2000::get_preamp()
 		size_t p = replystr.rfind("PA");
 		if (p != std::string::npos && (p+2 < replystr.length())) {
 			if (replystr[p+2] == '1')
-				preamp_level = 1;
+				preamp_state = 1;
 			else
-				preamp_level = 0;
+				preamp_state = 0;
 		}
 	}
-	return preamp_level;
+	return preamp_state;
 }
 
 int RIG_TS2000::set_widths(int val)
@@ -911,16 +919,16 @@ void RIG_TS2000::set_noise_reduction(int val)
 	if (val == -1) {
 		return;
 	}
-	_noise_reduction_level = val;
-	if (_noise_reduction_level == 0) {
-		nr_label("NR", false);
-	} else if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	nr_state = val;
+	if (nr_state == 0) {
+		noise_reduction_label(nr_label(), false);
+	} else if (nr_state == 1) {
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		noise_reduction_label(nr_label(), true);
 	}
 	cmd.assign("NR");
-	cmd += '0' + _noise_reduction_level;
+	cmd += '0' + nr_state;
 	cmd += ';';
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
@@ -938,28 +946,28 @@ int  RIG_TS2000::get_noise_reduction()
 
 	if (ret == 4) {
 		size_t p = replystr.rfind(rsp);
-		if (p == std::string::npos) return _noise_reduction_level;
-		_noise_reduction_level = replystr[p+2] - '0';
+		if (p == std::string::npos) return nr_state;
+		nr_state = replystr[p+2] - '0';
 	}
 	if (replystr == "?;") {
-		_noise_reduction_level = 0;
+		nr_state = 0;
 		return 0;
 	}
 
-	if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	if (nr_state == 1) {
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		noise_reduction_label(nr_label(), true);
 	} else {
-		nr_label("NR", false);
+		noise_reduction_label(nr_label(), false);
 	}
-	return _noise_reduction_level;
+	return nr_state;
 }
 
 void RIG_TS2000::set_noise_reduction_val(int val)
 {
-	if (_noise_reduction_level == 0) return;
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 0) return;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	cmd.assign("RL").append(to_decimal(val, 2)).append(";");
@@ -971,7 +979,7 @@ void RIG_TS2000::set_noise_reduction_val(int val)
 int  RIG_TS2000::get_noise_reduction_val()
 {
 	int nrval = 0;
-	if (_noise_reduction_level == 0) return 0;
+	if (nr_state == 0) return 0;
 	int val = progStatus.noise_reduction_val;
 	cmd = rsp = "RL";
 	cmd.append(";");
@@ -983,13 +991,13 @@ int  RIG_TS2000::get_noise_reduction_val()
 	if (ret == 5) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) {
-			nrval = (_noise_reduction_level == 1 ? _nrval1 : _nrval2);
+			nrval = (nr_state == 1 ? _nrval1 : _nrval2);
 			return nrval;
 		}
 		val = atoi(&replystr[p+2]);
 	}
 
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	return val;

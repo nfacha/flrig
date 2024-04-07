@@ -90,6 +90,11 @@ static const char *vIC7410_fm_bws[] =
 {
 "FIXED" };
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7410_att_labels;
+static const char *vIC7410_att_labels[] = { "ATT", "20 dB" };
+//----------------------------------------------------------------------
+
 static GUI IC7410_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -120,6 +125,9 @@ void RIG_IC7410::initialize()
 	modes_ = IC7410modes_;
 	bandwidths_ = IC7410_ssb_bws;
 	_mode_type = IC7410_mode_type;
+
+	VECTOR (IC7410_att_labels, vIC7410_att_labels);
+	att_labels_ = IC7410_att_labels;
 
 	IC7410_widgets[0].W = btnVol;
 	IC7410_widgets[1].W = sldrVOLUME;
@@ -494,12 +502,6 @@ int RIG_IC7410::get_attenuator()
 		}
 	}
 	return atten_level;
-}
-
-const char *RIG_IC7410::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 void RIG_IC7410::set_compression(int on, int val)

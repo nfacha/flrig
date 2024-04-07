@@ -101,7 +101,6 @@ static const char *vfmv[] = {
 "RF400;", "RF401;", "RF402;" };
 static const int duoFMvals = 3;
 
-static int agcval = 1;
 static bool fm_mode = false;
 
 static GUI rig_widgets[]= {
@@ -198,7 +197,7 @@ RIG_FDMDUO::RIG_FDMDUO() {
 	_noise_reduction_level = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
-	preamp_level = atten_level = 0;
+	preamp_state = atten_state = 0;
 
 	powerScale = 100; // displays 0 to 5 as 0 to 50 W
 }
@@ -716,7 +715,7 @@ void RIG_FDMDUO::set_attenuator(int val)
 	set_trace(1, "set attenuator");
 	sendCommand(cmd);
 	sett("");
-	atten_level = val;
+	atten_state = val;
 }
 
 int RIG_FDMDUO::get_attenuator()
@@ -725,12 +724,12 @@ int RIG_FDMDUO::get_attenuator()
 	get_trace(1, "get_attenuator");
 	ret = wait_char(';', 7, 100, "get attenuator", ASC);
 	gett("");
-	if (ret < 7) return atten_level;
+	if (ret < 7) return atten_state;
 
 	size_t p = replystr.rfind("RA");
 	if (p != std::string::npos)
-		atten_level = (replystr[p+3] == '1');
-	return atten_level;
+		atten_state = (replystr[p+3] == '1');
+	return atten_state;
 }
 
 void RIG_FDMDUO::set_preamp(int val)
@@ -741,7 +740,7 @@ void RIG_FDMDUO::set_preamp(int val)
 	set_trace(1, "set preamp");
 	sendCommand(cmd);
 	sett("");
-	preamp_level = val;
+	preamp_state = val;
 }
 
 int RIG_FDMDUO::get_preamp()
@@ -750,12 +749,12 @@ int RIG_FDMDUO::get_preamp()
 	get_trace(1, "get_preamp");
 	ret = wait_char(';', 5, 100, "get preamp", ASC);
 	gett("");
-	if (ret < 5) return preamp_level;
+	if (ret < 5) return preamp_state;
 
 	size_t p = replystr.rfind("PA");
 	if (p != std::string::npos)
-		preamp_level = (replystr[p+2] == '1');
-	return preamp_level;
+		preamp_state = (replystr[p+2] == '1');
+	return preamp_state;
 }
 
 // Noise Reduction (TS2000.cxx) NR1 only works; no NR2 and don' no why

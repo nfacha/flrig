@@ -164,8 +164,8 @@ RIG_TX500::RIG_TX500() {
 	precision = 1;
 	ndigits = 9;
 
-	atten_level = 0;
-	preamp_level = 0;
+	atten_state = 0;
+	preamp_state = 0;
 //	_noise_reduction_level = 0;
 //	_nrval1 = 2;
 //	_nrval2 = 4;
@@ -185,7 +185,7 @@ static int ret = 0;
 
 void RIG_TX500::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	if (val) cmd = "RA01;";
 	else     cmd = "RA00;";
 	sendCommand(cmd);
@@ -202,17 +202,17 @@ int RIG_TX500::get_attenuator()
 		size_t p = replystr.rfind("RA");
 		if (p != std::string::npos && (p+3 < replystr.length())) {
 			if (replystr[p+2] == '0' && replystr[p+3] == '0')
-				atten_level = 0;
+				atten_state = 0;
 			else
-				atten_level = 1;
+				atten_state = 1;
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 void RIG_TX500::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	if (val) cmd = "PA1;";
 	else     cmd = "PA0;";
 	sendCommand(cmd);
@@ -229,12 +229,12 @@ int RIG_TX500::get_preamp()
 		size_t p = replystr.rfind("PA");
 		if (p != std::string::npos && (p+2 < replystr.length())) {
 			if (replystr[p+2] == '1')
-				preamp_level = 1;
+				preamp_state = 1;
 			else
-				preamp_level = 0;
+				preamp_state = 0;
 		}
 	}
-	return preamp_level;
+	return preamp_state;
 }
 
 void RIG_TX500::set_modeA(int val)

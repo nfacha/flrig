@@ -39,6 +39,14 @@ static const char *vIC718_widths[] =
 { "Wide", "Med", "Narr"};
 static int IC718_bw_vals[] = {1,2,3,WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC718_att_labels;
+static const char *vIC718_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>IC718_pre_labels;
+static const char *vIC718_pre_labels[] = { "PRE", "Pre on"};
+//----------------------------------------------------------------------
+
 static GUI IC718_widgetsdgets[]= {
 	{ (Fl_Widget *)btnVol,       2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,  54, 125, 156 },
@@ -112,6 +120,12 @@ void RIG_IC718::initialize()
 	_mode_type = IC718_mode_type;
 	bandwidths_ = IC718_widths;
 	bw_vals_ = IC718_bw_vals;
+
+	VECTOR (IC718_att_labels, vIC718_att_labels);
+	VECTOR (IC718_pre_labels, vIC718_pre_labels);
+
+	att_labels_ = IC718_att_labels;
+	pre_labels_ = IC718_pre_labels;
 
 	IC718_widgetsdgets[0].W = btnVol;
 	IC718_widgetsdgets[1].W = sldrVOLUME;
@@ -272,7 +286,7 @@ int RIG_IC718::get_smeter()
 
 void RIG_IC718::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = pre_to;
 	cmd += '\x11';
 	cmd += val ? '\x20' : '\x00';
@@ -367,7 +381,7 @@ int RIG_IC718::get_noise_reduction_val()
 
 void RIG_IC718::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x02';
@@ -388,26 +402,10 @@ int RIG_IC718::get_preamp()
 	if (waitFOR(8, "get pre")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
 	return 0;
-}
-const char *RIG_IC718::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "P ON"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC718::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 void RIG_IC718::set_rf_gain(int val)
@@ -591,36 +589,39 @@ int RIG_IC718::get_bwB()
 // added by Jason Turning - N6WBL
 void RIG_IC718::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC718::get_auto_notch()
 {
-	cmd = pre_to;
-	cmd += '\x16';
-	cmd += '\x41';
-	cmd.append( post );
+	std::string cstr = "\x16\x41";
 	std::string resp = pre_fm;
-	resp += '\x16';
-	resp += '\x41';
-	if (waitFOR(8, "get AN")) {
+	resp.append(cstr);
+	cmd = pre_to;
+	cmd.append(cstr);
+	cmd.append( post );
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[6] == 0x01) {
-				auto_notch_label("AN", true);
-				return 1;
-			} else {
-				auto_notch_label("AN", false);
-				return 0;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
-	return 0;
+	return progStatus.auto_notch;
 }
 
 void RIG_IC718::set_compression(int on, int val)

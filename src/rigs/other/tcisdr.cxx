@@ -156,8 +156,6 @@ static std::string TCI_DRMpairs[] = {
 static int tci_nbr_drm = 1;
 static int tci_def_drm = 0;
 
-static int agcval = 1;
-
 void tci_adjust_widths()
 {
 	char szpairs[20];
@@ -339,7 +337,7 @@ RIG_TCI_SDR::RIG_TCI_SDR() {
 	_noise_reduction_level = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
-	preamp_level = atten_level = 0;
+	preamp_state = atten_state = 0;
 
 	sdrtype = UNK;
 

@@ -52,6 +52,14 @@ static int RIG_TT566_bw_vals[] = {
 21,22,23,24,25,26,27,28,29,
 WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>TT566_att_labels;
+static const char *vTT566_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>TT566_pre_labels;
+static const char *vTT566_pre_labels[] = { "PRE", "Pre ON" };
+//----------------------------------------------------------------------
+
 static char TT566setFREQa[]		= "*AF"; // binary data
 static char TT566getFREQa[]		= "?AF\r";
 static char TT566rspFREQa[]		= "@AF";
@@ -213,7 +221,7 @@ RIG_TT566::RIG_TT566() {
 	def_freq = freqB = freqA = A.freq = B.freq = 14070000ULL;
 
 	max_power = 100;
-	atten_level = 0;
+	atten_state = 0;
 
 //	has_ifshift_control =
 //	has_agc_level =
@@ -243,6 +251,12 @@ void RIG_TT566::initialize()
 {
 	VECTOR (RIG_TT566modes_, vRIG_TT566modes_);
 	VECTOR (RIG_TT566widths, vRIG_TT566widths); 
+
+	VECTOR (TT566_att_labels, vTT566_att_labels);
+	att_labels_ = TT566_att_labels;
+
+	VECTOR (TT566_pre_labels, vTT566_pre_labels);
+	pre_labels_ = TT566_pre_labels;
 
 	modes_ = RIG_TT566modes_;
 	bandwidths_ = RIG_TT566widths;
@@ -697,7 +711,7 @@ int  RIG_TT566::get_rf_gain()
 
 int  RIG_TT566::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -708,9 +722,9 @@ int  RIG_TT566::next_attenuator()
 
 void RIG_TT566::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = TT566setATTa;
-	cmd += (atten_level + '0');
+	cmd += (atten_state + '0');
 	cmd += '\r';
 	sendCommand(cmd);
 	setcr("set attenuator");
@@ -723,15 +737,15 @@ int RIG_TT566::get_attenuator()
 //	replystr = "";
 	waitcr(7);
 
-	int val = atten_level;
+	int val = atten_state;
 
 	size_t p = replystr.rfind(TT566rspATTa);
 	if (p == std::string::npos) return val;
 
 	val = (replystr[p + strlen(TT566rspATTa)] - '0');
 
-	if (atten_level != val) atten_level = val;
-	return atten_level;
+	if (atten_state != val) atten_state = val;
+	return atten_state;
 }
 
 void RIG_TT566::set_preamp(int val)
@@ -752,21 +766,6 @@ int RIG_TT566::get_preamp()
 	if (p == std::string::npos) return 0;
 
 	return replystr[p + strlen(TT566rspPREAMP)] - '0';
-}
-
-const char *RIG_TT566::PRE_label()
-{
-	if (preamp_level == 1) return "Pr ON";
-	return "Pre";
-}
-
-const char *RIG_TT566::ATT_label()
-{
-	if (atten_level == 0) return "0 dB";
-	if (atten_level == 1) return "6 dB";
-	if (atten_level == 2) return "12 dB";
-	if (atten_level == 3) return "18 dB";
-	return "ATT";
 }
 
 void RIG_TT566::set_noise(bool val)

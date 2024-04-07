@@ -700,7 +700,9 @@ void read_auto_notch()
 // NOISE blanker
 void update_noise(void *d)
 {
+	btnNOISE->label(selrig->nb_label());
 	btnNOISE->value(progStatus.noise);
+	btnNOISE->redraw_label();
 	btnNOISE->redraw();
 	sldr_nb_level->value(progStatus.nb_level);
 	sldr_nb_level->redraw();
@@ -717,8 +719,8 @@ void read_noise()
 		trace(1,"read_noise()");
 		on = selrig->get_noise();
 		val = selrig->get_nb_level();
-	}
-	if ((on != progStatus.noise) || (val != progStatus.nb_level)) {
+//	}
+//	if ((on != progStatus.noise) || (val != progStatus.nb_level)) {
 		vfo->noise = progStatus.noise = on;
 		vfo->nb_level = progStatus.nb_level = val;
 		Fl::awake(update_noise, (void*)0);
@@ -759,7 +761,7 @@ void update_preamp(void *d)
 	}
 
 	btnPreamp->value(progStatus.preamp > 0 ? 1 : 0);
-	btnPreamp->label(selrig->PRE_label());
+	btnPreamp->label(selrig->pre_label());
 	btnPreamp->redraw_label();
 	btnPreamp->redraw();
 }
@@ -772,7 +774,7 @@ void update_attenuator(void *d)
 	}
 
 	btnAttenuator->value(progStatus.attenuator > 0 ? 1 : 0);
-	btnAttenuator->label(selrig->ATT_label());
+	btnAttenuator->label(selrig->att_label());
 	btnAttenuator->redraw_label();
 	btnAttenuator->redraw();
 }
@@ -2893,7 +2895,7 @@ void cbAttenuator()
 			selrig->get_attenuator();
 	}
 	btnAttenuator->value( progStatus.attenuator > 0 ? 1 : 0);
-	btnAttenuator->label( selrig->ATT_label() );
+	btnAttenuator->label( selrig->att_label() );
 	btnAttenuator->redraw_label();
 	btnAttenuator->redraw();
 
@@ -2923,7 +2925,7 @@ void cbPreamp()
 	}
 
 	btnPreamp->value( progStatus.preamp > 0 ? 1 : 0);
-	btnPreamp->label( selrig->PRE_label() );
+	btnPreamp->label( selrig->pre_label() );
 	btnPreamp->redraw_label();
 	btnPreamp->redraw();
 
@@ -4186,40 +4188,39 @@ void editAlphaTag()
 // that the main thread is actually changing the widget
 
 // noise reduction
-static std::string nr_label_;
-static bool nr_state_;
+static std::string nrlabel;
+static bool nrstate;
 
 void do_nr_label(void *)
 {
-	btnNR->value(nr_state_ ? 1 : 0);
-	btnNR->label(nr_label_.c_str());
+	btnNR->value(nrstate ? 1 : 0);
+	btnNR->label(nrlabel.c_str());
 	btnNR->redraw_label();
 }
 
-void nr_label(const char *l, int on)
+void noise_reduction_label(const char *l, int on)
 {
-	nr_label_ = l;
-	nr_state_ = on;
-	progStatus.noise_reduction = on;
+	nrlabel = l;
+	progStatus.noise_reduction = nrstate = on;
 	Fl::awake(do_nr_label);
 }
 
 // noise blanker
-static std::string nb_label_;
-static bool nb_state_;
+static std::string nblabel;
+static bool nbstate;
 
 void do_nb_label(void *)
 {
-	btnNOISE->value(nb_state_ ? 1 : 0);
-	btnNOISE->label(nb_label_.c_str());
+	btnNOISE->value(nbstate ? 1 : 0);
+	btnNOISE->label(nblabel.c_str());
 	btnNOISE->redraw_label();
+	btnNOISE->redraw();
 }
 
-void nb_label(const char * l, int on)
+void noise_blanker_label(const char * l, int on)
 {
-	nb_label_ = l;
-	nb_state_ = on;
-	progStatus.noise = on;
+	nblabel = l;
+	progStatus.noise = nbstate = on;
 	Fl::awake(do_nb_label);
 }
 
@@ -4385,6 +4386,9 @@ void cbNoise()
 {
 	guard_lock serial_lock(&mutex_serial, "58");
 	trace(1, "cbNoise()");
+
+//	selrig->set_noise(btnNOISE->value());
+//	return;
 
 	int btn, get, cnt = 0;
 

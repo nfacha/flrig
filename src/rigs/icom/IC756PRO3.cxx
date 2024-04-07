@@ -72,6 +72,14 @@ static const char *vIC756PRO3_AMFMwidths[] =
 { "FILT-1", "FILT-2", "FILT-3" };
 static int IC756PRO3_bw_vals_AMFM[] = { 1,2,3, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC756PRO3_att_labels;
+static const char *vIC756PRO3_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>IC756PRO3_pre_labels;
+static const char *vIC756PRO3_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC756PRO3_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -101,6 +109,12 @@ void RIG_IC756PRO3::initialize()
 	modes_ = IC756PRO3modes_;
 	bandwidths_ = IC756PRO3_SSBwidths;
 	bw_vals_ = IC756PRO3_bw_vals_SSB;
+
+	VECTOR (IC756PRO3_att_labels, vIC756PRO3_att_labels);
+	VECTOR (IC756PRO3_pre_labels, vIC756PRO3_pre_labels);
+
+	att_labels_ = IC756PRO3_att_labels;
+	pre_labels_ = IC756PRO3_pre_labels;
 
 	IC756PRO3_widgets[0].W = btnVol;
 	IC756PRO3_widgets[1].W = sldrVOLUME;
@@ -137,8 +151,8 @@ RIG_IC756PRO3::RIG_IC756PRO3() {
 //	serial_post_write_delay = 0;
 
 	_mode_type = IC756PRO3_mode_type;
-	atten_level = 3; // will force initializing to 0 dB
-	preamp_level = 2; // will force initializaing to 0 dB
+	atten_state = 3; // will force initializing to 0 dB
+	preamp_state = 2; // will force initializaing to 0 dB
 
 	widgets = IC756PRO3_widgets;
 
@@ -907,7 +921,7 @@ void RIG_IC756PRO3::get_notch_min_max_step(int &min, int &max, int &step)
 
 int  RIG_IC756PRO3::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -918,15 +932,15 @@ int  RIG_IC756PRO3::next_attenuator()
 
 void RIG_IC756PRO3::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	int cmdval = 0;
-	if (atten_level == 1) {
+	if (atten_state == 1) {
 		cmdval = 0x06;
-	} else if (atten_level == 2) {
+	} else if (atten_state == 2) {
 		cmdval = 0x12;
-	} else if (atten_level == 3) {
+	} else if (atten_state == 3) {
 		cmdval = 0x18;
-	} else if (atten_level == 0) {
+	} else if (atten_state == 0) {
 		cmdval = 0x00;
 	}
 	cmd = pre_to;
@@ -948,22 +962,22 @@ int RIG_IC756PRO3::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x06) {
-				atten_level = 1;
+				atten_state = 1;
 			} else if (replystr[p+5] == 0x12) {
-				atten_level = 2;
+				atten_state = 2;
 			} else if (replystr[p+5] == 0x18) {
-				atten_level = 3;
+				atten_state = 3;
 			} else if (replystr[p+5] == 0x00) {
-				atten_level = 0;
+				atten_state = 0;
 			}
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 int  RIG_IC756PRO3::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -973,12 +987,12 @@ int  RIG_IC756PRO3::next_preamp()
 
 void RIG_IC756PRO3::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x02';
-	cmd += (unsigned char) preamp_level;
+	cmd += (unsigned char) preamp_state;
 	cmd.append( post );
 	waitFB("set preamp");
 }
@@ -995,40 +1009,15 @@ int RIG_IC756PRO3::get_preamp()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+6] == 0x01) {
-				preamp_level = 1;
+				preamp_state = 1;
 			} else if (replystr[p+6] == 0x02) {
-				preamp_level = 2;
+				preamp_state = 2;
 			} else {
-				preamp_level = 0;
+				preamp_state = 0;
 			}
 		}
 	}
-	return preamp_level;
-}
-
-const char *RIG_IC756PRO3::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC756PRO3::ATT_label()
-{
-	switch (atten_level) {
-		default:
-		case 0: break;
-		case 1: return "6 dB"; break;
-		case 2: return "12 dB"; break;
-		case 3: return "18 dB"; break;
-	}
-	return "ATT";
+	return preamp_state;
 }
 
 void RIG_IC756PRO3::set_modeA(int val)
@@ -1173,12 +1162,16 @@ int RIG_IC756PRO3::get_modeB()
 
 void RIG_IC756PRO3::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
-	cmd += val ? 0x01 : 0x00;
+	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC756PRO3::get_auto_notch()
@@ -1189,16 +1182,16 @@ int RIG_IC756PRO3::get_auto_notch()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(8, "get AN")) {
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;

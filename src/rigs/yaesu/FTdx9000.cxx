@@ -121,6 +121,17 @@ static const char *vFTdx9000_US_60m[] = {"", "126", "127", "128", "130"};
 
 static std::vector<std::string>& Channels_60m = FTdx9000_US_60m;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FTdx9000_att_labels;
+static const char *vFTdx9000_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>FTdx9000_pre_labels;
+static const char *vFTdx9000_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
+
+static std::vector<std::string>FTdx9000_nb_labels;
+static const char *vFTdx9000_nb_labels[] = { "NB", "NB 1", "NB 2" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -147,6 +158,15 @@ void RIG_FTdx9000::initialize()
 	VECTOR (FTdx9000_widths_FMwide, vFTdx9000_widths_FMwide);
 	VECTOR (FTdx9000_widths_FMpkt, vFTdx9000_widths_FMpkt);
 	VECTOR (FTdx9000_US_60m, vFTdx9000_US_60m);
+
+	VECTOR (FTdx9000_att_labels, vFTdx9000_att_labels);
+	att_labels_ = FTdx9000_att_labels;
+
+	VECTOR (FTdx9000_pre_labels, vFTdx9000_pre_labels);
+	pre_labels_ = FTdx9000_pre_labels;
+
+	VECTOR (FTdx9000_nb_labels, vFTdx9000_nb_labels);
+	nb_labels_ = FTdx9000_nb_labels;
 
 	modes_ = FTdx9000modes_;
 	bandwidths_ = FTdx9000_widths_SSB;
@@ -238,8 +258,8 @@ RIG_FTdx9000::RIG_FTdx9000() {
 	has_xcvr_auto_on_off = true;
 
 // derived specific
-	atten_level = 0;
-	preamp_level = 0;
+	atten_state = 0;
+	preamp_state = 0;
 	notch_on = false;
 	m_60m_indx = 0;
 
@@ -623,7 +643,7 @@ int RIG_FTdx9000::get_tune()
 
 int  RIG_FTdx9000::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -634,10 +654,10 @@ int  RIG_FTdx9000::next_attenuator()
 
 void RIG_FTdx9000::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 
 	cmd = "RA00;";
-	cmd[3] += atten_level;
+	cmd[3] += atten_state;
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET att", cmd, replystr);
 }
@@ -653,13 +673,13 @@ int RIG_FTdx9000::get_attenuator()
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.attenuator;
 	if (p + 3 >= replystr.length()) return progStatus.attenuator;
-	atten_level = replystr[p+3] - '0';
-	return atten_level;
+	atten_state = replystr[p+3] - '0';
+	return atten_state;
 }
 
 int  RIG_FTdx9000::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -669,9 +689,9 @@ int  RIG_FTdx9000::next_preamp()
 
 void RIG_FTdx9000::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = "PA00;";
-	cmd[3] = '0' + preamp_level;
+	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET preamp", cmd, replystr);
 }
@@ -686,28 +706,8 @@ int RIG_FTdx9000::get_preamp()
 
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos)
-		preamp_level = replystr[p+3] - '0';
-	return preamp_level;
-}
-
-const char *RIG_FTdx9000::ATT_label()
-{
-	if (atten_level == 1)
-		return "6 dB";
-	if (atten_level == 2)
-		return "12 dB";
-	if (atten_level == 3)
-		return "18 dB";
-	return "ATT";
-}
-
-const char *RIG_FTdx9000::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	return "IPO";
+		preamp_state = replystr[p+3] - '0';
+	return preamp_state;
 }
 
 int RIG_FTdx9000::adjust_bandwidth(int val)
@@ -1106,22 +1106,20 @@ int  RIG_FTdx9000::get_auto_notch()
 	return 0;
 }
 
-int FTdx9000_blanker_level = 0;
-
 void RIG_FTdx9000::set_noise(bool b)
 {
 	cmd = "NB00;";
-	if (FTdx9000_blanker_level == 0) {
-		FTdx9000_blanker_level = 1;
-		nb_label("NB 1", true);
-	} else if (FTdx9000_blanker_level == 1) {
-		FTdx9000_blanker_level = 2;
-		nb_label("NB 2", true);
-	} else if (FTdx9000_blanker_level == 2) {
-		FTdx9000_blanker_level = 0;
-		nb_label("NB", false);
+	if (nb_state == 0) {
+		nb_state = 1;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 1) {
+		nb_state = 2;
+		noise_blanker_label(nb_label(), true);
+	} else if (nb_state == 2) {
+		nb_state = 0;
+		noise_blanker_label(nb_label(), false);
 	}
-	cmd[3] = '0' + FTdx9000_blanker_level;
+	cmd[3] = '0' + nb_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET NB", cmd, replystr);
 }
@@ -1135,18 +1133,18 @@ int RIG_FTdx9000::get_noise()
 	rig_trace(2, "get_noise()", replystr.c_str());
 
 	size_t p = replystr.rfind(rsp);
-	if (p == std::string::npos) return FTdx9000_blanker_level;
+	if (p == std::string::npos) return nb_state;
 
-	FTdx9000_blanker_level = replystr[p+3] - '0';
-	if (FTdx9000_blanker_level == 1) {
-		nb_label("NB 1", true);
-	} else if (FTdx9000_blanker_level == 2) {
-		nb_label("NB 2", true);
+	nb_state = replystr[p+3] - '0';
+	if (nb_state == 1) {
+		noise_blanker_label("NB 1", true);
+	} else if (nb_state == 2) {
+		noise_blanker_label("NB 2", true);
 	} else {
-		nb_label("NB", false);
-		FTdx9000_blanker_level = 0;
+		noise_blanker_label("NB", false);
+		nb_state = 0;
 	}
-	return FTdx9000_blanker_level;
+	return nb_state;
 }
 
 // val 0 .. 100

@@ -63,9 +63,6 @@ public:
 	void set_preamp(int val);
 	int  get_preamp();
 
-	const char * ATT_label();
-	const char * PRE_label();
-
 	void set_modeA(int val);
 	int  get_modeA();
 	void set_modeB(int val);

@@ -561,6 +561,7 @@ int RIG_IC7000::get_preamp()
 
 void RIG_IC7000::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
@@ -568,6 +569,7 @@ void RIG_IC7000::set_auto_notch(int val)
 	cmd.append( post );
 	waitFB("set AN");
 	isett("set_auto_notch()");
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7000::get_auto_notch()
@@ -584,13 +586,8 @@ int RIG_IC7000::get_auto_notch()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;

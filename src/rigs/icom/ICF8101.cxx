@@ -88,6 +88,14 @@ static const char ICF8101_bw_vals_AM[] = {
 };
 #define NUM_AM_WIDTHS 50
 
+//----------------------------------------------------------------------
+//static std::vector<std::string>ICF8101_att_labels;
+//static const char *vICF8101_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>ICF8101_pre_labels;
+static const char *vICF8101_pre_labels[] = { "OFF", "PRE", "ATT" };
+//----------------------------------------------------------------------
+
 //======================================================================
 // ICF8101 unique commands
 //======================================================================
@@ -124,6 +132,12 @@ void RIG_ICF8101::initialize()
 	modes_ = ICF8101modes_;
 	_mode_type = ICF8101_mode_type;
 	bandwidths_ = ICF8101_CW_SSB_widths;
+
+//	VECTOR (ICF8101_att_labels, vICF8101_att_labels);
+	VECTOR (ICF8101_pre_labels, vICF8101_pre_labels);
+
+//	att_labels_ = ICF8101_att_labels;
+	pre_labels_ = ICF8101_pre_labels;
 
 	ICF8101_widgets[0].W = btnVol;
 	ICF8101_widgets[1].W = sldrVOLUME;
@@ -489,7 +503,7 @@ int RIG_ICF8101::get_smeter()
 	cmd.append(cstr);
 	cmd.append( post );
 	int mtr = 0;
-	int n = preamp_level;
+	int n = preamp_state;
 	if (n == 0) n = 1;
 	else if (n == 1) n = 0;
 	if (waitFOR(9, "get smeter")) {
@@ -550,7 +564,6 @@ int RIG_ICF8101::get_power_out(void)
 	return mtr;
 }
 
-static int agcval = 0;
 int  RIG_ICF8101::get_agc()
 {
 	cmd = pre_to;
@@ -845,14 +858,14 @@ int  RIG_ICF8101::get_nb_level()
 
 int RIG_ICF8101::next_preamp()
 {
-	preamp_level++;
-	if (preamp_level == 3) preamp_level = 0;
-	return preamp_level;
+	preamp_state++;
+	if (preamp_state == 3) preamp_state = 0;
+	return preamp_state;
 }
 
 void RIG_ICF8101::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = pre_to;
 	cmd.append("\x1A\x05\x03\x05");
 	cmd += '\x00';
@@ -884,31 +897,18 @@ int RIG_ICF8101::get_preamp()
 		if (p != std::string::npos) {
 			switch (replystr[p+9]) {
 			case 0:
-				preamp_level = 1;
+				preamp_state = 1;
 				break;
 			case 1:
-				preamp_level = 0;
+				preamp_state = 0;
 				break;
 			case 2:
-				preamp_level = 2;
+				preamp_state = 2;
 			}
 		}
 	}
 	get_trace(2, "get_preamp_attenuator()", str2hex(replystr.c_str(), replystr.length()));
-	return preamp_level;
-}
-
-const char *RIG_ICF8101::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "OFF"; break;
-		case 1:
-			return "PRE"; break;
-		case 2:
-			return "ATT"; break;
-	}
-	return "PRE";
+	return preamp_state;
 }
 
 void RIG_ICF8101::set_compression(int on, int val)

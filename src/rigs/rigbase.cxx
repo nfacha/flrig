@@ -44,10 +44,13 @@ const char *szNORIG = "NONE";
 
 std::vector<std::string> vNOMODES;
 const char *NOMODES[] = {"LSB", "USB"};
+
 std::vector<std::string> vNOBWS;
 const char *NOBWS[] = {"3200"};
+
 std::vector<std::string> vDSPLO;
 const char *DSPLO[] = {"200"};
+
 std::vector<std::string> vDSPHI;
 const char *DSPHI[] = {"3400"};
 
@@ -61,6 +64,39 @@ std::vector<std::string> &rigbase::modes_ = vNOMODES;
 std::vector<std::string> &rigbase::bandwidths_ = vNOBWS;
 std::vector<std::string> &rigbase::dsp_SL = vDSPLO;
 std::vector<std::string> &rigbase::dsp_SH = vDSPHI;
+
+std::vector<std::string> vAGC_LABELS;
+const char *AGCVAL[] = {"AGC"};
+
+std::vector<std::string> vATT_LABELS;
+const char *ATTVAL[] = {"ATT"};
+
+std::vector<std::string> vPRE_LABELS;
+const char *PREVAL[] = {"PRE"};
+
+std::vector<std::string> vNB_LABELS;
+const char *NBVAL[] = {"NB"};
+
+std::vector<std::string> vNR_LABELS;
+const char *NRVAL[] = {"NR"};
+
+std::vector<std::string> vBK_LABELS;
+const char *BKVAL[] = {"BK"};
+
+std::vector<std::string> v60M_LABELS;
+const char *m60VAL[] = {""};
+
+std::vector<std::string> vAN_LABELS;
+const char *ANVAL[] = {"AN", "AN ON"};
+
+std::vector<std::string> &rigbase::agc_labels_ = vAGC_LABELS;
+std::vector<std::string> &rigbase::att_labels_ = vATT_LABELS;
+std::vector<std::string> &rigbase::pre_labels_ = vPRE_LABELS;
+std::vector<std::string> &rigbase::nb_labels_ = vNB_LABELS;
+std::vector<std::string> &rigbase::nr_labels_ = vNR_LABELS;
+std::vector<std::string> &rigbase::bk_labels_ = vBK_LABELS;
+std::vector<std::string> &rigbase::m60_labels_ = v60M_LABELS;
+std::vector<std::string> &rigbase::an_labels_ = vAN_LABELS;
 
 rigbase::rigbase()
 {
@@ -76,6 +112,15 @@ rigbase::rigbase()
 	SH_tooltip = szdsptooltip;
 	SH_label = szbtnlabel;
 	bw_vals_ = &ibw_val;
+
+	agc_labels_ = vAGC_LABELS;
+	att_labels_ = vATT_LABELS;
+	pre_labels_ = vPRE_LABELS;
+	nb_labels_  = vNR_LABELS;
+	nr_labels_  = vNB_LABELS;
+	bk_labels_  = vBK_LABELS;
+	m60_labels_ = v60M_LABELS;
+	an_labels_  = vAN_LABELS;
 
 	io_class = SERIAL;
 
@@ -205,8 +250,16 @@ rigbase::rigbase()
 	if_shift_step = 10;
 	if_shift_mid = 0;
 
-	atten_level = 0;
-	preamp_level = 0;
+	agcval = 0;
+	atten_state = 0;
+	preamp_state = 0;
+	nb_state = 0;
+	nr_state = 0;
+	bk_state = 0;
+	m60_level = 0;
+	an_level = 0;
+
+	initialize();
 }
 
 void rigbase::initialize()
@@ -216,10 +269,36 @@ void rigbase::initialize()
 	VECTOR( vDSPLO, DSPLO );
 	VECTOR( vDSPHI, DSPHI );
 
+	VECTOR( vAGC_LABELS, AGCVAL );
+	agc_labels_ = vAGC_LABELS;
+
+	VECTOR( vATT_LABELS, ATTVAL );
+	att_labels_ = vATT_LABELS;
+
+	VECTOR( vPRE_LABELS, PREVAL );
+	pre_labels_ = vPRE_LABELS;
+
+	VECTOR( vNB_LABELS, NBVAL );
+	nb_labels_ = vNB_LABELS;
+
+	VECTOR( vNR_LABELS, NRVAL );
+	nr_labels_ = vNR_LABELS;
+
+	VECTOR( vBK_LABELS, BKVAL );
+	bk_labels_ = vBK_LABELS;
+
+	VECTOR( v60M_LABELS, m60VAL );
+	m60_labels_ = v60M_LABELS;
+
+	VECTOR( vAN_LABELS, ANVAL );
+	an_labels_ = vAN_LABELS;
+
 	modes_ 		= vNOMODES;
 	bandwidths_	= vNOBWS;
 	dsp_SL		= vDSPLO;
 	dsp_SH		= vDSPHI;
+
+
 }
 
 std::string rigbase::to_bcd_be(unsigned long long val, int len)

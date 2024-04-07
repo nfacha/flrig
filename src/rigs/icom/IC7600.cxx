@@ -96,6 +96,14 @@ static const char *vIC7600_fm_bws[] =
 { "FIXED" };
 static int IC7600_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7600_att_labels;
+static const char *vIC7600_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>IC7600_pre_labels;
+static const char *vIC7600_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7600_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -126,6 +134,12 @@ void RIG_IC7600::initialize()
 	modes_ = IC7600modes_;
 	bandwidths_ = IC7600_ssb_bws;
 	bw_vals_ = IC7600_bw_vals_SSB;
+
+	VECTOR (IC7600_att_labels, vIC7600_att_labels);
+	VECTOR (IC7600_pre_labels, vIC7600_pre_labels);
+
+	att_labels_ = IC7600_att_labels;
+	pre_labels_ = IC7600_pre_labels;
 
 	IC7600_widgets[0].W = btnVol;
 	IC7600_widgets[1].W = sldrVOLUME;
@@ -1076,7 +1090,7 @@ void RIG_IC7600::get_rf_min_max_step(double &min, double &max, double &step)
 // ALH inserted code from the IC7100 to get the preamp to switch correctly
 int RIG_IC7600::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1090,12 +1104,12 @@ void RIG_IC7600::set_preamp(int val)
 	cmd += '\x16';
 	cmd += '\x02';
 
-	preamp_level = val;
+	preamp_state = val;
 
-	cmd += (unsigned char)preamp_level;
+	cmd += (unsigned char)preamp_state;
 	cmd.append( post );
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 	set_trace(2, "set_preamp()", str2hex(cmd.c_str(), cmd.length()));
 }
@@ -1111,16 +1125,16 @@ int RIG_IC7600::get_preamp()
 	if (waitFOR(8, "get Pre")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
 	get_trace(2, "get_preamp() ", str2hex(replystr.c_str(), replystr.length()));
-	return preamp_level;
+	return preamp_state;
 }	// ALH end of changed code for the preamp.
 
 int  RIG_IC7600::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0x00: return 0x06;
 		case 0x06: return 0x12;
 		case 0x12: return 0x18;
@@ -1131,11 +1145,11 @@ int  RIG_IC7600::next_attenuator()
 
 void RIG_IC7600::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level;
+	cmd += atten_state;
 	cmd.append( post );
 	set_trace(2, "set_attenuator()", str2hex(cmd.c_str(), cmd.length()));
 	waitFB("set att");
@@ -1153,33 +1167,9 @@ int RIG_IC7600::get_attenuator()
 		get_trace(2, "get_ATT()", str2hex(replystr.c_str(), replystr.length()));
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos)
-			atten_level = replystr[p+5];
+			atten_state = replystr[p+5];
 	}
-	return atten_level;
-}
-
-const char *RIG_IC7600::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Amp 1"; break;
-		case 2:
-			return "Amp 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC7600::ATT_label()
-{
-	if (atten_level == 0x06)
-		return("6 dB");
-	if (atten_level == 0x12)
-		return("12 dB");
-	if (atten_level == 0x18)
-		return("18 dB");
-	return "ATT";
+	return atten_state;
 }
 
 void RIG_IC7600::set_noise(bool val)
@@ -1316,12 +1306,16 @@ int  RIG_IC7600::get_squelch()
 
 void RIG_IC7600::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7600::get_auto_notch()
@@ -1332,16 +1326,16 @@ int RIG_IC7600::get_auto_notch()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(8, "get AN")) {
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;

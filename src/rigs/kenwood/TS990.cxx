@@ -257,7 +257,17 @@ static const char *vTS990_CAT_PSK_filt[] = {
 
 #define DEFAULT_PSK       0x06 // WIDTH 300
 
-//==============================================================================
+//----------------------------------------------------------------------
+static std::vector<std::string>TS990_att_labels;
+static const char *vTS990_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
+
+static std::vector<std::string>TS990_pre_labels;
+static const char *vTS990_pre_labels[] = { "PRE", "Pre 1", "Pre 2" };
+
+// nb control is subverted and used as AGC control
+static std::vector<std::string>TS990_nb_labels;
+static const char *vTS990_nb_labels[] = { "", "AGC S", "AGC M", "AGC F"};
+//----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
@@ -306,6 +316,15 @@ void RIG_TS990::initialize()
 
 	dsp_SL      = TS990_filt_SL;
 	dsp_SH      = TS990_filt_SH;
+
+	VECTOR (TS990_att_labels, vTS990_att_labels);
+	att_labels_ = TS990_att_labels;
+
+	VECTOR (TS990_pre_labels, vTS990_pre_labels);
+	pre_labels_ = TS990_pre_labels;
+
+	VECTOR (TS990_nb_labels, vTS990_nb_labels);
+	nb_labels_ = TS990_nb_labels;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -422,7 +441,7 @@ RIG_TS990::RIG_TS990() {
 
 	can_change_alt_vfo = true;
 
-	nb_level = 1;
+	nb_state = 1;
 
 	has_auto_notch =
 	has_notch_control =
@@ -506,7 +525,7 @@ int  RIG_TS990::next_attenuator()
 {
 	gett("next_attenuator()");
 
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -519,30 +538,30 @@ void RIG_TS990::set_attenuator(int val)
 {
 	sett("set_attenuator(int val)");
 
-	atten_level = val;
+	atten_state = val;
 	if (inuse == onB) {
-		if (atten_level == 1) {			// If attenuator level = 0 (off)
+		if (atten_state == 1) {			// If attenuator level = 0 (off)
 			cmd = "RA11;";				// this is the command...
 		}
-		else if (atten_level == 2) {		// If attenuator level = 1 (6dB)
+		else if (atten_state == 2) {		// If attenuator level = 1 (6dB)
 			cmd = "RA12;";
-		} else if (atten_level == 3) {		// if it's 12dB
+		} else if (atten_state == 3) {		// if it's 12dB
 			cmd = "RA13;";
-		} else if (atten_level == 0) {		// If it's 18dB
+		} else if (atten_state == 0) {		// If it's 18dB
 			cmd = "RA10;";
 		}
 		sendCommand(cmd);
 		showresp(INFO, ASC, "set Att B", cmd, "");
 
 	} else {
-		if (atten_level == 1) {
+		if (atten_state == 1) {
 			cmd = "RA01;";
 		}
-		else if (atten_level == 2) {
+		else if (atten_state == 2) {
 			cmd = "RA02;";
-		} else if (atten_level == 3) {
+		} else if (atten_state == 3) {
 			cmd = "RA03;";
-		} else if (atten_level == 0) {
+		} else if (atten_state == 0) {
 			cmd = "RA00;";
 		}
 		sendCommand(cmd);
@@ -566,16 +585,16 @@ int RIG_TS990::get_attenuator() {
 
 		if (replystr[p + 2] == '1' && replystr[p + 3] == '0') {
 			att_on = 0;						// Attenuator is OFF
-			atten_level = 0;					// remember it...
+			atten_state = 0;					// remember it...
 		} else if (replystr[p + 2] == '1' && replystr[p + 3] == '1') {
 			att_on = 1;						// Attenuator is ON, 6dB
-			atten_level = 1;					// remember the level
+			atten_state = 1;					// remember the level
 		} else if (replystr[p + 2] == '1' && replystr[p + 3] == '2') {
 			att_on = 1;						// .. still ON, 12dB
-			atten_level = 2;					// remember this level
+			atten_state = 2;					// remember this level
 		} else if (replystr[p + 2] == '1' && replystr[p + 3] == '3') {
 			att_on = 1;						// .. still ON 18dB
-			atten_level = 3;					// remember...
+			atten_state = 3;					// remember...
 		}
 	} else {
 		cmd = "RA0;";
@@ -586,16 +605,16 @@ int RIG_TS990::get_attenuator() {
 
 		if (replystr[p + 2] == '0' && replystr[p + 3] == '0') {
 			att_on = 0;
-			atten_level = 0;
+			atten_state = 0;
 		} else if (replystr[p + 2] == '0' && replystr[p + 3] == '1') {
 			att_on = 1;
-			atten_level = 1;
+			atten_state = 1;
 		} else if (replystr[p + 2] == '0' && replystr[p + 3] == '2') {
 			att_on = 1;
-			atten_level = 2;
+			atten_state = 2;
 		} else if (replystr[p + 2] == '0' && replystr[p + 3] == '3') {
 			att_on = 1;
-			atten_level = 3;
+			atten_state = 3;
 		}
 	}
 	return att_on;
@@ -610,7 +629,7 @@ int  RIG_TS990::next_preamp()
 {
 	gett("next_preamp()");
 
-	if (preamp_level) return 0;
+	if (preamp_state) return 0;
 	return 1;
 }
 
@@ -619,12 +638,12 @@ void RIG_TS990::set_preamp(int val)
 	sett("set_preamp(int val)");
 
 	if (inuse == onB) {
-		preamp_level = val;
+		preamp_state = val;
 		if (val) cmd = "PA11;";
 		else     cmd = "PA10;";
 		sendCommand(cmd);
 	} else {
-		preamp_level = val;
+		preamp_state = val;
 		if (val) cmd = "PA01;";
 		else     cmd = "PA00;";
 		sendCommand(cmd);
@@ -644,9 +663,9 @@ int RIG_TS990::get_preamp()
 		if (p == std::string::npos) return 0;
 
 		if (replystr[p  + 3] == '1')
-			preamp_level = 1;
+			preamp_state = 1;
 		else
-			preamp_level = 0;
+			preamp_state = 0;
 
 	} else {
 		cmd = "PA0;";
@@ -656,28 +675,13 @@ int RIG_TS990::get_preamp()
 		if (p == std::string::npos) return 0;
 
 		if (replystr[p  + 3] == '1')
-			preamp_level = 1;
+			preamp_state = 1;
 		else
-			preamp_level = 0;
+			preamp_state = 0;
 	}
 
-	return preamp_level;
+	return preamp_state;
 }
-
-const char *RIG_TS990::PRE_label()
-{
-	if (preamp_level == 1) return "Pre 1";
-	return "PRE";
-}
-
-const char *RIG_TS990::ATT_label()
-{
-	if (atten_level == 1) return "6 dB";
-	if (atten_level == 2) return "12 dB";
-	if (atten_level == 3) return "18 dB";
-	return "ATT";
-}
-
 
 //==============================================================================
 
@@ -2714,36 +2718,36 @@ int RIG_TS990::get_modetype(int n)
 void RIG_TS990::set_noise(bool val) //Now Setting AGC
 {
 	if (inuse == onB) {
-		if (nb_level == 2) {
-			nb_level = 3;
-			nb_label("AGC F", false);
+		if (nb_state == 2) {
+			nb_state = 3;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC13;";
 			sendCommand(cmd);
-		} else if (nb_level == 3) {
-			nb_level = 1;
-			nb_label("AGC S", false);
+		} else if (nb_state == 3) {
+			nb_state = 1;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC11;";
 			sendCommand(cmd);
-		} else if (nb_level == 1) {
-			nb_level = 2;
-			nb_label("AGC M", false);
+		} else if (nb_state == 1) {
+			nb_state = 2;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC12;";
 			sendCommand(cmd);
 		}
 	} else {
-		if (nb_level == 2) {
-			nb_level = 3;
-			nb_label("AGC F", false);
+		if (nb_state == 2) {
+			nb_state = 3;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC03;";
 			sendCommand(cmd);
-		} else if (nb_level == 3) {
-			nb_level = 1;
-			nb_label("AGC S", false);
+		} else if (nb_state == 3) {
+			nb_state = 1;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC01;";
 			sendCommand(cmd);
-		} else if (nb_level == 1) {
-			nb_level = 2;
-			nb_label("AGC M", false);
+		} else if (nb_state == 1) {
+			nb_state = 2;
+			noise_blanker_label(nb_label(), false);
 			cmd = "GC02;";
 			sendCommand(cmd);
 		}
@@ -2762,11 +2766,11 @@ int  RIG_TS990::get_agc()
 		size_t p = replystr.rfind("GC");
 		if (p == std::string::npos) return val;
 		if (replystr[p + 3] == '1' ) {
-			nb_label("AGC S", false);
+			noise_blanker_label("AGC S", false);
 		} else if (replystr[p + 3] == '2' ) {
-			nb_label("AGC M", false);
+			noise_blanker_label("AGC M", false);
 		} else if (replystr[p + 3] == '3' ) {
-			nb_label("AGC F", false);
+			noise_blanker_label("AGC F", false);
 		}
 	} else {
 		cmd = "GC0;";
@@ -2775,11 +2779,11 @@ int  RIG_TS990::get_agc()
 		size_t p = replystr.rfind("GC");
 		if (p == std::string::npos) return val;
 		if (replystr[p + 3] == '1' ) {
-			nb_label("AGC S", false);
+			noise_blanker_label("AGC S", false);
 		} else if (replystr[p + 3] == '2' ) {
-			nb_label("AGC M", false);
+			noise_blanker_label("AGC M", false);
 		} else if (replystr[p + 3] == '3' ) {
-			nb_label("AGC F", false);
+			noise_blanker_label("AGC F", false);
 		}
 	}
 	return val;

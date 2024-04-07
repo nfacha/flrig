@@ -108,6 +108,10 @@ static const char *vvarwidths[] =
 "  500", "  200" };
 
 //------------------------------------------------------------------------------
+static std::vector<std::string>FLEX1500_nr_labels;
+static const char *vFLEX1500_nr_labels[] = { "NR", "NR 1", "NR 2" };
+//------------------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 }, // 1
@@ -138,6 +142,9 @@ void RIG_FLEX1500::initialize()
 	VECTOR (FLEX1500_CWwidths, vFLEX1500_CWwidths);
 	VECTOR (FLEX1500_CAT_CW, vFLEX1500_CAT_CW);
 	VECTOR (varwidths, vvarwidths);
+
+	VECTOR (FLEX1500_nr_labels, vFLEX1500_nr_labels);
+	nr_labels_ = FLEX1500_nr_labels;
 
 	modes_ = FLEX1500modes_;
 	bandwidths_ = FLEX1500_empty;
@@ -223,9 +230,9 @@ RIG_FLEX1500::RIG_FLEX1500() {
 	precision = 1;
 	ndigits = 9;
 
-	att_level = 0;
-//	preamp_level = 0;
-	_noise_reduction_level = 0;
+	atten_state = 0;
+//	preamp_state = 0;
+	nr_state = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
 
@@ -362,7 +369,7 @@ int RIG_FLEX1500::get_alc()
 
 void RIG_FLEX1500::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = "ZZPA";
 	cmd += (val + '0');
 	cmd += ';';
@@ -377,12 +384,12 @@ int RIG_FLEX1500::get_preamp()
 	get_trace(1, "get_preamp");
 	ret = wait_string("ZZPA", 6);
 	gett("");
-	if (ret < 6) return preamp_level;
+	if (ret < 6) return preamp_state;
 
 	size_t p = replystr.rfind("PA");
 	if (p != std::string::npos)
-		preamp_level = (unsigned char)replystr[p+2] - '0';
-	return preamp_level;
+		preamp_state = (unsigned char)replystr[p+2] - '0';
+	return preamp_state;
 }
 
 int RIG_FLEX1500::set_widths(int val)
@@ -813,17 +820,17 @@ void RIG_FLEX1500::set_noise_reduction(int val)
 	if (val == -1) {
 		return;
 	}
-	_noise_reduction_level = val;
-	if (_noise_reduction_level == 0) {
-		nr_label("ZZNR0", 0);
-	} else if (_noise_reduction_level == 1) {
-		nr_label("ZZNR1", 1);
+	nr_state = val;
+	if (nr_state == 0) {
+		noise_reduction_label("NR 0", 0);
+	} else if (nr_state == 1) {
+		noise_reduction_label("NR 1", 1);
 	} else {
-		nr_label("???", 2);
+		noise_reduction_label("NR ??", 2);
 		return;
 	}
 	cmd.assign("ZZNR");
-	cmd += '0' + _noise_reduction_level;
+	cmd += '0' + nr_state;
 	cmd += ';';
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
@@ -839,24 +846,24 @@ int  RIG_FLEX1500::get_noise_reduction()
 	gett("");
 	if (ret == 6) {
 		size_t p = replystr.rfind(rsp);
-		if (p == std::string::npos) return _noise_reduction_level;
-		_noise_reduction_level = replystr[p+4] - '0';
+		if (p == std::string::npos) return nr_state;
+		nr_state = replystr[p+4] - '0';
 	}
 
-	if (_noise_reduction_level == 1) {
-		nr_label("NR", 1);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", 2);
+	if (nr_state == 1) {
+		noise_reduction_label("NR 1", 1);
+	} else if (nr_state == 2) {
+		noise_reduction_label("NR 2", 2);
 	} else {
-		nr_label("NR", 0);
+		noise_reduction_label("NR", 0);
 	}
-	return _noise_reduction_level;
+	return nr_state;
 }
 
 void RIG_FLEX1500::set_noise_reduction_val(int val)
 {
-	if (_noise_reduction_level == 0) return;
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 0) return;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	cmd.assign("NR").append(to_decimal(val, 2)).append(";");
@@ -868,7 +875,7 @@ void RIG_FLEX1500::set_noise_reduction_val(int val)
 int  RIG_FLEX1500::get_noise_reduction_val()
 {
 	int nrval = 0;
-	if (_noise_reduction_level == 0) return 0;
+	if (nr_state == 0) return 0;
 	int val = progStatus.noise_reduction_val;
 	cmd = rsp = "ZZNR";
 	cmd.append(";");
@@ -878,12 +885,12 @@ int  RIG_FLEX1500::get_noise_reduction_val()
 	if (ret == 6) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) {
-			nrval = (_noise_reduction_level == 1 ? _nrval1 : _nrval2);
+			nrval = (nr_state == 1 ? _nrval1 : _nrval2);
 			return nrval;
 		}
 		val = atoi(&replystr[p+2]);
 	}
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	return val;

@@ -99,6 +99,16 @@ static const char *vIC7800_fm_bws[] =
 { "FIXED" };
 static int IC7800_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7800_att_labels;
+static const char *vIC7800_att_labels[] = { 
+	"ATT", "3 dB", "6 dB", "9 dB", "12 dB", "15 dB", "18 dB", "21 dB"};
+
+
+//static std::vector<std::string>IC7800_pre_labels;
+//static const char *vIC7800_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7800_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -131,6 +141,12 @@ void RIG_IC7800::initialize()
 	bw_vals_ = IC7800_bw_vals_SSB;
 
 	_mode_type = IC7800_mode_type;
+
+	VECTOR (IC7800_att_labels, vIC7800_att_labels);
+//	VECTOR (IC7800_pre_labels, vIC7800_pre_labels);
+
+	att_labels_ = IC7800_att_labels;
+//	pre_labels_ = IC7800_pre_labels;
 
 	IC7800_widgets[0].W = btnVol;
 	IC7800_widgets[1].W = sldrVOLUME;
@@ -560,9 +576,6 @@ void RIG_IC7800::set_mic_gain(int v)
 	checkresponse();
 }
 
-static const char *atten_labels[] = {
-"ATT", "3 dB", "6 dB", "9 dB", "12 dB", "15 dB", "18 dB", "21 dB"};
-
 int  RIG_IC7800::next_attenuator()
 {
 	if (atten_level >= 7) return 0;
@@ -592,13 +605,6 @@ int RIG_IC7800::get_attenuator()
 			atten_level = replystr[5];
 	}
 	return atten_level;
-}
-
-const char *RIG_IC7800::ATT_label()
-{
-	if (atten_level >= 0 && atten_level <= 7)
-		return atten_labels[atten_level];
-	return atten_labels[0];
 }
 
 void RIG_IC7800::set_compression(int on, int val)

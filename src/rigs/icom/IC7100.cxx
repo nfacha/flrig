@@ -142,6 +142,14 @@ static const char *vIC7100_fixed_bws[] =
 
 static int IC7100_fixed_bw_vals[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC7100_att_labels;
+static const char *vIC7100_att_labels[] = { "ATT", "12 dB" };
+
+static std::vector<std::string>IC7100_pre_labels;
+static const char *vIC7100_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC7100_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -174,6 +182,12 @@ void RIG_IC7100::initialize()
 	bandwidths_ = IC7100_ssb_bws;
 	bw_vals_ = IC7100_vals_ssb_bws;
 	_mode_type = IC7100_mode_type;
+
+	VECTOR (IC7100_att_labels, vIC7100_att_labels);
+	VECTOR (IC7100_pre_labels, vIC7100_pre_labels);
+
+	att_labels_ = IC7100_att_labels;
+	pre_labels_ = IC7100_pre_labels;
 
 	IC7100_widgets[0].W = btnVol;
 	IC7100_widgets[1].W = sldrVOLUME;
@@ -998,14 +1012,14 @@ void RIG_IC7100::get_mic_gain_min_max_step(int &min, int &max, int &step)
 void RIG_IC7100::set_attenuator(int val)
 {
    if (val) {
-		atten_level = 1;
+		atten_state = 1;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x12' : '\x00';
+	cmd += atten_state ? '\x12' : '\x00';
 	cmd.append( post );
 	set_trace(1, "set_attenuator()");
 	waitFB("set att");
@@ -1027,22 +1041,22 @@ int RIG_IC7100::get_attenuator()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (replystr[p+5] == 0x12) {
-			atten_level = 1;
+			atten_state = 1;
 		} else {
-			atten_level = 0;
+			atten_state = 0;
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 int RIG_IC7100::next_preamp()
 {
 	if (inuse == onA) {
 		if (A.freq > 100000000) {
-			if (preamp_level) return 0;
+			if (preamp_state) return 0;
 			return 1;
 		} else {
-			switch (preamp_level) {
+			switch (preamp_state) {
 			case 0: return 1;
 			case 1: return 2;
 			case 2: return 0;
@@ -1050,10 +1064,10 @@ int RIG_IC7100::next_preamp()
 		}
 	} else {
 		if (B.freq > 100000000) {
-			if (preamp_level) return 0;
+			if (preamp_state) return 0;
 			return 1;
 		} else {
-			switch (preamp_level) {
+			switch (preamp_state) {
 			case 0: return 1;
 			case 1: return 2;
 			case 2: return 0;
@@ -1069,15 +1083,15 @@ void RIG_IC7100::set_preamp(int val)
 	cmd += '\x16';
 	cmd += '\x02';
 
-	preamp_level = val;
+	preamp_state = val;
 	if (inuse == onA && A.freq > 100000000 && val > 1) val = 1;
 	if (inuse == onB && B.freq > 100000000 && val > 1) val = 1;
 
-	cmd += (unsigned char)preamp_level;
+	cmd += (unsigned char)preamp_state;
 	cmd.append( post );
 	set_trace(1, "set_preamp()");
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 	seth();
 }
@@ -1098,28 +1112,9 @@ int RIG_IC7100::get_preamp()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos)
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 	}
-	return preamp_level;
-}
-
-const char *RIG_IC7100::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC7100::ATT_label()
-{
-	if (atten_level == 1) return "12 dB";
-	return "ATT";
+	return preamp_state;
 }
 
 void RIG_IC7100::set_compression(int on, int val)
@@ -1478,7 +1473,7 @@ double RIG_IC7100::get_voltmeter()
 	double val = 0;
 
 	get_trace(1, "get_voltmeter()");
-	ret = waitFOR(9, "get voltmeter");
+	int ret = waitFOR(9, "get voltmeter");
 	geth();
 
 	if (ret) {
@@ -1737,6 +1732,7 @@ void RIG_IC7100::get_notch_min_max_step(int &min, int &max, int &step)
 
 void RIG_IC7100::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
@@ -1761,13 +1757,8 @@ int RIG_IC7100::get_auto_notch()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;

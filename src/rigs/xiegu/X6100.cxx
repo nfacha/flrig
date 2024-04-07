@@ -137,6 +137,14 @@ static const char *vX6100_fm_bws[] =
 { "FIXED" };
 static int X6100_bw_vals_FM[] = { 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>Xiegu_G90_att_labels;
+static const char *vXiegu_G90_att_labels[] = { "ATT", "20 dB" };
+
+static std::vector<std::string>Xiegu_G90_pre_labels;
+static const char *vXiegu_G90_pre_labels[] = { "PRE", "Pre 1", "Pre 2" };
+//----------------------------------------------------------------------
+
 static GUI X6100_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -147,14 +155,6 @@ static GUI X6100_widgets[]= {
 	{ (Fl_Widget *)sldrNR,      266, 145, 156 },	//6
 	{ (Fl_Widget *)sldrMICGAIN,  54, 165, 156 },	//7
 	{ (Fl_Widget *)sldrPOWER,   266, 165, 156 },	//8
-//	{ (Fl_Widget *)btnLOCK,     214, 105,  50 },	//7
-//	{ (Fl_Widget *)sldrINNER,   266, 105, 156 },	//8
-//	{ (Fl_Widget *)btnCLRPBT,   214, 125,  50 },	//9
-//	{ (Fl_Widget *)sldrOUTER,   266, 125, 156 },	//10
-//	{ (Fl_Widget *)btnNotch,    214, 145,  50 },	//11
-//	{ (Fl_Widget *)sldrNOTCH,   266, 145, 156 },	//12
-//	{ (Fl_Widget *)sldrMICGAIN, 266, 165, 156 },	//13
-//	{ (Fl_Widget *)sldrPOWER,   266, 185, 156 },	//14
 	{ (Fl_Widget *)NULL, 0, 0, 0 }
 };
 
@@ -165,6 +165,12 @@ void RIG_X6100::initialize()
 	VECTOR (X6100_rtty_bws, vX6100_rtty_bws);
 	VECTOR (X6100_am_bws, vX6100_am_bws);
 	VECTOR (X6100_fm_bws, vX6100_fm_bws);
+
+	VECTOR (Xiegu_G90_att_labels, vXiegu_G90_att_labels);
+	att_labels_ = Xiegu_G90_att_labels;
+
+	VECTOR (Xiegu_G90_pre_labels, vXiegu_G90_pre_labels);
+	pre_labels_ = Xiegu_G90_pre_labels;
 
 	modes_ = X6100modes_;
 	bandwidths_ = X6100_ssb_bws;
@@ -179,14 +185,6 @@ void RIG_X6100::initialize()
 	X6100_widgets[4].W = sldrSQUELCH;
 	X6100_widgets[5].W = btnNR;
 	X6100_widgets[6].W = sldrNR;
-//	X6100_widgets[7].W = btnLOCK;
-//	X6100_widgets[8].W = sldrINNER;
-//	X6100_widgets[9].W = btnCLRPBT;
-//	X6100_widgets[10].W = sldrOUTER;
-//	X6100_widgets[11].W = btnNotch;
-//	X6100_widgets[12].W = sldrNOTCH;
-//	X6100_widgets[13].W = sldrMICGAIN;
-//	X6100_widgets[14].W = sldrPOWER;
 	X6100_widgets[7].W = sldrMICGAIN;
 	X6100_widgets[8].W = sldrPOWER;
 
@@ -235,8 +233,6 @@ RIG_X6100::RIG_X6100() {
 
 	has_cw_wpm = true;
 	has_cw_spot_tone = true;
-//	has_cw_qsk = true;
-//	has_cw_break_in = true;
 
 	has_vox_onoff = true;
 	has_vox_gain = true;
@@ -253,8 +249,6 @@ RIG_X6100::RIG_X6100() {
 	has_bandwidth_control = true;
 
 	has_smeter = true;
-
-//	has_voltmeter = true;
 
 	has_power_out = true;
 	has_swr_control = true;
@@ -275,20 +269,13 @@ RIG_X6100::RIG_X6100() {
 	has_noise_reduction = true;
 	has_noise_reduction_control = true;
 
-//	has_auto_notch = true;
-//	has_notch_control = true;
-
-//	has_pbt_controls = true;
 	has_FILTER = true;
 
 	has_rf_control = true;
 
 	has_ptt_control = true;
-//	has_tune_control = true;
 
 	has_band_selection = true;
-
-//	has_xcvr_auto_on_off = true;
 
 	precision = 1;
 	ndigits = 9;
@@ -1577,9 +1564,9 @@ void RIG_X6100::get_rf_min_max_step(double &min, double &max, double &step)
 
 int RIG_X6100::next_preamp()
 {
-	if (atten_level == 1)
-		return preamp_level;
-	switch (preamp_level) {
+	if (atten_state == 1)
+		return preamp_state;
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1593,12 +1580,12 @@ void RIG_X6100::set_preamp(int val)
 	cmd += '\x16';
 	cmd += '\x02';
 
-	preamp_level = val;
+	preamp_state = val;
 
-	cmd += (unsigned char)preamp_level;
+	cmd += (unsigned char)preamp_state;
 	cmd.append( post );
-	waitFB(	(preamp_level == 0) ? "set Preamp OFF" :
-			(preamp_level == 1) ? "set Preamp Level 1" :
+	waitFB(	(preamp_state == 0) ? "set Preamp OFF" :
+			(preamp_state == 1) ? "set Preamp Level 1" :
 			"set Preamp Level 2");
 	isett("set preamp on/off");
 }
@@ -1615,23 +1602,23 @@ int RIG_X6100::get_preamp()
 		igett("get preamp level");
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
-	return preamp_level;
+	return preamp_state;
 }
 
 void RIG_X6100::set_attenuator(int val)
 {
 	if (val) {
-		atten_level = 1;
+		atten_state = 1;
 	} else {
-		atten_level = 0;
+		atten_state = 0;
 	}
 
 	cmd = pre_to;
 	cmd += '\x11';
-	cmd += atten_level ? '\x20' : '\x00';
+	cmd += atten_state ? '\x20' : '\x00';
 	cmd.append( post );
 	waitFB("set att");
 	isett("set attenuator");
@@ -1639,7 +1626,7 @@ void RIG_X6100::set_attenuator(int val)
 
 int RIG_X6100::next_attenuator()
 {
-	if (atten_level) return 0;
+	if (atten_state) return 0;
 	return 1;
 }
 
@@ -1655,34 +1642,15 @@ int RIG_X6100::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x20) {
-				atten_level = 1;
+				atten_state = 1;
 				return 1;
 			} else {
-				atten_level = 0;
+				atten_state = 0;
 				return 0;
 			}
 		}
 	}
 	return 0;
-}
-
-const char *RIG_X6100::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_X6100::ATT_label()
-{
-	if (atten_level == 1) return "20 dB";
-	return "ATT";
 }
 
 void RIG_X6100::set_noise(bool val)
@@ -1848,13 +1816,16 @@ int  RIG_X6100::get_squelch()
 
 void RIG_X6100::set_auto_notch(int val)
 {
+	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
 	cmd += (unsigned char)val;
 	cmd.append( post );
+	set_trace(1, "set auto notch");
 	waitFB("set AN");
-	isett("set auto notch on/off");
+	seth();
+	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_X6100::get_auto_notch()
@@ -1865,17 +1836,16 @@ int RIG_X6100::get_auto_notch()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(8, "get AN")) {
-		igett("get autonotch");
+
+	get_trace(1, "get_auto_notch()");
+	int ret = waitFOR(8, "get AN");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p+6] == 0x01) {
-				auto_notch_label("AN", true);
-				return true;
-			} else {
-				auto_notch_label("AN", false);
-				return false;
-			}
+			progStatus.auto_notch = an_level = replystr[p+6];
+			auto_notch_label(an_label(), an_level ? true : false);
 		}
 	}
 	return progStatus.auto_notch;
@@ -2000,7 +1970,7 @@ void RIG_X6100::get_notch_min_max_step(int &min, int &max, int &step)
 			break;
 	}
 }
-static int agcval = 3;
+
 int  RIG_X6100::get_agc()
 {
 	cmd = pre_to;

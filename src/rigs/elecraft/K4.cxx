@@ -42,6 +42,18 @@ static int mode_bwB[] = { -1, -1, -1, -1, -1, -1, -1, -1 };
 // entry # = (FREQ - 50)/10; FREQ: 50...5000, #: 0...495
 static int mode_def_bw[] = { 275, 275, 75, 495, 395, 275, 75, 275 };
  
+//----------------------------------------------------------------------
+static std::vector<std::string>K4_att_labels;
+static const char *vK4_att_labels[] = { "ATT", "3 dB", "6 dB", "9 dB", "12 dB", "15 dB", "18 dB", "21 dB" };
+
+static std::vector<std::string>K4_pre_labels;
+static const char *vK4_pre_labels[] = { "PRE", "10 dB", "18 dB", "30 dB" };
+
+// nr button used for AGC on K4
+static std::vector<std::string>K4_nr_labels;
+static const char *vK4_nr_labels[] = { "AGC", "AGC S", "AGC F" };
+//----------------------------------------------------------------------
+
 static GUI k4_widgets[]= {
 	{ (Fl_Widget *)btnVol, 2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME, 54, 125, 156 },
@@ -53,10 +65,8 @@ static GUI k4_widgets[]= {
 	{ (Fl_Widget *)NULL, 0, 0, 0 }
 };
 
-static int agcval = 1;
 static int agcvalA = 1;
 static int agcvalB = 1;
-
 
 int RIG_K4::power_scale()
 {
@@ -150,7 +160,6 @@ std::cout << vK4modes_[0] << ":" << mode_bwA[0] << ":" << mode_bwB[0] << ", " <<
 }
 
 #define K4_WAIT_TIME 800
-#define VECTOR(a,b) { a.clear(); for (size_t n = 0; n < sizeof(b)/sizeof(*b); n++) {a.push_back(b[n]);} }
 
 void RIG_K4::initialize()
 {
@@ -165,6 +174,15 @@ void RIG_K4::initialize()
 
 	modes_ = K4modes_;
 	bandwidths_ = K4_widths;
+
+	VECTOR (K4_att_labels, vK4_att_labels);
+	att_labels_ = K4_att_labels;
+
+	VECTOR (K4_pre_labels, vK4_pre_labels);
+	pre_labels_ = K4_pre_labels;
+
+	VECTOR (K4_nr_labels, vK4_nr_labels);
+	nr_labels_ = K4_nr_labels;
 
 	LOG_INFO("K4");
 	k4_widgets[0].W = btnVol;
@@ -365,7 +383,6 @@ const char *RIG_K4::agc_label()
 	return "AGC";
 }
 
-
 int  RIG_K4::get_agc()
 {
 	if (isOnA()) {
@@ -376,9 +393,9 @@ int  RIG_K4::get_agc()
 		if (p == std::string::npos) return agcvalA;
 		switch (replystr[p+2]) {
 			default:
-			case '0': nb_label("AGC", false); agcvalA = 0; break;
-			case '1': nb_label("AG-S", true); agcvalA = 1; break;
-			case '2': nb_label("AG-F", true); agcvalA = 2; break;
+			case '0': noise_reduction_label(nr_label(), false); agcvalA = 0; break;
+			case '1': noise_reduction_label(nr_label(), true); agcvalA = 1; break;
+			case '2': noise_reduction_label(nr_label(), true); agcvalA = 2; break;
 		}
 		agcval=agcvalA;
 	} else {
@@ -389,9 +406,9 @@ int  RIG_K4::get_agc()
 		if (p == std::string::npos) return agcvalB;
 		switch (replystr[p+3]) {
 			default:
-			case '0': nb_label("AGC", false); agcvalB = 0; break;
-			case '1': nb_label("AG-S", true); agcvalB = 1; break;
-			case '2': nb_label("AG-F", true); agcvalB = 2; break;
+			case '0': noise_reduction_label(nr_label(), false); agcvalB = 0; break;
+			case '1': noise_reduction_label(nr_label(), true); agcvalB = 1; break;
+			case '2': noise_reduction_label(nr_label(), true); agcvalB = 2; break;
 		}
 		agcval=agcvalB;
 	}
@@ -408,9 +425,9 @@ void  RIG_K4::set_agc_level(int val)
 		cmd = "GT0;";
 		switch (val) {
 			default:
-			case '0': nb_label("AGC", false); cmd[2] = '0'; break;
-			case '1': nb_label("AG-S", true); cmd[2] = '1'; break;
-			case '2': nb_label("AG-F", true); cmd[2] = '2'; break;
+			case '0': noise_reduction_label("AGC", false); cmd[2] = '0'; break;
+			case '1': noise_reduction_label("AG-S", true); cmd[2] = '1'; break;
+			case '2': noise_reduction_label("AG-F", true); cmd[2] = '2'; break;
 		}
 		set_trace(1, "set agc");
 		sendCommand(cmd);
@@ -420,9 +437,9 @@ void  RIG_K4::set_agc_level(int val)
 		cmd = "GT$0;";
 		switch (val) {
 			default:
-			case '0': nb_label("AGC", false); cmd[3] = '0'; break;
-			case '1': nb_label("AG-S", true); cmd[3] = '1'; break;
-			case '2': nb_label("AG-F", true); cmd[3] = '2'; break;
+			case '0': noise_reduction_label("AGC", false); cmd[3] = '0'; break;
+			case '1': noise_reduction_label("AG-S", true); cmd[3] = '1'; break;
+			case '2': noise_reduction_label("AG-F", true); cmd[3] = '2'; break;
 		}
 		set_trace(1, "set agc");
 		sendCommand(cmd);
@@ -555,7 +572,7 @@ void RIG_K4::set_preamp(int val)
 		case 3: cmd.append("31;"); break;
 #endif
 	}
-	preamp_level = val;
+	preamp_state = val;
 	sendCommand(cmd);
 	sett("");
 }
@@ -586,7 +603,7 @@ int RIG_K4::get_preamp()
 		val = progStatus.preamp = (replystr[p + 3] - '0');
 	}
 
-	preamp_level = val;
+	preamp_state = val;
 	return val;
 }
 
@@ -597,54 +614,23 @@ void K4_return(int val)
 
 int RIG_K4::next_attenuator()
 {
-		if (atten_level < 7) atten_level++;
-		else atten_level = 0;
+		if (atten_state < 7) atten_state++;
+		else atten_state = 0;
 
-	return atten_level;
+	return atten_state;
 }
 
 int RIG_K4::next_preamp()
 {
 #ifdef HAVE_LNA
-	if (preamp_level < 3) preamp_level++;
+	if (preamp_state < 3) preamp_state++;
 #else
-	if (preamp_level < 2) preamp_level++;
+	if (preamp_state < 2) preamp_state++;
 #endif
-	else preamp_level = 0;
+	else preamp_state = 0;
 
-	return preamp_level;
+	return preamp_state;
 }
-
-const char *RIG_K4::PRE_label()
-{
-	switch (preamp_level) {
-		default:
-		case 0: break;
-		case 1: return("10 db"); break;
-		case 2: return("18 db"); break;
-#ifdef HAVE_LNA
-		case 3: return("30 db"); break;
-#endif
-	}
-	return("PRE");
-}
-
-const char *RIG_K4::ATT_label()
-{
-	switch (atten_level) {
-		default:
-		case 0: break;
-		case 1: return("3 db"); break;
-		case 2: return("6 db"); break;
-		case 3: return("9 db"); break;
-		case 4: return("12 db"); break;
-		case 5: return("15 db"); break;
-		case 6: return("18 db"); break;
-		case 7: return("21 db"); break;
-	}
-	return("ATT");
-}
-
 
 /*
   RA$nnm; where nn is 0/3/6/9/12/15/18/21 (dB) and m = 0 (off), 1 (on)

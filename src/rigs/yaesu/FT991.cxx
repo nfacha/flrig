@@ -101,6 +101,14 @@ static const char *vUK_60m_label[] = {"VFO","U51","U52","U53","U54","U55","U56",
 static std::vector<std::string>& Channels_60m = US_60m_chan;
 static std::vector<std::string>& label_60m    = US_60m_label;
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT991_att_labels;
+static const char *vFT991_att_labels[] = { "ATT", "12 dB" };
+
+static std::vector<std::string>FT991_pre_labels;
+static const char *vFT991_pre_labels[] = { "IPO", "Amp 1", "Amp 2" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 368 }, // 1
@@ -204,8 +212,8 @@ RIG_FT991::RIG_FT991() {
 
 
 // derived specific
-	atten_level = 1;
-	preamp_level = 2;
+	atten_state = 1;
+	preamp_state = 2;
 	notch_on = false;
 	m_60m_indx = 0;
 
@@ -227,6 +235,12 @@ void RIG_FT991::initialize()
 	VECTOR (US_60m_label, vUS_60m_label);
 	VECTOR (UK_60m_chan, vUK_60m_chan);
 	VECTOR (UK_60m_label, vUK_60m_label)
+
+	VECTOR (FT991_att_labels, vFT991_att_labels);
+	att_labels_ = FT991_att_labels;
+
+	VECTOR (FT991_pre_labels, vFT991_pre_labels);
+	pre_labels_ = FT991_pre_labels;
 
 	modes_ = FT991modes_;
 	bandwidths_ = FT991_widths_SSB;
@@ -682,7 +696,7 @@ int  RIG_FT991::get_tune()
 
 int  RIG_FT991::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 0;
 	}
@@ -691,9 +705,9 @@ int  RIG_FT991::next_attenuator()
 
 void RIG_FT991::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	cmd = "RA00;";
-	cmd[3] += atten_level;
+	cmd[3] += atten_state;
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET att", cmd, replystr);
 }
@@ -707,13 +721,13 @@ int RIG_FT991::get_attenuator()
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return progStatus.attenuator;
 	if (p + 3 >= replystr.length()) return progStatus.attenuator;
-	atten_level = replystr[p+3] - '0';
-	return atten_level;
+	atten_state = replystr[p+3] - '0';
+	return atten_state;
 }
 
 int  RIG_FT991::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -723,9 +737,9 @@ int  RIG_FT991::next_preamp()
 
 void RIG_FT991::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 	cmd = "PA00;";
-	cmd[3] = '0' + preamp_level;
+	cmd[3] = '0' + preamp_state;
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET preamp", cmd, replystr);
 }
@@ -738,24 +752,8 @@ int RIG_FT991::get_preamp()
 
 	size_t p = replystr.rfind(rsp);
 	if (p != std::string::npos)
-		preamp_level = replystr[p+3] - '0';
-	return preamp_level;
-}
-
-const char *RIG_FT991::ATT_label()
-{
-	if (atten_level == 1)
-		return "12 dB";
-	return "ATT";
-}
-
-const char *RIG_FT991::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp 1";
-	if (preamp_level == 2)
-		return "Amp 2";
-	return "IPO";
+		preamp_state = replystr[p+3] - '0';
+	return preamp_state;
 }
 
 int RIG_FT991::adjust_bandwidth(int val)

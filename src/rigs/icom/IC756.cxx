@@ -51,6 +51,14 @@ static const char *vIC756_widths[] =
 { "NORM", "NARR"};
 static int IC756_bw_vals[] = {1, 2, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC756_att_labels;
+static const char *vIC756_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB", "20 dB" };
+
+static std::vector<std::string>IC756_pre_labels;
+static const char *vIC756_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC756_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -79,6 +87,12 @@ void RIG_IC756::initialize()
 	bandwidths_ = IC756_widths;
 	bw_vals_ = IC756_bw_vals;
 	_mode_type = IC756_mode_type;
+
+	VECTOR (IC756_att_labels, vIC756_att_labels);
+	VECTOR (IC756_pre_labels, vIC756_pre_labels);
+
+	att_labels_ = IC756_att_labels;
+	pre_labels_ = IC756_pre_labels;
 
 	IC756_widgets[0].W = btnVol;
 	IC756_widgets[1].W = sldrVOLUME;
@@ -253,6 +267,14 @@ static const char *vIC756PRO_bw_vals[] =
 
 // IC756_widgets[] declared in RIG_IC756
 
+//----------------------------------------------------------------------
+static std::vector<std::string>IC756PRO_att_labels;
+static const char *vIC756PRO_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB", "20 dB" };
+
+static std::vector<std::string>IC756PRO_pre_labels;
+static const char *vIC756PRO_pre_labels[] = { "PRE", "Pre 1", "Pre 2"};
+//----------------------------------------------------------------------
+
 static GUI IC756PRO_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },	//0
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },	//1
@@ -284,8 +306,8 @@ RIG_IC756PRO::RIG_IC756PRO() {
 	def_freq = freqA = freqB = A.freq = 14070000;
 	def_mode = modeA = modeB = B.imode = 1;
 	def_bw = A.iBW = B.iBW = 0;
-	atten_level = 3;
-	preamp_level = 2;
+	atten_state = 3;
+	preamp_state = 2;
 	adjustCIV(defaultCIV);
 
 	has_extras = true;
@@ -337,6 +359,12 @@ void RIG_IC756PRO::initialize()
 	modes_ = IC756PROmodes_;
 	bandwidths_ = IC756PRO_bw_vals;
 	_mode_type = IC756PRO_mode_type;
+
+	VECTOR (IC756PRO_att_labels, vIC756PRO_att_labels);
+	VECTOR (IC756PRO_pre_labels, vIC756PRO_pre_labels);
+
+	att_labels_ = IC756PRO_att_labels;
+	pre_labels_ = IC756PRO_pre_labels;
 
 	IC756PRO_widgets[0].W = btnVol;
 	IC756PRO_widgets[1].W = sldrVOLUME;
@@ -1087,7 +1115,7 @@ int  RIG_IC756PRO::get_auto_notch()
 
 int  RIG_IC756PRO::next_attenuator()
 {
-	switch(atten_level) {
+	switch(atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -1098,15 +1126,15 @@ int  RIG_IC756PRO::next_attenuator()
 
 void RIG_IC756PRO::set_attenuator(int val)
 {
-	atten_level = val;
+	atten_state = val;
 	int cmdval = 0;
-	if (atten_level == 1) {
+	if (atten_state == 1) {
 		cmdval = 0x06;
-	} else if (atten_level == 2) {
+	} else if (atten_state == 2) {
 		cmdval = 0x12;
-	} else if (atten_level == 3) {
+	} else if (atten_state == 3) {
 		cmdval = 0x18;
-	} else if (atten_level == 0) {
+	} else if (atten_state == 0) {
 		cmdval = 0x00;
 	}
 	cmd = pre_to;
@@ -1128,22 +1156,22 @@ int RIG_IC756PRO::get_attenuator()
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
 			if (replystr[p+5] == 0x06) {
-				atten_level = 1;
+				atten_state = 1;
 			} else if (replystr[p+5] == 0x12) {
-				atten_level = 2;
+				atten_state = 2;
 			} else if (replystr[p+5] == 0x18) {
-				atten_level = 3;
+				atten_state = 3;
 			} else if (replystr[p+5] == 0x00) {
-				atten_level = 0;
+				atten_state = 0;
 			}
 		}
 	}
-	return atten_level;
+	return atten_state;
 }
 
 int  RIG_IC756PRO::next_preamp()
 {
-	switch (preamp_level) {
+	switch (preamp_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 0;
@@ -1153,12 +1181,12 @@ int  RIG_IC756PRO::next_preamp()
 
 void RIG_IC756PRO::set_preamp(int val)
 {
-	preamp_level = val;
+	preamp_state = val;
 
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x02';
-	cmd += (unsigned char) preamp_level;
+	cmd += (unsigned char) preamp_state;
 	cmd.append( post );
 	waitFB("set preamp");
 }
@@ -1174,36 +1202,10 @@ int RIG_IC756PRO::get_preamp()
 	if (waitFOR(8, "get preamp")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			preamp_level = replystr[p+6];
+			preamp_state = replystr[p+6];
 		}
 	}
-	return preamp_level;
-}
-
-const char *RIG_IC756PRO::PRE_label()
-{
-	switch (preamp_level) {
-		case 0: default:
-			return "PRE"; break;
-		case 1:
-			return "Pre 1"; break;
-		case 2:
-			return "Pre 2"; break;
-	}
-	return "PRE";
-}
-
-const char *RIG_IC756PRO::ATT_label()
-{
-	switch (atten_level) {
-		default:
-		case 0: break;
-		case 1: return "6 dB"; break;
-		case 2: return "12 dB"; break;
-		case 3: return "18 dB"; break;
-		case 4: return "20 dB"; break;
-	}
-	return "ATT";
+	return preamp_state;
 }
 
 const char *RIG_IC756PRO::FILT(int val)

@@ -100,8 +100,18 @@ static std::vector<std::string>TS480SAT_FSKbw;
 static const char *vTS480SAT_FSKbw[] = {
 "FW0250;", "FW0500;", "FW1000;", "FW1500;" };
 
-static int agcval = 1;
 static bool fm_mode = false;
+
+//----------------------------------------------------------------------
+static std::vector<std::string>TS480SAT_att_labels;
+static const char *vTS480SAT_att_labels[] = { "ATT", "Att ON" };
+
+static std::vector<std::string>TS480SAT_pre_labels;
+static const char *vTS480SAT_pre_labels[] = { "PRE", "Pre ON"};
+
+static std::vector<std::string>TS480SAT_nr_labels;
+static const char *vTS480SAT_nr_labels[] = { "NR", "NR 1", "NR 2" };
+//----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
@@ -137,6 +147,15 @@ void RIG_TS480SAT::initialize()
 	_mode_type = TS480SAT_mode_type;
 	bandwidths_ = TS480SAT_empty;
 	bw_vals_ = TS480SAT_bw_vals;
+
+	VECTOR (TS480SAT_att_labels, vTS480SAT_att_labels);
+	att_labels_ = TS480SAT_att_labels;
+
+	VECTOR (TS480SAT_pre_labels, vTS480SAT_pre_labels);
+	pre_labels_ = TS480SAT_pre_labels;
+
+	VECTOR (TS480SAT_nr_labels, vTS480SAT_nr_labels);
+	nr_labels_ = TS480SAT_nr_labels;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -233,10 +252,10 @@ RIG_TS480SAT::RIG_TS480SAT() {
 	precision = 1;
 	ndigits = 8;
 
-	_noise_reduction_level = 0;
+	nr_state = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
-	preamp_level = atten_level = 0;
+	preamp_state = atten_state = 0;
 }
 
 const char * RIG_TS480SAT::get_bwname_(int n, int md) 
@@ -750,7 +769,7 @@ void RIG_TS480SAT::set_attenuator(int val)
 	set_trace(1, "set attenuator");
 	sendCommand(cmd);
 	sett("");
-	atten_level = val;
+	atten_state = val;
 }
 
 int RIG_TS480SAT::get_attenuator()
@@ -759,12 +778,12 @@ int RIG_TS480SAT::get_attenuator()
 	get_trace(1, "get_attenuator");
 	int ret = wait_char(';', 7, 100, "get attenuator", ASC);
 	gett("");
-	if (ret < 7) return atten_level;
+	if (ret < 7) return atten_state;
 
 	size_t p = replystr.rfind("RA");
 	if (p != std::string::npos)
-		atten_level = (replystr[p+3] == '1');
-	return atten_level;
+		atten_state = (replystr[p+3] == '1');
+	return atten_state;
 }
 
 void RIG_TS480SAT::set_preamp(int val)
@@ -775,7 +794,7 @@ void RIG_TS480SAT::set_preamp(int val)
 	set_trace(1, "set preamp");
 	sendCommand(cmd);
 	sett("");
-	preamp_level = val;
+	preamp_state = val;
 }
 
 int RIG_TS480SAT::get_preamp()
@@ -784,24 +803,12 @@ int RIG_TS480SAT::get_preamp()
 	get_trace(1, "get_preamp");
 	int ret = wait_char(';', 5, 100, "get preamp", ASC);
 	gett("");
-	if (ret < 5) return preamp_level;
+	if (ret < 5) return preamp_state;
 
 	size_t p = replystr.rfind("PA");
 	if (p != std::string::npos)
-		preamp_level = (replystr[p+2] == '1');
-	return preamp_level;
-}
-
-const char *RIG_TS480SAT::PRE_label()
-{
-	if (preamp_level == 1) return "Pre 1";
-	return "PRE";
-}
-
-const char *RIG_TS480SAT::ATT_label()
-{
-	if (atten_level == 1) return "ON";
-	return "ATT";
+		preamp_state = (replystr[p+2] == '1');
+	return preamp_state;
 }
 
 void RIG_TS480SAT::set_if_shift(int val)
@@ -844,16 +851,16 @@ void RIG_TS480SAT::set_noise_reduction(int val)
 	if (val == -1) {
 		return;
 	}
-	_noise_reduction_level = val;
-	if (_noise_reduction_level == 0) {
-		nr_label("NR", false);
-	} else if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	nr_state = val;
+	if (nr_state == 0) {
+		noise_reduction_label("NR", false);
+	} else if (nr_state == 1) {
+		noise_reduction_label("NR1", true);
+	} else if (nr_state == 2) {
+		noise_reduction_label("NR2", true);
 	}
 	cmd.assign("NR");
-	cmd += '0' + _noise_reduction_level;
+	cmd += '0' + nr_state;
 	cmd += ';';
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
@@ -866,25 +873,25 @@ int  RIG_TS480SAT::get_noise_reduction()
 	cmd.append(";");
 	if (wait_char(';', 4, 100, "GET noise reduction", ASC) == 4) {
 		size_t p = replystr.rfind(rsp);
-		if (p == std::string::npos) return _noise_reduction_level;
-		_noise_reduction_level = replystr[p+2] - '0';
+		if (p == std::string::npos) return nr_state;
+		nr_state = replystr[p+2] - '0';
 	}
 
-	if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	if (nr_state == 1) {
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		noise_reduction_label(nr_label(), true);
 	} else {
-		nr_label("NR", false);
+		noise_reduction_label(nr_label(), false);
 	}
 	gett("noise reduction");
-	return _noise_reduction_level;
+	return nr_state;
 }
 
 void RIG_TS480SAT::set_noise_reduction_val(int val)
 {
-	if (_noise_reduction_level == 0) return;
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 0) return;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	cmd.assign("RL").append(to_decimal(val, 2)).append(";");
@@ -896,20 +903,20 @@ void RIG_TS480SAT::set_noise_reduction_val(int val)
 int  RIG_TS480SAT::get_noise_reduction_val()
 {
 	int nrval = 0;
-	if (_noise_reduction_level == 0) return 0;
+	if (nr_state == 0) return 0;
 	int val = progStatus.noise_reduction_val;
 	cmd = rsp = "RL";
 	cmd.append(";");
 	if (wait_char(';', 5, 100, "GET noise reduction val", ASC) == 5) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) {
-			nrval = (_noise_reduction_level == 1 ? _nrval1 : _nrval2);
+			nrval = (nr_state == 1 ? _nrval1 : _nrval2);
 			return nrval;
 		}
 		val = atoi(&replystr[p+2]);
 	}
 
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 	gett("nr value");
 	return val;

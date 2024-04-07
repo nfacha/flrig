@@ -60,9 +60,6 @@ public:
 	void set_attenuator(int val);
 	int  get_attenuator();
 
-	const char * PRE_label();
-	const char * ATT_label();
-
 	void set_noise(bool);
 	int  get_noise();
 

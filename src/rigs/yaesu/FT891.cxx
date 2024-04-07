@@ -85,6 +85,14 @@ static const int FT891_wvals_AMFM[] = { 0, WVALS_LIMIT };
 
 static const int FT891_wvals_NN[] = {0, 1, WVALS_LIMIT};
 
+//----------------------------------------------------------------------
+static std::vector<std::string>FT891_att_labels;
+static const char *vFT891_att_labels[] = { "ATT", "12 dB" };
+
+static std::vector<std::string>FT891_pre_labels;
+static const char *vFT891_pre_labels[] = { "IPO", "Amp" };
+//----------------------------------------------------------------------
+
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 },
 	{ (Fl_Widget *)sldrVOLUME,   54, 125, 156 },
@@ -198,6 +206,12 @@ void RIG_FT891::initialize()
 	VECTOR (FT891_widths_CW, vFT891_widths_CW);
 	VECTOR (FT891_widths_AMFMnar, vFT891_widths_AMFMnar);
 	VECTOR (FT891_widths_AMFMnorm, vFT891_widths_AMFMnorm);
+
+	VECTOR (FT891_att_labels, vFT891_att_labels);
+	att_labels_ = FT891_att_labels;
+
+	VECTOR (FT891_pre_labels, vFT891_pre_labels);
+	pre_labels_ = FT891_pre_labels;
 
 	modes_ = FT891modes_;
 	bandwidths_ = FT891_widths_SSB;
@@ -672,20 +686,6 @@ int RIG_FT891::get_preamp()
 	if (p != std::string::npos)
 		preamp_level = replystr[p+3] - '0';
 	return preamp_level;
-}
-
-const char *RIG_FT891::ATT_label()
-{
-	if (atten_level == 1)
-		return "12 dB";
-	return "ATT";
-}
-
-const char *RIG_FT891::PRE_label()
-{
-	if (preamp_level == 1)
-		return "Amp";
-	return "IPO";
 }
 
 int RIG_FT891::adjust_bandwidth(int val)

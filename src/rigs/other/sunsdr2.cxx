@@ -79,7 +79,10 @@ static const char *vSUNSDR2_other_cat[] = {
 "FW0000;" };
 int SUNSDR2_num_other = 1;
 
-static int agcval = 1;
+//----------------------------------------------------------------------
+static std::vector<std::string>SUNSDR2_nr_labels;
+static const char *vSUNSDR2_nr_labels[] = { "NR", "NR 1", "NR 2" };
+//----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
 	{ (Fl_Widget *)btnVol,        2, 125,  50 }, // 0
@@ -107,6 +110,9 @@ void RIG_SDR2_PRO::initialize()
 	VECTOR (SUNSDR2_other_widths, vSUNSDR2_other_widths);
 	VECTOR (SUNSDR2_am_cat, vSUNSDR2_am_cat);
 	VECTOR (SUNSDR2_other_cat, vSUNSDR2_other_cat);
+
+	VECTOR (SUNSDR2_nr_labels, vSUNSDR2_nr_labels);
+	nr_labels_ = SUNSDR2_nr_labels;
 
 	modes_ = SUNSDR2modes_;
 	bandwidths_ = SUNSDR2_cw_widths;
@@ -180,10 +186,10 @@ RIG_SDR2_PRO::RIG_SDR2_PRO() {
 	precision = 1;
 	ndigits = 9;
 
-	_noise_reduction_level = 0;
+	nr_state = 0;
 	_nrval1 = 2;
 	_nrval2 = 4;
-	preamp_level = atten_level = 0;
+	preamp_state = atten_state = 0;
 }
 
 static int ret = 0;
@@ -542,7 +548,7 @@ void RIG_SDR2_PRO::set_attenuator(int val)
 	set_trace(1, "set attenuator");
 	sendCommand(cmd);
 	sett("");
-	atten_level = val;
+	atten_state = val;
 }
 
 int RIG_SDR2_PRO::get_attenuator()
@@ -551,12 +557,12 @@ int RIG_SDR2_PRO::get_attenuator()
 	get_trace(1, "get_attenuator");
 	ret = wait_char(';', 7, 100, "get attenuator", ASC);
 	gett("");
-	if (ret < 7) return atten_level;
+	if (ret < 7) return atten_state;
 
 	size_t p = replystr.rfind("RA");
 	if (p != std::string::npos)
-		atten_level = (replystr[p+3] == '1');
-	return atten_level;
+		atten_state = (replystr[p+3] == '1');
+	return atten_state;
 }
 
 void RIG_SDR2_PRO::set_preamp(int val)
@@ -567,7 +573,7 @@ void RIG_SDR2_PRO::set_preamp(int val)
 	set_trace(1, "set preamp");
 	sendCommand(cmd);
 	sett("");
-	preamp_level = val;
+	preamp_state = val;
 }
 
 int RIG_SDR2_PRO::get_preamp()
@@ -576,12 +582,12 @@ int RIG_SDR2_PRO::get_preamp()
 	get_trace(1, "get_preamp");
 	ret = wait_char(';', 5, 100, "get preamp", ASC);
 	gett("");
-	if (ret < 5) return preamp_level;
+	if (ret < 5) return preamp_state;
 
 	size_t p = replystr.rfind("PA");
 	if (p != std::string::npos)
-		preamp_level = (replystr[p+2] == '1');
-	return preamp_level;
+		preamp_state = (replystr[p+2] == '1');
+	return preamp_state;
 }
 
 void RIG_SDR2_PRO::set_if_shift(int val)
@@ -625,16 +631,16 @@ void RIG_SDR2_PRO::set_noise_reduction(int val)
 	if (val == -1) {
 		return;
 	}
-	_noise_reduction_level = val;
-	if (_noise_reduction_level == 0) {
-		nr_label("NR", false);
-	} else if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	nr_state = val;
+	if (nr_state == 0) {
+		noise_reduction_label(nr_label(), false);
+	} else if (nr_state == 1) {
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		noise_reduction_label(nr_label(), true);
 	}
 	cmd.assign("NR");
-	cmd += '0' + _noise_reduction_level;
+	cmd += '0' + nr_state;
 	cmd += ';';
 	sendCommand (cmd);
 	showresp(WARN, ASC, "SET noise reduction", cmd, "");
@@ -649,25 +655,25 @@ int  RIG_SDR2_PRO::get_noise_reduction()
 	gett("");
 	if (ret == 4) {
 		size_t p = replystr.rfind(rsp);
-		if (p == std::string::npos) return _noise_reduction_level;
-		_noise_reduction_level = replystr[p+2] - '0';
+		if (p == std::string::npos) return nr_state;
+		nr_state = replystr[p+2] - '0';
 	}
 
-	if (_noise_reduction_level == 1) {
-		nr_label("NR1", true);
-	} else if (_noise_reduction_level == 2) {
-		nr_label("NR2", true);
+	if (nr_state == 1) {
+		noise_reduction_label(nr_label(), true);
+	} else if (nr_state == 2) {
+		noise_reduction_label(nr_label(), true);
 	} else {
-		nr_label("NR", false);
+		noise_reduction_label(nr_label(), false);
 	}
 
-	return _noise_reduction_level;
+	return nr_state;
 }
 
 void RIG_SDR2_PRO::set_noise_reduction_val(int val)
 {
-	if (_noise_reduction_level == 0) return;
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 0) return;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	cmd.assign("RL").append(to_decimal(val, 2)).append(";");
@@ -678,7 +684,7 @@ void RIG_SDR2_PRO::set_noise_reduction_val(int val)
 int  RIG_SDR2_PRO::get_noise_reduction_val()
 {
 	int nrval = 0;
-	if (_noise_reduction_level == 0) return 0;
+	if (nr_state == 0) return 0;
 	int val = progStatus.noise_reduction_val;
 	cmd = rsp = "RL";
 	cmd.append(";");
@@ -688,13 +694,13 @@ int  RIG_SDR2_PRO::get_noise_reduction_val()
 	if (ret == 5) {
 		size_t p = replystr.rfind(rsp);
 		if (p == std::string::npos) {
-			nrval = (_noise_reduction_level == 1 ? _nrval1 : _nrval2);
+			nrval = (nr_state == 1 ? _nrval1 : _nrval2);
 			return nrval;
 		}
 		val = atoi(&replystr[p+2]);
 	}
 
-	if (_noise_reduction_level == 1) _nrval1 = val;
+	if (nr_state == 1) _nrval1 = val;
 	else _nrval2 = val;
 
 	return val;

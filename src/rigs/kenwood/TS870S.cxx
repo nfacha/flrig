@@ -152,6 +152,8 @@ static const char *vTS870S_FMbw[] = { // Corresponding commands.
 "FW0500;", "FW0600;", "FW0800;", "FW1000;", "FW1200;", "FW1400;" };
 
 //----------------------------------------------------------------------
+static std::vector<std::string>TS870S_att_labels;
+static const char *vTS870S_att_labels[] = { "ATT", "6 dB", "12 dB", "18 dB" };
 //----------------------------------------------------------------------
 
 static GUI rig_widgets[]= {
@@ -189,6 +191,9 @@ void RIG_TS870S::initialize()
 
 	dsp_SL     = TS870S_SSB_SL;
 	dsp_SH     = TS870S_SSB_SH;
+
+	VECTOR (TS870S_att_labels, vTS870S_att_labels);
+	att_labels_ = TS870S_att_labels;
 
 	rig_widgets[0].W = btnVol;
 	rig_widgets[1].W = sldrVOLUME;
@@ -583,7 +588,7 @@ void RIG_TS870S::tune_rig()
 
 int  RIG_TS870S::next_attenuator()
 {
-	switch (atten_level) {
+	switch (atten_state) {
 		case 0: return 1;
 		case 1: return 2;
 		case 2: return 3;
@@ -594,17 +599,17 @@ int  RIG_TS870S::next_attenuator()
 
 void RIG_TS870S::set_attenuator(int val)
 {
-	atten_level = val;
-	if (atten_level == 1) {			// If attenuator level = 0 (off)
+	atten_state = val;
+	if (atten_state == 1) {			// If attenuator level = 0 (off)
 		cmd = "RA01;";				// this is the command...
 	}
-	else if (atten_level == 2) {
+	else if (atten_state == 2) {
 		cmd = "RA02;";
 	}
-	else if (atten_level == 3) {
+	else if (atten_state == 3) {
 		cmd = "RA03;";
 	}
-	else if (atten_level == 0) {
+	else if (atten_state == 0) {
 		cmd = "RA00;";
 	}
 
@@ -627,30 +632,22 @@ int RIG_TS870S::get_attenuator() {
 
 	if (replystr[p + 2] == '0' && replystr[p + 3] == '0') {
 		att_on = 0;						// Attenuator is OFF
-		atten_level = 0;					// remember it...
+		atten_state = 0;					// remember it...
 	}
 	else if (replystr[p + 2] == '0' && replystr[p + 3] == '1') {
 		att_on = 1;						// Attenuator is ON, 6dB
-		atten_level = 1;					// remember the level
+		atten_state = 1;					// remember the level
 	}
 	else if (replystr[p + 2] == '0' && replystr[p + 3] == '2') {
 		att_on = 1;						// .. still ON, 12dB
-		atten_level = 2;					// remember this level
+		atten_state = 2;					// remember this level
 	}
 	else if (replystr[p + 2] == '0' && replystr[p + 3] == '3') {
 		att_on = 1;						// .. still ON 18dB
-		atten_level = 3;					// remember...
+		atten_state = 3;					// remember...
 	}
 
 	return att_on;			// let the rest of the world know.
-}
-
-const char *RIG_TS870S::ATT_label()
-{
-	if (atten_level == 1) return "6 dB";
-	if (atten_level == 2) return "12 dB";
-	if (atten_level == 3) return "18 dB";
-	return "ATT";
 }
 
 //----------------------------------------------------------------------
