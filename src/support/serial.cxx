@@ -413,14 +413,13 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	int      bytes = 0;
 	size_t   retval = 0,
 			 maxchars = nchars + bytes_written,
-			 tnow = 0,
 			 start = 0;
 
 	buf.clear();
 
-	start = tnow = zusec();
+	start = zusec();
 
-	while (1) {
+	while ( (zusec() - start) < (progStatus.serial_timeout * 1000.0) ) {
 		memset(uctemp, 0, sizeof(uctemp));
 		ioctl( fd, FIONREAD, &bytes);
 		if (bytes) {
@@ -430,10 +429,6 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 				}
 			}
 		}
-		if (!find1.empty() && buf.find(find1) == (buf.length() - find1.length())) break;
-		if (!find2.empty() && buf.find(find2) == (buf.length() - find2.length())) break;
-
-		timedout = ( (zusec() - tnow) > (size_t)(progStatus.serial_timeout * 1000));
 
 		// test for icom echo
 		if (buf.length() >= 4) {
@@ -443,9 +438,16 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 				echo = true;
 			}
 		}
+
 		if (buf.length() >= (echo ? maxchars : (size_t)nchars)) break;
 
-		if (timedout) break;
+		if ( !find1.empty() && 
+			( buf.find(find1) != std::string::npos ) &&
+			( buf.find(find1) == (buf.length() - find1.length()) ) ) break;
+
+		if ( !find2.empty() && 
+			( buf.find(find2) != std::string::npos ) &&
+			( buf.find(find2) == (buf.length() - find2.length())) ) break;
 
 		MilliSleep(1);
 	}
@@ -783,10 +785,18 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		// test for icom echo
 		if ((sbuf.length() >= (size_t)nchars) && ((sbuf[3] & 0xFF) == 0xE0))
 			echo = true;
-		if (sbuf.length() >= (echo ? maxchars : (size_t)nchars)) break;
-		if (!find1.empty() && sbuf.find(find1) == (sbuf.length() - find1.length())) break;
-		if (!find2.empty() && sbuf.find(find2) == (sbuf.length() - find2.length())) break;
-		
+
+		if ( sbuf.length() >= (echo ? maxchars : (size_t)nchars) ) break;
+
+		if ( !find1.empty() && 
+			(sbuf.find(find1) != std::string::npos) &&
+			(sbuf.find(find1) == (sbuf.length() - find1.length()) ) ) break;
+
+		// This covers the Icom case of either 0xFA or 0xFD
+        if ( !find2.empty() &&
+			( sbuf.find(find2) != std::string::npos ) &&
+			(sbuf.find(find2) == (sbuf.length() - find2.length()) ) ) break;
+
 		if (!thisread || !retval) MilliSleep(1);
 	}
 
