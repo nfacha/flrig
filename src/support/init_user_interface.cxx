@@ -2778,30 +2778,38 @@ void TRACED(initStatusConfigDialog)
 				LOG_WARN("No comm port ... test mode");
 			} else if (!progStatus.xmlrpc_rig) {
 				fl_alert2("\
-Cannot open %s!\n\n\
+Cannot open %s!\n\
+Error: %s\n\n\
+Is Rig turned on?\n\n\
 Check serial (COM) port connection\n\
 Open menu Config/Setup/Transceiver\n\
 Press 'Update' button, reselect port\n\n\
-Press 'Init' button.", progStatus.xcvr_serial_port.c_str());
-				LOG_WARN("Cannot open %s", progStatus.xcvr_serial_port.c_str());
-				progStatus.xcvr_serial_port = "NONE";
-				selectCommPort->value(progStatus.xcvr_serial_port.c_str());
+Press 'Init' button.",
+					progStatus.xcvr_serial_port.c_str(),strerror(errno));
+				LOG_WARN("Failed to open %s: %s", progStatus.xcvr_serial_port.c_str(), strerror(errno));
 			}
 			box_xcvr_connect->color(FL_BACKGROUND2_COLOR);
 			box_xcvr_connect->redraw();
 		}
 		if ( progStatus.aux_serial_port != "NONE") {
 			if (!startAuxSerial()) {
-				LOG_WARN("Cannot open %s", progStatus.aux_serial_port.c_str());
-				progStatus.aux_serial_port = "NONE";
-				selectAuxPort->value(progStatus.aux_serial_port.c_str());
+				fl_alert2("\
+Cannot open %s!\n\n\
+Error: %s\n\n\
+Check auxiliary serial (COM) port connection",
+					progStatus.aux_serial_port.c_str(), strerror(errno));
+				LOG_WARN("Faialed to open %s: %s", progStatus.aux_serial_port.c_str(), strerror(errno));
 			}
 		}
 		if ( progStatus.sep_serial_port != "NONE") {
 			if (!startSepSerial()) {
-				LOG_WARN("Cannot open %s", progStatus.sep_serial_port.c_str());
-				progStatus.sep_serial_port = "NONE";
-				selectSepPTTPort->value(progStatus.sep_serial_port.c_str());
+				fl_alert2("\
+Cannot open %s!\n\
+Error: %s\n\n\
+Check separate serial (COM) port connection",
+					progStatus.sep_serial_port.c_str(), strerror(errno));
+				LOG_WARN("Failed to open %s: %s",
+					progStatus.sep_serial_port.c_str(), strerror(errno));
 			}
 		}
 	}
