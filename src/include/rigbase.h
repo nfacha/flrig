@@ -483,42 +483,42 @@ public:
 		try {
 			return agc_labels_.at(agcval).c_str();
 		} catch (...) {
-			return "";
+			return "AGC";
 		}
 	}
 	virtual const char *att_label() {
 		try {
 			 return att_labels_.at(atten_state).c_str();
 		} catch (...) {
-			return "";
+			return "ATT";
 		}
 	}
 	virtual const char *pre_label() {
 		try {
 			 return pre_labels_.at(preamp_state).c_str();
 		} catch (...) {
-			return "";
+			return "PRE";
 		}
 	}
 	virtual const char *nb_label() {
 		try {
 			 return nb_labels_.at(nb_state).c_str();
 		} catch (...) {
-			return "";
+			return "NB";
 		}
 	}
 	virtual const char *nr_label() {
 		try {
 			 return nr_labels_.at(nr_state).c_str();
 		} catch (...) {
-			return "";
+			return "NR";
 		}
 	}
 	virtual const char *bk_label() {
 		try {
 			 return bk_labels_.at(bk_state).c_str();
 		} catch (...) {
-			return "";
+			return "BK";
 		}
 	}
 	virtual const char *m60_label() {
@@ -532,7 +532,7 @@ public:
 		try {
 			 return an_labels_.at(an_level).c_str();
 		} catch (...) {
-			return "";
+			return "AN";
 		}
 	}
 

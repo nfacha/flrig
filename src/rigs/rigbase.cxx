@@ -87,7 +87,7 @@ std::vector<std::string> v60M_LABELS;
 const char *m60VAL[] = {""};
 
 std::vector<std::string> vAN_LABELS;
-const char *ANVAL[] = {"AN", "AN ON"};
+const char *ANVAL[] = {"AN"};
 
 std::vector<std::string> &rigbase::agc_labels_ = vAGC_LABELS;
 std::vector<std::string> &rigbase::att_labels_ = vATT_LABELS;
@@ -113,14 +113,15 @@ rigbase::rigbase()
 	SH_label = szbtnlabel;
 	bw_vals_ = &ibw_val;
 
-	agc_labels_ = vAGC_LABELS;
-	att_labels_ = vATT_LABELS;
-	pre_labels_ = vPRE_LABELS;
-	nb_labels_  = vNR_LABELS;
-	nr_labels_  = vNB_LABELS;
-	bk_labels_  = vBK_LABELS;
-	m60_labels_ = v60M_LABELS;
-	an_labels_  = vAN_LABELS;
+	initialize();
+//	agc_labels_ = vAGC_LABELS;
+//	att_labels_ = vATT_LABELS;
+//	pre_labels_ = vPRE_LABELS;
+//	nb_labels_  = vNR_LABELS;
+//	nr_labels_  = vNB_LABELS;
+//	bk_labels_  = vBK_LABELS;
+//	m60_labels_ = v60M_LABELS;
+//	an_labels_  = vAN_LABELS;
 
 	io_class = SERIAL;
 
