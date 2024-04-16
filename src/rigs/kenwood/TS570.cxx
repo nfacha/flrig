@@ -986,6 +986,8 @@ void RIG_TS570::set_PTT_control(int val)
 {
 	if (val) cmd = "TX;";
 	else	 cmd = "RX;";
+ptt_ = val;
+std::cout << val << ", \"" << cmd << "\"" << std::endl;
 	sendCommand(cmd);
 	showresp(WARN, ASC, "PTT", cmd, "");
 }
