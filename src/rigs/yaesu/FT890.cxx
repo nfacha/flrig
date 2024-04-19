@@ -24,10 +24,10 @@ const char FT890name_[] = "FT-890";
 
 static std::vector<std::string>FT890modes_;
 static const char *vFT890modes_[] = {
-		"LSB", "USB", "CW", "CW-N", "AM", "AM-N", "FM"};
-static const int FT890_mode_val[] =  { 0, 1, 2, 3, 4, 5, 6 };
+		"LSB", "USB", "CW", "CW-N", "AM", "AM-N", "FM", "FM-N"};
+static const int FT890_mode_val[] =  { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-static const char FT890_mode_type[] = { 'L', 'U', 'U', 'U', 'U', 'U', 'U' };
+static const char FT890_mode_type[] = { 'L', 'U', 'U', 'U', 'U' };
 
 static std::vector<std::string>FT890widths_;
 static const char *vFT890widths_[] = { "wide", "narr"};
@@ -61,6 +61,8 @@ RIG_FT890::RIG_FT890() {
 	aBW = bBW = A.iBW = B.iBW = 0;
 	precision = 10;
 
+	has_getvfoAorB =
+	has_split =
 	has_smeter =
 	has_power_out =
 	has_get_info =
@@ -120,94 +122,193 @@ void RIG_FT890::set_split(bool val)
 		showresp(INFO, HEX, "set split OFF", cmd, replystr);
 }
 
+
+
 bool RIG_FT890::check()
 {
 	init_cmd();
 	cmd[3] = 0x03;
 	cmd[4] = 0x10;
-	int ret = waitN(28, 100, "check", HEX);
-	if (ret >= 28) return true;
+	int ret = waitN(18, 100, "check", HEX);
+	if (ret >= 18) return true;
 	return false;
 }
+
+// 18 byte return values
+/*
+
+VFO A is 5000.00 MHz on FLRIG
+VFO B is .740.00 MHz on the rig
+Radio is set to 5.000.00 MHz, the same as FLRIG.
+
+05:37:41.733 : read_smeter()
+05:37:41.733 : WriteBuffer:  00 00 00 00 F7
+05:37:41.783 : ReadBuffer [0.032000 msec]: 36 36 36 36 F7
+
+05:37:42.203 : read_vfo()
+05:37:42.203 : WriteBuffer:  00 00 00 03 10
+05:37:42.260 : ReadBuffer [6.529000 msec]: 08 07 A1 20 00 00 03 04 04 01 01 21 10 00 00 03 04 85
+
+05:37:42.260 : vfoA active get vfo A
+05:37:42.260 : read_mode vfoA active
+05:37:42.260 : read: 0
+
+05:37:42.661 : read_smeter()
+05:37:42.661 : WriteBuffer:  00 00 00 00 F7
+05:37:42.711 : ReadBuffer [0.033000 msec]: 3C 3C 3C 3C F7
+
+05:37:43.131 : read_vfo()
+05:37:43.131 : WriteBuffer:  00 00 00 03 10
+05:37:43.188 : ReadBuffer [6.500000 msec]: 08 07 A1 20 00 00 03 04 04 01 01 21 10 00 00 03 04 85
+
+05:37:43.188 : vfoA active get vfo A
+05:37:43.189 : read_mode vfoA active
+05:37:43.189 : read: 0
+
+05:37:43.589 : read_smeter()
+05:37:43.589 : WriteBuffer:  00 00 00 00 F7
+05:37:43.640 : ReadBuffer [0.019000 msec]: 3C 3C 3C 3C F7
+
+------------------------------------
+VFO A is 5000.00 MHz on FLRIG
+VFO B is 2961.92 on FLRIG, .740.00 MHz on the rig.
+Radio is set to 5.001.00 MHz, different from FLRIG.
+
+05:50:47.284 : read_vfo()
+05:50:47.285 : WriteBuffer:  00 00 00 03 10
+05:50:47.340 : ReadBuffer [5.437000 msec]: 08 07 A1 84 00 00 03 04 04 01 01 21 10 00 00 03 04 85
+
+05:50:47.340 : vfoA active get vfo A
+05:50:47.341 : read_mode vfoA active
+05:50:47.341 : read: 0
+
+05:50:47.741 : read_smeter()
+05:50:47.741 : WriteBuffer:  00 00 00 00 F7
+05:50:47.791 : ReadBuffer [0.067000 msec]: 42 42 42 42 F7
+
+05:50:48.211 : read_vfo()
+05:50:48.211 : WriteBuffer:  00 00 00 03 10
+05:50:48.268 : ReadBuffer [6.509000 msec]: 08 07 A1 84 00 00 03 04 04 01 01 21 10 00 00 03 04 85
+
+05:50:48.268 : vfoA active get vfo A
+05:50:48.268 : read_mode vfoA active
+05:50:48.268 : read: 0
+
+05:50:48.669 : read_smeter()
+05:50:48.669 : WriteBuffer:  00 00 00 00 F7
+05:50:48.719 : ReadBuffer [0.035000 msec]: 3F 3F 3F 3F F7
+
+05:50:49.139 : read_vfo()
+05:50:49.139 : WriteBuffer:  00 00 00 03 10
+05:50:49.196 : ReadBuffer [6.537000 msec]: 08 07 A1 84 00 00 03 04 04 01 01 21 10 00 00 03 04 85
+
+05:50:49.196 : vfoA active get vfo A
+05:50:49.197 : read_mode vfoA active
+05:50:49.197 : read: 0
+
+05:50:49.597 : read_smeter()
+05:50:49.597 : WriteBuffer:  00 00 00 00 F7
+05:50:49.648 : ReadBuffer [0.037000 msec]: 3E 3E 3E 3E F7
+
+*/
+
+static bool testing = false;
 
 bool RIG_FT890::get_info()
 {
 	init_cmd();
 	cmd[3] = 0x03;
 	cmd[4] = 0x10;
-	int ret = waitN(28, 100, "get info", HEX);
 
-	if (ret >= 28) {
-		size_t p = ret - 28;
-		afreq = 0;
-		bfreq = 0;
-		for (size_t n = 1; n < 5; n++) {
-			afreq = afreq * 256 + (unsigned char)replystr[p + n];
-			bfreq = bfreq * 256 + (unsigned char)replystr[p + 14 + n];
-		}
-		afreq *= 10;
-		bfreq *= 10;
-		int md = replystr[p+5];
-		switch (md) {
-			case 0 :
-				amode = (md & 0x40) ? 1 : 0;
-				break;
-			case 1 :
-				amode = (md & 0x40) ? 2 : 3;
-				break;
-			case 2 :
-				amode = 4;
-				break;
-			case 3 :
-				amode = (md & 0x80) ? 7 : 6;
-				break;
-			case 4 :
-				amode = (md & 0x40) ? 8 : 10;
-				break;
-			case 6 :
-				amode = 11;
-				break;
-			default :
-				amode = 1;
-		}
-		aBW = (md & 0x80) ? 0 : 1;
+	size_t ret;
 
-		md = replystr[p + 19];
-		switch (md) {
-			case 0 :
-				bmode = (md & 0x40) ? 1 : 0;
-				break;
-			case 1 :
-				bmode = (md & 0x40) ? 2 : 3;
-				break;
-			case 2 :
-				bmode = 4;
-				break;
-			case 3 :
-				bmode = (md & 0x80) ? 7 : 6;
-				break;
-			case 4 :
-				bmode = (md & 0x40) ? 8 : 10;
-				break;
-			case 6 :
-				bmode = 11;
-				break;
-			default :
-				bmode = 1;
-		}
-		bBW = (md & 0x80) ? 0 : 1;
+	if (testing) {
+		replystr.clear();
+// vfo A
+		replystr += '\x08'; replystr += '\x07'; replystr += '\xA1'; replystr += '\x20';
+		replystr += '\x00'; replystr += '\x00'; replystr += '\x01'; replystr += '\x04';
+		replystr += '\x04';
+// vfo B
+//		replystr += '\x01'; replystr += '\x01'; replystr += '\x21'; replystr += '\x10';
+		replystr += '\x08'; replystr += '\x07'; replystr += '\xA1'; replystr += '\x20';
+		replystr += '\x00'; replystr += '\x00'; replystr += '\x03'; replystr += '\x04';
+		replystr += '\x85';
 
-		A.freq = afreq;
-		A.imode = amode;
-		A.iBW = aBW;
-
-		B.freq = bfreq;
-		B.imode = bmode;
-		B.iBW = bBW;
-
-		return true;
+		ret = replystr.length();
+	} else {
+		ret = waitN(18, 100, "get info", HEX);
 	}
-	return false;
+
+	if (ret == 18) {
+
+		A.iBW = (replystr[0] & 1);
+		A.freq = 10 * ((((replystr[1] & 0xFF) * 256 +
+				   (replystr[2] & 0xFF) ) * 256 +
+				   (replystr[3] & 0xFF) ) );
+
+		switch (replystr[6] & 0x07) {
+			case 0: A.imode = ((replystr[6] & 0x40) == 0x40) ? 1 : 0; break;
+			case 1: A.imode = ((replystr[6] & 0x40) == 0x40) ? 3 : 2; break;
+			case 2: A.imode = ((replystr[6] & 0x80) == 0x80) ? 5 : 4; break;
+			case 3: A.imode = ((replystr[6] & 0x80) == 0x80) ? 7 : 6; break;
+			default: A.imode = 0;
+		}
+
+std::cout << "Info: " << str2hex(replystr.c_str(), replystr.length()) << std::endl;
+
+std::cout << "   A: " << A.freq << ", " << vFT890modes_[A.imode] << std::endl;
+
+		B.iBW = (replystr[9] & 1);
+		B.freq = 10 * ((((replystr[10] & 0xFF) * 256 +
+				   (replystr[11] & 0xFF) ) * 256 +
+				   (replystr[12] & 0xFF) ) );
+
+		switch (replystr[15] & 0x07) {
+			case 0: B.imode = ((replystr[15] & 0x40) == 0x40) ? 1 : 0; break;
+			case 1: B.imode = ((replystr[15] & 0x40) == 0x40) ? 3 : 2; break;
+			case 2: B.imode = ((replystr[15] & 0x80) == 0x80) ? 5 : 4; break;
+			case 3: B.imode = ((replystr[15] & 0x80) == 0x80) ? 7 : 6; break;
+			default: B.imode = 0;
+		}
+
+std::cout << "   B: " << B.freq << ", " << vFT890modes_[B.imode] << std::endl;
+
+	} else {
+std::cout << "failed to read VFO status bytes (18)" << std::endl;
+		return false;
+	}
+
+// read flag bytes
+	if (testing) {
+		replystr.clear();
+		replystr += '\x04'; replystr += '\xFF'; replystr += '\x80'; replystr += '\xFF';
+		replystr += '\xFF';
+		ret = replystr.length();
+	} else {
+		init_cmd();
+		cmd[4] = 0xFA;
+		ret = waitN(5, 100, "get info", HEX);
+	}
+
+	ptt_ = false;
+	split = false;
+	inuse = onA;
+	if (ret == 5) {
+		if ( (replystr[0] & 0x04) == 0x04 ) split = true;
+		if ( (replystr[0] & 0x40) == 0x40 ) inuse = onB;
+		if ( (replystr[2] & 0x80) == 0x80 ) ptt_ = true;
+
+std::cout << "Flag Bytes    " << str2hex(replystr.c_str(), replystr.length()) << std::endl;
+std::cout << "  Split:      " << (split ? "ON" : "OFF") << 
+			 "  Active vfo: " << (inuse ? "B" : "A") << 
+			 "  PTT:        " << (ptt_ ? "ON" : "OFF") << std::endl << std::endl;
+
+	} else {
+std::cout << "failed to read flag bytes (5)" << std::endl << std::endl;
+		return false;
+	}
+
+	return true;
 }
 
 unsigned long long RIG_FT890::get_vfoA ()
@@ -218,6 +319,7 @@ unsigned long long RIG_FT890::get_vfoA ()
 void RIG_FT890::set_vfoA (unsigned long long freq)
 {
 	A.freq = freq;
+
 	freq /=10; // 890 does not support 1 Hz resolution
 	cmd = to_bcd_be(freq, 8);
 	cmd += 0x0A;
@@ -278,8 +380,12 @@ void RIG_FT890::set_PTT_control(int val)
 	else	 cmd[3] = 0;
 	cmd[4] = 0x0F;
 	sendCommand(cmd, 0);
-LOG_INFO("%s", str2hex(cmd.c_str(), 5));
+	LOG_INFO("%s", str2hex(cmd.c_str(), 5));
 	ptt_ = val;
+}
+
+int RIG_FT890::get_PTT() {
+	return ptt_;
 }
 
 int RIG_FT890::get_smeter()
@@ -288,8 +394,8 @@ int RIG_FT890::get_smeter()
 	cmd[4] = 0xF7;
 	int ret = waitN(5, 100, "get smeter", HEX);
 	if (ret < 5) return 0;
-	int sval = (unsigned char)(replystr[ret - 2]);
-	sval = sval * 100 / 255;
+	int sval = (unsigned char)(replystr[ret - 2] & 0xFF);
+	sval = round(sval * 100.0 / 240.0);
 	return sval;
 }
 
@@ -297,9 +403,16 @@ int RIG_FT890::get_power_out()
 {
 	init_cmd();
 	cmd[4] = 0xF7;
-	int ret = waitN(5, 100, "get pwr out", HEX);
+	size_t ret;
+	if (testing) {
+		replystr[0] = 120; replystr[1] = 60; replystr[2] = 60; replystr[3] = 60; 
+		replystr[4] = 0xF7;
+		ret = replystr.length();
+	} else {
+		ret = waitN(5, 100, "get pwr out", HEX);
+	}
 	if (ret < 5) return 0;
-	int sval = (unsigned char)(replystr[ret - 2]);
-	sval = sval * 100 / 255;
+	int sval = (unsigned char)(replystr[ret - 5]);
+	sval = round(sval * 100.0 / 240.0);
 	return sval;
 }

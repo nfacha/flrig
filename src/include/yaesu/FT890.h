@@ -42,9 +42,12 @@ public:
 
 	bool get_info();
 
-	bool can_split() { return true;}
+	bool can_split() { return true; }
 	void set_split(bool val);
-	bool twovfos() {return false;}
+	int  get_split() { return split; }
+
+	bool twovfos() { return true; }
+	int  get_vfoAorB() { return inuse; }
 
 	bool check();
 
@@ -62,6 +65,7 @@ public:
 	void selectB();
 
 	void set_PTT_control(int val);
+	int  get_PTT();
 
 	int  get_smeter();
 	int  get_power_out();
