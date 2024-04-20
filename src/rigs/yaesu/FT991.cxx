@@ -1414,16 +1414,16 @@ void RIG_FT991::set_xcvr_auto_on()
 // This command requires dummy data be initially sent. Then after one
 // second and before two seconds the command is sent.
 
-	cmd = "IF;"; // use as the dummy data
+	cmd = "PS1;"; // use as the dummy data
 	sendCommand(cmd);
 	update_progress(0);
-	for (int i = 0; i < 1500; i += 100) {
+	for (int i = 0; i < 1200; i += 100) {
 		MilliSleep(100);
 		update_progress(100 * i / 6000);
 		Fl::awake();
 	}
 
-	cmd = rsp = "PS";
+	cmd = rsp = "PS1";
 	cmd.append(";");
 	get_trace(1, "xcvr ON? ()");
 	wait_char(';',4, 500, "Test: Is Rig ON", ASC);
