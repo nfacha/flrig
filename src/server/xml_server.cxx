@@ -1949,16 +1949,16 @@ public:
 			return;
 		}
 
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_set_AB");
 		guard_lock serial_lock(&mutex_serial, "xml rig_set_AB");
 
-		XCVR_STATE vfo = vfoA;
+		if (ans == "A") {
+			selrig->selectA();
+			xml_trace(4, "set_AB ", ans.c_str(), " ", printXCVR_STATE(vfoA).c_str());
+		} else {
+			selrig->selectB();
+			xml_trace(4, "set_AB ", ans.c_str(), " ", printXCVR_STATE(vfoB).c_str());
+		}
 
-		vfo.src = SRVR;
-
-
-xml_trace(4, "set_AB ", ans.c_str(), " ", printXCVR_STATE(vfo).c_str());
-		srvc_reqs.push (VFOQUEUE((ans == "A" ? sA : sB), vfo));
 	}
 
 	std::string help() { return std::string("sets & verifies vfo in use A or B"); }
@@ -1986,16 +1986,15 @@ public:
 			return;
 		}
 
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_set_verify_AB");
-		guard_lock serial_lock(&mutex_serial, "xml rig_set_verify_AB");
+		guard_lock serial_lock(&mutex_serial, "xml rig_set_AB");
 
-		XCVR_STATE vfo = vfoA;
-
-		vfo.src = SRVR;
-
-
-xml_trace(4, "set verify AB ", ans.c_str(), " ", printXCVR_STATE(vfo).c_str());
-		srvc_reqs.push (VFOQUEUE((ans == "A" ? sA : sB), vfo));
+		if (ans == "A") {
+			selrig->selectA();
+			xml_trace(4, "set_AB ", ans.c_str(), " ", printXCVR_STATE(vfoA).c_str());
+		} else {
+			selrig->selectB();
+			xml_trace(4, "set_AB ", ans.c_str(), " ", printXCVR_STATE(vfoB).c_str());
+		}
 	}
 
 	std::string help() { return std::string("sets & verifies vfo in use A or B"); }
@@ -2514,29 +2513,29 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
 
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 33");
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
 					if (selrig->inuse == onB) {
-						serviceB(nuvals);
+						vfo->imode = vfoB.imode = imode;
+						selrig->set_modeB(imode);
+						vfo->iBW = vfoB.iBW = selrig->def_bandwidth(imode);
+						selrig->set_bwB(vfo->iBW);
 					} else {
-						serviceA(nuvals);
+						vfo->imode = vfoA.imode = imode;
+						selrig->set_modeA(imode);
+						vfo->iBW = vfoA.iBW = selrig->def_bandwidth(imode);
+						selrig->set_bwA(vfo->iBW);
 					}
-					Fl::awake(updateUI);
+					Fl::awake(set_Mode_BW_control);
 					result = 1;
-					break;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
@@ -2557,30 +2556,28 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
-
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 34");
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
 					if (selrig->inuse == onB) {
-						serviceB(nuvals);
-						result = (i == (size_t)selrig->get_modeB());
+						vfo->imode = vfoB.imode = imode;
+						selrig->set_modeB(imode);
+						vfo->iBW = vfoB.iBW = selrig->def_bandwidth(imode);
+						selrig->set_bwB(vfo->iBW);
 					} else {
-						serviceA(nuvals);
-						result = (i == (size_t)selrig->get_modeA());
+						vfo->imode = vfoA.imode = imode;
+						selrig->set_modeA(imode);
+						vfo->iBW = vfoA.iBW = selrig->def_bandwidth(imode);
+						selrig->set_bwA(vfo->iBW);
 					}
-					Fl::awake(updateUI);
-					break;
+					Fl::awake(set_Mode_BW_control);
+					result = 1;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
@@ -2608,28 +2605,25 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
-
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 35");
-					serviceA(nuvals);
-					Fl::awake(updateUI);
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
+					vfo->imode = vfoA.imode = imode;
+					selrig->set_modeA(imode);
+					vfo->iBW = vfoA.iBW = selrig->def_bandwidth(imode);
+					selrig->set_bwA(vfo->iBW);
+					Fl::awake(set_Mode_BW_control);
 					result = 1;
-					break;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
+
 
 	}
 
@@ -2647,25 +2641,21 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
-
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 36");
-					serviceA(nuvals);
-					Fl::awake(updateUI);
-					result = (nuvals.imode == selrig->get_modeA());
-					break;
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
+						vfo->imode = vfoA.imode = imode;
+					selrig->set_modeA(imode);
+					vfo->iBW = vfoA.iBW = selrig->def_bandwidth(imode);
+					selrig->set_bwA(vfo->iBW);
+					Fl::awake(set_Mode_BW_control);
+					result = 1;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
@@ -2690,25 +2680,21 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
-
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 37");
-					serviceB(nuvals);
-					Fl::awake(updateUI);
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
+						vfo->imode = vfoB.imode = imode;
+					selrig->set_modeB(imode);
+					vfo->iBW = vfoB.iBW = selrig->def_bandwidth(imode);
+					selrig->set_bwB(vfo->iBW);
+					Fl::awake(set_Mode_BW_control);
 					result = 1;
-					break;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}
@@ -2728,25 +2714,21 @@ public:
 			return;
 		}
 
-		XCVR_STATE nuvals;
-		nuvals.freq = 0;
-		nuvals.imode = -1;
-		nuvals.iBW = 255;
-
 		std::string numode = (std::string)params[0];
-
 		try {
-			for (size_t i = 0; i < selrig->modes_.size(); i++) {
-				if (numode == selrig->modes_.at(i))  {
-					nuvals.imode = i;
-					nuvals.iBW = selrig->def_bandwidth(i);
-					guard_lock serial_lock(&mutex_serial, "xml 38");
-					serviceB(nuvals);
-					Fl::awake(updateUI);
-					result = (nuvals.imode == selrig->get_modeB());
-					break;
+			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
+				if (numode == selrig->modes_.at(imode))  {
+					guard_lock serlock( &mutex_serial );
+						vfo->imode = vfoB.imode = imode;
+					selrig->set_modeB(imode);
+					vfo->iBW = vfoB.iBW = selrig->def_bandwidth(imode);
+					selrig->set_bwB(vfo->iBW);
+					Fl::awake(set_Mode_BW_control);
+					result = 1;
+					return;
 				}
 			}
+			return;
 		} catch (const std::exception& e) {
 			LOG_ERROR("%s", e.what());
 		}

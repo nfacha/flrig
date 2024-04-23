@@ -360,7 +360,7 @@ void update_ifshift(void *d);
 
 void TRACED(updateUI, void *)
 
-	setModeControl(NULL);
+	set_Mode_BW_control(NULL);
 
 	updateBandwidthControl(NULL);
 
@@ -383,10 +383,11 @@ void TRACED(updateUI, void *)
 
 }
 
-void TRACED(setModeControl, void *)
+void TRACED(set_Mode_BW_control, void *)
 
 	opMODE->index(vfo->imode);
 	opMODE->redraw();
+
 	selrig->bandwidths_ = selrig->bwtable(vfo->imode);
 	opBW->clear();
 	for (size_t i = 0; i < selrig->bandwidths_.size(); i++)
@@ -394,8 +395,8 @@ void TRACED(setModeControl, void *)
 
 	if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
 		return;
-//	if (vfo->iBW != opBW->index())
-		opBW->index(vfo->iBW);
+
+	opBW->index(vfo->iBW);
 	opBW->redraw();
 	opBW->show();
 
@@ -446,7 +447,7 @@ rig_trace(1, resp);
 		if (nu_mode != opMODE->index()) {
 			vfoA.imode = vfo->imode = nu_mode;
 			selrig->adjust_bandwidth(vfo->imode);
-			Fl::awake(setModeControl);
+			Fl::awake(set_Mode_BW_control);
 			vfoA.iBW = vfo->iBW = selrig->get_bwA();
 			Fl::awake(updateBandwidthControl);
 		}
@@ -467,7 +468,7 @@ rig_trace(1, resp);
 		if (nu_mode != opMODE->index()) {
 			vfoB.imode = vfo->imode = nu_mode;
 			selrig->adjust_bandwidth(vfo->imode);
-			Fl::awake(setModeControl);
+			Fl::awake(set_Mode_BW_control);
 			vfoB.iBW = vfo->iBW = selrig->get_bwB();
 			Fl::awake(updateBandwidthControl);
 		}
@@ -506,7 +507,7 @@ void TRACED(setBWControl, void *)
 			opDSP_lo->hide();
 			opDSP_hi->hide();
 			btnDSP->hide();
-			if (vfo->iBW != opBW->index())
+//			if (vfo->iBW != opBW->index())
 				opBW->index(vfo->iBW);
 			opBW->show();
 			opBW->redraw();
@@ -521,7 +522,7 @@ void TRACED(setBWControl, void *)
 
 		if (xcvr_name == rig_KX3.name_ || xcvr_name == rig_K4.name_)
 			return;
-		if (vfo->iBW != opBW->index())
+//		if (vfo->iBW != opBW->index())
 			opBW->index(vfo->iBW);
 		opBW->show();
 		opBW->redraw();
@@ -1522,7 +1523,7 @@ void serviceA(XCVR_STATE nuvals)
 			selrig->set_vfoA(nuvals.freq);
 			selrig->get_vfoA();
 			vfo = &vfoA;
-			Fl::awake(setModeControl);
+			Fl::awake(set_Mode_BW_control);
 			Fl::awake(setFreqDispA);
 			return;
 		}
@@ -1622,7 +1623,7 @@ void serviceB(XCVR_STATE nuvals)
 			selrig->get_bwB();
 			selrig->set_vfoB(nuvals.freq);
 			selrig->get_vfoB();
-			Fl::awake(setModeControl);
+			Fl::awake(set_Mode_BW_control);
 			Fl::awake(setFreqDispB);
 			vfo = &vfoB;
 			return;
@@ -2203,17 +2204,19 @@ void TRACED ( updateBandwidthControl, void *d )
 
 void setMode()
 {
-	XCVR_STATE fm = *vfo;
-	fm.imode = opMODE->index();
-	fm.iBW = selrig->def_bandwidth(fm.imode);
-	fm.src = UI;
-	if (selrig->has_FILTER) {
-		fm.filter = selrig->get_FILT(fm.imode);
-		if (selrig->inuse == onB) fm.filter = selrig->get_FILT(fm.imode);
+	guard_lock serlock( &mutex_serial );
+	if (selrig->inuse == onB) {
+		vfo->imode = vfoB.imode = opMODE->index();
+		selrig->set_modeB(vfo->imode);
+		vfo->iBW = vfoB.iBW = selrig->def_bandwidth(vfo->imode);
+		selrig->set_bwB(vfo->iBW);
+	} else {
+		vfo->imode = vfoA.imode = opMODE->index();
+		selrig->set_modeA(vfo->imode);
+		vfo->iBW = vfoA.iBW = selrig->def_bandwidth(vfo->imode);
+		selrig->set_bwA(vfo->iBW);
 	}
-
-	guard_lock que_lock( &mutex_srvc_reqs, "setMode" );
-	srvc_reqs.push(VFOQUEUE( (selrig->inuse == onB ? vB : vA), fm));
+	set_Mode_BW_control(NULL);
 }
 
 void sortList() {
@@ -2721,15 +2724,25 @@ void cb_set_split(int val)
 
 void cb_selectA()
 {
-	guard_lock que_lock( &mutex_srvc_reqs, "cb_selectA");
-	srvc_reqs.push (VFOQUEUE(sA, vfoA));
+//	guard_lock que_lock( &mutex_srvc_reqs, "cb_selectA");
+//	srvc_reqs.push (VFOQUEUE(sA, vfoA));
+
+	guard_lock serial_lock(&mutex_serial, "cb_selectA()");
+	selrig->selectA();
+	xml_trace(3, "cb_selectA() ", printXCVR_STATE(vfoA).c_str());
+
 	return;
 }
 
 void cb_selectB()
 {
-	guard_lock que_lock( &mutex_srvc_reqs, "cb_selectB");
-	srvc_reqs.push (VFOQUEUE(sB, vfoB));
+//	guard_lock que_lock( &mutex_srvc_reqs, "cb_selectB");
+//	srvc_reqs.push (VFOQUEUE(sB, vfoB));
+
+	guard_lock serial_lock(&mutex_serial, "cb_selectB()");
+	selrig->selectB();
+	xml_trace(3, "cb_selectB() ", printXCVR_STATE(vfoB).c_str());
+
 	return;
 }
 
@@ -4824,7 +4837,7 @@ void cbBandSelect(int band)
 	}
 // local display freqmdbw
 	if (selrig->has_mode_control) {
-		setModeControl(NULL);
+		set_Mode_BW_control(NULL);
 	}
 	if (selrig->has_bandwidth_control) {
 		set_bandwidth_control();

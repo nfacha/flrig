@@ -68,7 +68,7 @@ void read_KX3_mode()
 	if (nu_mode != vfoA.imode) {
 		vfoA.imode = vfo->imode = nu_mode;
 		selrig->set_bwA(vfo->iBW = selrig->adjust_bandwidth(nu_mode));
-		Fl::awake(setModeControl);
+		Fl::awake(set_Mode_BW_control);
 		Fl::awake(updateBandwidthControl);
 	}
 	nu_mode = selrig->get_modeB();

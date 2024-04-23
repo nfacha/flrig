@@ -128,7 +128,7 @@ extern void serviceB(XCVR_STATE nuvals);
 extern void cbExit();
 
 extern void setVolumeControl(void *);
-extern void setModeControl(void *);
+extern void set_Mode_BW_control(void *);
 extern void set_bandwidth_control();
 extern void updateBandwidthControl(void *d = NULL);
 extern void updateUI(void *);

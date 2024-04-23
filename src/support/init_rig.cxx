@@ -41,7 +41,7 @@ void TRACED(init_xcvr)
 		vfoA.imode = selrig->get_modeA();
 
 		updateBandwidthControl();
-		setModeControl((void *)0);
+		set_Mode_BW_control((void *)0);
 
 		highlight_vfo(NULL);
 
@@ -73,7 +73,7 @@ void TRACED(init_xcvr)
 			updateBandwidthControl();
 		}
 
-		setModeControl((void *)0);
+		set_Mode_BW_control((void *)0);
 
 		highlight_vfo(NULL);
 
@@ -164,7 +164,7 @@ void TRACED(init_xcvr)
 		vfo = &vfoA;
 		selrig->set_modeA(vfo->imode);
 		selrig->set_bwA(vfo->iBW);
-		setModeControl((void *)0);
+		set_Mode_BW_control((void *)0);
 
 		update_progress(progress->value() + 4);
 

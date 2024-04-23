@@ -357,7 +357,7 @@ void RIG_FT900::set_PTT_control(int val)
                     vfo = &vfoB;
                }
           }
-          Fl::awake(setModeControl);
+          Fl::awake(set_Mode_BW_control);
      }
 	init_cmd();
 	if (val) cmd[3] = 1;
