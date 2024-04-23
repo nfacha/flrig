@@ -1237,7 +1237,7 @@ CTRL  click: FreqB -> FreqA\
 				btnSpot->value(progStatus.cw_spot);
 
 				spnr_cw_spot_tone = new Hspinner(
-					btnSpot->x() + btnSpot->w() + 75, by,
+					btnSpot->x() + btnSpot->w() + 50, by,
 					5*bh, bh, _("Spot tone"));
 				spnr_cw_spot_tone->tooltip(_("Spot tone freq"));
 				spnr_cw_spot_tone->type(FL_INT_INPUT);
@@ -1250,7 +1250,7 @@ CTRL  click: FreqB -> FreqA\
 				spnr_cw_spot_tone->align(FL_ALIGN_CENTER | FL_ALIGN_BOTTOM);
 
 				spnr_cw_weight = new Hspinner(
-					spnr_cw_spot_tone->x() + spnr_cw_spot_tone->w() + 75, by,
+					spnr_cw_spot_tone->x() + spnr_cw_spot_tone->w() +50, by,
 					5*bh, bh, _("Weight"));
 				spnr_cw_weight->type(FL_INT_INPUT);
 				spnr_cw_weight->minimum(2.5);
@@ -1262,7 +1262,7 @@ CTRL  click: FreqB -> FreqA\
 				spnr_cw_weight->tooltip(_("CW weight"));
 
 				spnr_cw_wpm = new Hspinner(
-					spnr_cw_weight->x() + spnr_cw_weight->w() + 75, by,
+					spnr_cw_weight->x() + spnr_cw_weight->w() +50, by,
 					5*bh, bh, _("wpm"));
 				spnr_cw_wpm->type(FL_INT_INPUT);
 				spnr_cw_wpm->minimum(5);
@@ -1273,8 +1273,22 @@ CTRL  click: FreqB -> FreqA\
 				spnr_cw_wpm->align(FL_ALIGN_CENTER | FL_ALIGN_BOTTOM);
 				spnr_cw_wpm->tooltip(_("CW words per minute"));
 
+				spnr_cw_vol= new Hspinner(
+					spnr_cw_weight->w() + spnr_cw_weight->x() + 50, by,
+					5*bh, bh, _("CW vol"));
+				spnr_cw_vol->type(1);
+				spnr_cw_vol->minimum(0);
+				spnr_cw_vol->maximum(100);
+				spnr_cw_vol->step(1);
+				spnr_cw_vol->value(50);
+				spnr_cw_vol->callback((Fl_Callback*)cb_spnr_cw_vol);
+				spnr_cw_vol->value(progStatus.cw_vol);
+				spnr_cw_vol->labelsize(12);
+				spnr_cw_vol->align(FL_ALIGN_BOTTOM | FL_ALIGN_CENTER);
+				spnr_cw_vol->tooltip(_("CW volume"));
+
 				btn_enable_keyer = new Fl_Check_Button(
-					spnr_cw_wpm->x() + spnr_cw_wpm->w() + 10, by,
+					spnr_cw_vol->x() + spnr_cw_vol->w() + 10, by,
 					5*bh, bh, _("Keyer"));
 				btn_enable_keyer->tooltip(_("Enable internal keyer"));
 				btn_enable_keyer->down_box(FL_DOWN_BOX);

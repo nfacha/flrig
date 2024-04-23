@@ -120,6 +120,12 @@ public:
 
 	int power_scale();
 
+	void set_cw_spot_tone();
+	int  get_cw_spot_tone();
+	void get_cw_spot_tone_min_max_step(int &min, int &max, int &step);
+
+	void set_cw_vol();
+	int  get_cw_vol();
 };
 
 

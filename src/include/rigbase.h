@@ -35,6 +35,7 @@
 #include "debug.h"
 #include "trace.h"
 #include "rig_io.h"
+#include "status.h"
 
 #include "rigpanel.h"
 
@@ -679,9 +680,11 @@ double vfo_;
 	virtual void set_agc_level() {}
 
 	virtual void set_cw_weight() {}
+	virtual int  get_cw_weight() {return progStatus.cw_weight;}
 	virtual void get_cw_weight_min_max_step(double &min, double &max, double &step) {
 		min = 2.5; max = 4.5; step = 0.1; } // default for FT950/FT450D
 	virtual void set_cw_wpm() {}
+	virtual int  get_cw_wpm() {return progStatus.cw_wpm;}
 	virtual void get_cw_wpm_min_max(int &min, int &max) {
 		min = 5; max = 50; } // default for FT950/FT450D
 	virtual void enable_keyer() {}
@@ -697,13 +700,20 @@ double vfo_;
 		min = 30; max = 3000; step = 10; } // default for FT950/FT450D
 
 	virtual void set_cw_vol() {}
+	virtual int  get_cw_vol() { return progStatus.cw_vol; }
+	virtual void get_cw_vol_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 1; } // default for FT950/FT450D
+
+	virtual void set_spot_onoff() {}
 	virtual bool set_cw_spot() {return false;}
 	virtual void set_cw_spot_tone() {}
+	virtual int  get_cw_spot_tone() { return progStatus.cw_spot_tone; }
 	virtual void get_cw_spot_tone_min_max_step(int &min, int &max, int &step) {
 		min = 300; max = 1050; step = 50; } // default for FT950/FT450D
-	virtual void set_spot_onoff() {}
+
 	virtual void set_vox_onoff() {}
 	virtual void set_vox_gain() {}
+
 	virtual void get_vox_gain_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; } // default for FT950/FT450D
 	virtual void set_vox_anti() {}

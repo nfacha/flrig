@@ -212,6 +212,7 @@ Hspinner *spnr_cw_spot_tone = (Hspinner *)0;
 Hspinner *spnr_cw_qsk = (Hspinner *)0;
 Hspinner *spnr_cw_weight = (Hspinner *)0;
 Hspinner *spnr_cw_wpm = (Hspinner *)0;
+Hspinner *spnr_cw_vol = (Hspinner *)0;
 Fl_Check_Button *btn_enable_keyer = (Fl_Check_Button *)0;
 
 Fl_Group *genericQSK = (Fl_Group *)0;
@@ -818,6 +819,11 @@ static void cb_btnSpot(Fl_Light_Button* o, void*) {
 static void cb_spnr_cw_spot_tone(Hspinner* o, void*) {
 	progStatus.cw_spot_tone=(int)o->value();
 	cb_cw_spot_tone();
+}
+
+static void cb_spnr_cw_vol(Hspinner* o, void*) {
+	progStatus.cw_vol=(int)o->value();
+	cb_cw_vol();
 }
 
 static void cb_spnr_cw_qsk(Hspinner* o, void*) {

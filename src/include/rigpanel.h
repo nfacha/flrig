@@ -314,6 +314,7 @@ extern Hspinner *spnr_cw_spot_tone;
 extern Hspinner *spnr_cw_qsk;
 extern Hspinner *spnr_cw_weight;
 extern Hspinner *spnr_cw_wpm;
+extern Hspinner *spnr_cw_vol;
 
 extern Fl_Check_Button *btn_enable_keyer;
 extern Fl_Group *genericVOX;

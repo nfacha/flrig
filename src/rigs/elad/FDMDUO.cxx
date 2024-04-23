@@ -114,6 +114,20 @@ static GUI rig_widgets[]= {
 
 void RIG_FDMDUO::initialize()
 {
+	VECTOR(FDMDUOmodes_, vm);
+	VECTOR(FDMDUO_empty, ve);
+	VECTOR(FDMDUO_SSBwidths, vssb);
+	VECTOR(FDMDUO_LSBvals, vlsb);
+	VECTOR(FDMDUO_USBvals, vusb);
+	VECTOR(FDMDUO_AMwidths, vamw);
+	VECTOR(FDMDUO_AMvals, vamv);
+	VECTOR(FDMDUO_CWwidths, vcww);
+	VECTOR(FDMDUO_CWvals, vcwv);
+	VECTOR(FDMDUO_CWRwidths, vcwrw);
+	VECTOR(FDMDUO_CWRvals, vcwrv);
+	VECTOR(FDMDUO_FMwidths, vfmw);
+	VECTOR(FDMDUO_FMvals, vfmv);
+
 	modes_ = FDMDUOmodes_;
 	_mode_type = FDMDUO_mode_type;
 	bandwidths_ = FDMDUO_empty;
@@ -128,20 +142,6 @@ void RIG_FDMDUO::initialize()
 RIG_FDMDUO::RIG_FDMDUO() {
 // base class values
 	name_ = FDMDUOname_;
-
-	VECTOR(FDMDUOmodes_, vm);
-	VECTOR(FDMDUO_empty, ve);
-	VECTOR(FDMDUO_SSBwidths, vssb);
-	VECTOR(FDMDUO_LSBvals, vlsb);
-	VECTOR(FDMDUO_USBvals, vusb);
-	VECTOR(FDMDUO_AMwidths, vamw);
-	VECTOR(FDMDUO_AMvals, vamv);
-	VECTOR(FDMDUO_CWwidths, vcww);
-	VECTOR(FDMDUO_CWvals, vcwv);
-	VECTOR(FDMDUO_CWRwidths, vcwrw);
-	VECTOR(FDMDUO_CWRvals, vcwrv);
-	VECTOR(FDMDUO_FMwidths, vfmw);
-	VECTOR(FDMDUO_FMvals, vfmv);
 
 	modes_ = FDMDUOmodes_;
 	_mode_type = FDMDUO_mode_type;
@@ -166,6 +166,10 @@ RIG_FDMDUO::RIG_FDMDUO() {
 	can_change_alt_vfo = true;
 
 	has_extras = true;
+
+	has_cw_wpm = true;
+	has_cw_spot_tone = true;
+	has_cw_vol = true;
 
 	has_noise_reduction =
 	has_noise_reduction_control =
@@ -199,7 +203,7 @@ RIG_FDMDUO::RIG_FDMDUO() {
 	_nrval2 = 4;
 	preamp_state = atten_state = 0;
 
-	powerScale = 100; // displays 0 to 5 as 0 to 50 W
+	powerScale = 1000;
 }
 
 static int ret = 0;
@@ -255,20 +259,21 @@ int RIG_FDMDUO::get_smeter()
 	return mtr;
 }
 
+// returns "FP pppppp;"
+// or      "FP!pppppp;" if pppppp is unreliable
+// pppppp is forward power
+
 int RIG_FDMDUO::get_power_out()
 {
-	float mtr = 0;
 	cmd = "FP;";
 	get_trace(1, "get_power_out");
 	ret = wait_char(';', 10, 100, "get power", ASC);
 	gett("");
-	if (ret < 10) return mtr;
+	if (ret < 10) return 0;
 
-	size_t p = replystr.rfind("FP");
-	if (p != std::string::npos) {
-		mtr = atoi(&replystr[p + 3]); // value is 0 to 6000; 0 to 6.0
-	}
-	return mtr;
+	int pwr;
+	sscanf(replystr.c_str(), "FP %d;", &pwr);
+	return pwr;
 }
 
 int RIG_FDMDUO::power_scale()
@@ -284,12 +289,12 @@ int RIG_FDMDUO::get_swr()
 	gett("");
 	if (ret < 10) return 0;
 	size_t p = replystr.rfind("WR");
-	double swr = 0.0;
+	float swr = 0.0;
+
 	if (p != std::string::npos)
 		swr = atoi(&replystr[p+4]) + atoi(&replystr[p+7]) / 100.0;
-	swr -= 1.0;
-	if (swr < 0) swr = 0;
-	swr *= 25;
+	sscanf(&replystr[p+4], "%f", &swr);
+	swr *= 12.5;
 	if (swr > 100) swr = 100;
 	return int(swr);
 }
@@ -445,90 +450,94 @@ int RIG_FDMDUO::get_bwA()
 	int i = 0;
 	size_t p;
 
-	if (A.imode == duoLSB) {
-		cmd = "RF1;";
-		get_trace(1, "get bwA");
-		ret = wait_char(';', 6, 100, "get LSB bw", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			for (i = 0; i < duoLSBvals; i++) {
-				if (FDMDUO_LSBvals[i] == replystr.substr(p)) {
+	try {
+		if (A.imode == duoLSB) {
+			cmd = "RF1;";
+			get_trace(1, "get bwA");
+			ret = wait_char(';', 6, 100, "get LSB bw", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				for (i = 0; i < duoLSBvals; i++) {
+					if (FDMDUO_LSBvals.at(i) == replystr.substr(p)) {
+						A.iBW = i;
+						break;
+					}
+				}
+			}
+		} else if (A.imode == duoUSB) {
+			cmd = "RF2;";
+			get_trace(1, "get bwA");
+			ret = wait_char(';', 6, 100, "get USB bw", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				for (i = 0; i < duoUSBvals; i++) {
+					if (FDMDUO_USBvals.at(i) == replystr.substr(p)) {
+						A.iBW = i;
+						break;
+					}
+				}
+			}
+		} else if (A.imode == duoCW) {
+			cmd = "RF3;";
+			get_trace(1, "get CW bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoCWvals; i++)
+						if (FDMDUO_CWvals.at(i) == replystr.substr(p))
+							break;
 					A.iBW = i;
-					break;
+				}
+			}
+		} else if (A.imode == duoCWR) {
+			cmd = "RF4;";
+			get_trace(1, "get CWR bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoCWvals; i++)
+						if (FDMDUO_CWRvals.at(i) == replystr.substr(p))
+							break;
+					A.iBW = i;
+				}
+			}
+		} else if (A.imode == duoAM) {
+			cmd = "RF5;";
+			get_trace(1, "get AM bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoAMvals; i++)
+						if (FDMDUO_AMvals.at(i) == replystr.substr(p))
+							break;
+					A.iBW = i;
+				}
+			}
+		} else if (A.imode == duoFM) {
+			cmd = "RF5;";
+			get_trace(1, "get FM bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoFMvals; i++)
+						if (FDMDUO_FMvals.at(i) == replystr.substr(p))
+							break;
+					A.iBW = i;
 				}
 			}
 		}
-	} else if (A.imode == duoUSB) {
-		cmd = "RF2;";
-		get_trace(1, "get bwA");
-		ret = wait_char(';', 6, 100, "get USB bw", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			for (i = 0; i < duoUSBvals; i++) {
-				if (FDMDUO_USBvals[i] == replystr.substr(p)) {
-					A.iBW = i;
-					break;
-				}
-			}
-		}
-	} else if (A.imode == duoCW) {
-		cmd = "RF3;";
-		get_trace(1, "get CW bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoCWvals; i++)
-					if (FDMDUO_CWvals[i] == replystr.substr(p))
-						break;
-				A.iBW = i;
-			}
-		}
-	} else if (A.imode == duoCWR) {
-		cmd = "RF4;";
-		get_trace(1, "get CWR bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoCWvals; i++)
-					if (FDMDUO_CWRvals[i] == replystr.substr(p))
-						break;
-				A.iBW = i;
-			}
-		}
-	} else if (A.imode == duoAM) {
-		cmd = "RF5;";
-		get_trace(1, "get AM bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoAMvals; i++)
-					if (FDMDUO_AMvals[i] == replystr.substr(p))
-						break;
-				A.iBW = i;
-			}
-		}
-	} else if (A.imode == duoFM) {
-		cmd = "RF5;";
-		get_trace(1, "get FM bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoFMvals; i++)
-					if (FDMDUO_FMvals[i] == replystr.substr(p))
-						break;
-				A.iBW = i;
-			}
-		}
+	} catch (const std::exception& e) {
+		std::cout << e.what() << '\n';
 	}
 
 	return A.iBW;
@@ -558,92 +567,95 @@ int RIG_FDMDUO::get_bwB()
 	int i = 0;
 	size_t p;
 
-	if (B.imode == duoLSB) {
-		cmd = "RF1;";
-		get_trace(1, "get bwB");
-		ret = wait_char(';', 6, 100, "get LSB bw", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			for (i = 0; i < duoLSBvals; i++) {
-				if (FDMDUO_LSBvals[i] == replystr.substr(p)) {
+	try {
+		if (B.imode == duoLSB) {
+			cmd = "RF1;";
+			get_trace(1, "get bwB");
+			ret = wait_char(';', 6, 100, "get LSB bw", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				for (i = 0; i < duoLSBvals; i++) {
+					if (FDMDUO_LSBvals.at(i) == replystr.substr(p)) {
+						B.iBW = i;
+						break;
+					}
+				}
+			}
+		} else if (B.imode == duoUSB) {
+			cmd = "RF2;";
+			get_trace(1, "get bwB");
+			ret = wait_char(';', 6, 100, "get USB bw", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				for (i = 0; i < duoUSBvals; i++) {
+					if (FDMDUO_USBvals.at(i) == replystr.substr(p)) {
+						B.iBW = i;
+						break;
+					}
+				}
+			}
+		} else if (B.imode == duoCW) {
+			cmd = "RF3;";
+			get_trace(1, "get CW bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoCWvals; i++)
+						if (FDMDUO_CWvals.at(i) == replystr.substr(p))
+							break;
 					B.iBW = i;
-					break;
+				}
+			}
+		} else if (B.imode == duoCWR) {
+			cmd = "RF4;";
+			get_trace(1, "get CWR bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoCWvals; i++)
+						if (FDMDUO_CWRvals.at(i) == replystr.substr(p))
+							break;
+					B.iBW = i;
+				}
+			}
+		} else if (B.imode == duoAM) {
+			cmd = "RF5;";
+			get_trace(1, "get AM bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoAMvals; i++)
+						if (FDMDUO_AMvals.at(i) == replystr.substr(p))
+							break;
+					B.iBW = i;
+				}
+			}
+		} else if (B.imode == duoFM) {
+			cmd = "RF5;";
+			get_trace(1, "get FM bw");
+			ret = wait_char(';', 6, 100, "get RF", ASC);
+			gett("");
+			if (ret >= 6) {
+				p = replystr.rfind("RF");
+				if (p != std::string::npos) {
+					for (i = 0; i < duoFMvals; i++)
+						if (FDMDUO_FMvals.at(i) == replystr.substr(p))
+							break;
+					B.iBW = i;
 				}
 			}
 		}
-	} else if (B.imode == duoUSB) {
-		cmd = "RF2;";
-		get_trace(1, "get bwB");
-		ret = wait_char(';', 6, 100, "get USB bw", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			for (i = 0; i < duoUSBvals; i++) {
-				if (FDMDUO_USBvals[i] == replystr.substr(p)) {
-					B.iBW = i;
-					break;
-				}
-			}
-		}
-	} else if (B.imode == duoCW) {
-		cmd = "RF3;";
-		get_trace(1, "get CW bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoCWvals; i++)
-					if (FDMDUO_CWvals[i] == replystr.substr(p))
-						break;
-				B.iBW = i;
-			}
-		}
-	} else if (B.imode == duoCWR) {
-		cmd = "RF4;";
-		get_trace(1, "get CWR bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoCWvals; i++)
-					if (FDMDUO_CWRvals[i] == replystr.substr(p))
-						break;
-				B.iBW = i;
-			}
-		}
-	} else if (B.imode == duoAM) {
-		cmd = "RF5;";
-		get_trace(1, "get AM bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoAMvals; i++)
-					if (FDMDUO_AMvals[i] == replystr.substr(p))
-						break;
-				B.iBW = i;
-			}
-		}
-	} else if (B.imode == duoFM) {
-		cmd = "RF5;";
-		get_trace(1, "get FM bw");
-		ret = wait_char(';', 6, 100, "get RF", ASC);
-		gett("");
-		if (ret >= 6) {
-			p = replystr.rfind("RF");
-			if (p != std::string::npos) {
-				for (i = 0; i < duoFMvals; i++)
-					if (FDMDUO_FMvals[i] == replystr.substr(p))
-						break;
-				B.iBW = i;
-			}
-		}
+	} catch (const std::exception& e) {
+		std::cout << e.what() << '\n';
 	}
-
 	return B.iBW;
 }
 
@@ -834,7 +846,7 @@ int RIG_FDMDUO::get_PTT()
 {
 	cmd = "IF;";
 	get_trace(1, "get_PTT");
-	ret = wait_char(';', 38, 100, "get VFO", ASC);
+	ret = wait_char(';', 38, 100, "get PTT", ASC);
 	gett("");
 	ptt_ = (replystr[28] == '1');
 	return ptt_;
@@ -1046,5 +1058,55 @@ void RIG_FDMDUO::tune_rig()
 	sett("");
 	showresp(WARN, ASC, "set PTT", cmd, "");
 
+}
+
+void RIG_FDMDUO::get_cw_spot_tone_min_max_step(int &min, int &max, int &step)
+{
+	min = 100; max = 1000; step = 10;
+}
+
+void RIG_FDMDUO::set_cw_spot_tone()
+{
+	char command[20];
+	snprintf(command, sizeof(command), "PI%04d;", progStatus.cw_spot_tone);
+	cmd.assign(command);
+
+	set_trace(1, "set cw spot tone");
+	sendCommand(cmd);
+	sett("");
+}
+
+int RIG_FDMDUO::get_cw_spot_tone()
+{
+	cmd.assign("PI;");
+
+	if (wait_char(';', 7, 100, "get cw_spot_tone", ASC) < 7) return 600;
+
+	sscanf(replystr.c_str(), "PI%d;", &progStatus.cw_spot_tone);
+
+	return progStatus.cw_spot_tone;
+}
+
+void RIG_FDMDUO::set_cw_vol()
+{
+	char command[20];
+	snprintf(command, sizeof(command), "VT%03d;", progStatus.cw_vol);
+	cmd.assign(command);
+
+	set_trace(1, "set_cw_vol");
+	sendCommand(cmd);
+	sett("");
+}
+
+int RIG_FDMDUO::get_cw_vol()
+{
+	int val;
+	cmd.assign("VT;");
+
+	if (wait_char(';', 6, 100, "get cw_vol", ASC) < 6) return 600;
+
+	sscanf(replystr.c_str(), "VT%d;", &val);
+
+	return val;
 }
 

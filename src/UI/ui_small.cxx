@@ -1436,8 +1436,8 @@ Fl_Double_Window *tabs_window()
 			genericCW->hide();
 
 			spnr_cw_wpm = new Hspinner(
-				4, 40,
-				85, 22, _("wpm"), 18);
+				4, 32,
+				85, 20, _("wpm"), 15);
 			spnr_cw_wpm->type(1);
 			spnr_cw_wpm->minimum(5);
 			spnr_cw_wpm->maximum(80);
@@ -1449,8 +1449,8 @@ Fl_Double_Window *tabs_window()
 			spnr_cw_wpm->tooltip(_("CW words per minute"));
 
 			spnr_cw_weight = new Hspinner(
-				spnr_cw_wpm->x() + spnr_cw_wpm->w() + 4, 40,
-				85, 22, _("Weight"), 18);
+				spnr_cw_wpm->x() + spnr_cw_wpm->w() + 4, 32,
+				85, 20, _("Weight"), 16);
 			spnr_cw_weight->type(1);
 			spnr_cw_weight->minimum(2.5);
 			spnr_cw_weight->maximum(4.5);
@@ -1463,8 +1463,8 @@ Fl_Double_Window *tabs_window()
 			spnr_cw_weight->tooltip(_("CW weight"));
 
 			spnr_cw_spot_tone= new Hspinner(
-				spnr_cw_weight->w() + spnr_cw_weight->x() + 4, 40,
-				85, 22, _("Spot tone"), 18);
+				spnr_cw_weight->w() + spnr_cw_weight->x() + 4, 32,
+				85, 20, _("Spot tone"), 16);
 			spnr_cw_spot_tone->tooltip(_("Spot volume"));
 			spnr_cw_spot_tone->type(1);
 			spnr_cw_spot_tone->minimum(50);
@@ -1476,15 +1476,29 @@ Fl_Double_Window *tabs_window()
 			spnr_cw_spot_tone->labelsize(12);
 			spnr_cw_spot_tone->align(FL_ALIGN_BOTTOM | FL_ALIGN_CENTER);
 
+			spnr_cw_vol= new Hspinner(
+				spnr_cw_spot_tone->w() + spnr_cw_spot_tone->x() + 4, 32,
+				85, 20, _("CW vol"), 18);
+			spnr_cw_vol->tooltip(_("CW volume"));
+			spnr_cw_vol->type(1);
+			spnr_cw_vol->minimum(0);
+			spnr_cw_vol->maximum(100);
+			spnr_cw_vol->step(1);
+			spnr_cw_vol->value(50);
+			spnr_cw_vol->callback((Fl_Callback*)cb_spnr_cw_vol);
+			spnr_cw_vol->value(progStatus.cw_vol);
+			spnr_cw_vol->labelsize(12);
+			spnr_cw_vol->align(FL_ALIGN_BOTTOM | FL_ALIGN_CENTER);
+
 			btnSpot = new Fl_Light_Button(
-				spnr_cw_spot_tone->x() + spnr_cw_spot_tone->w() + 4, 36,
-				60, 22, _("Spot"));
+				spnr_cw_vol->x() + spnr_cw_vol->w() + 4, 32,
+				50, 20, _("Spot"));
 			btnSpot->tooltip(_("Spot tone on/off"));
 			btnSpot->callback((Fl_Callback*)cb_btnSpot);
 			btnSpot->value(progStatus.cw_spot);
 
 			btn_enable_keyer = new Fl_Check_Button(
-				btnSpot->x(), 62, 60, 15, _("Keyer"));
+				btnSpot->x(), 56, 60, 15, _("Keyer"));
 			btn_enable_keyer->tooltip(_("Enable internal keyer"));
 			btn_enable_keyer->down_box(FL_DOWN_BOX);
 			btn_enable_keyer->callback((Fl_Callback*)cb_btn_enable_keyer);

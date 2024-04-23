@@ -861,9 +861,21 @@ void TRACED(init_Generic_Tabs)
 			spnr_cw_spot_tone->maximum(max);
 			spnr_cw_spot_tone->step(step);
 			spnr_cw_spot_tone->value(progStatus.cw_spot_tone);
-			selrig->set_cw_spot_tone();
+			selrig->get_cw_spot_tone();
 		} else
 			spnr_cw_spot_tone->hide();
+
+		if (selrig->has_cw_vol) {
+			spnr_cw_vol->show();
+			int min, max, step;
+			selrig->get_cw_vol_min_max_step(min, max, step);
+			spnr_cw_vol->minimum(min);
+			spnr_cw_vol->maximum(max);
+			spnr_cw_vol->step(step);
+			selrig->get_cw_vol();
+			spnr_cw_vol->value(progStatus.cw_vol);
+		} else
+			spnr_cw_vol->hide();
 
 		tabsGeneric->add(genericCW);
 		genericCW->redraw();

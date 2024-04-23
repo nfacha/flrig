@@ -1364,31 +1364,31 @@ void RIG_FT450D::get_rf_min_max_step(int &min, int &max, int &step)
 //----------------------------------------------------------------------
 // these are used during initialization
 
-void RIG_FT450D::get_cw_weight()
+int RIG_FT450D::get_cw_weight()
 {
 	cmd = "EX024;";
 	wait_char(';', 9, FL450D_WAIT_TIME, "get CW weight", ASC);
 	gett("get_cw_weight");
 
 	size_t p = replystr.rfind("EX024");
-	if (p == std::string::npos) return;
+	if (p == std::string::npos) return progStatus.cw_weight;
 	replystr[p+8] = 0;
 	int val = atoi(&replystr[p+5]);
-	progStatus.cw_weight = val / 10.0;
+	return (progStatus.cw_weight = val / 10.0);
 }
 
-void RIG_FT450D::get_cw_wpm()
+int RIG_FT450D::get_cw_wpm()
 {
 	cmd = rsp = "KS;";
 	wait_char(';', 6, FL450D_WAIT_TIME, "get WPM", ASC);
 	gett("get_cw_wpm");
 
 	size_t p = replystr.rfind("KS");
-	if (p == std::string::npos) return;
+	if (p == std::string::npos) return progStatus.cw_wpm;
 
 	replystr[p+5] = 0;
 	int val = atoi(&replystr[p+2]);
-	progStatus.cw_wpm = val;
+	return (progStatus.cw_wpm = val);
 }
 
 void RIG_FT450D::get_qsk()
@@ -1421,14 +1421,14 @@ void RIG_FT450D::get_qsk_delay()
 	progStatus.cw_delay = atoi(&replystr[p+5]);
 }
 
-void RIG_FT450D::get_cw_spot_tone()
+int RIG_FT450D::get_cw_spot_tone()
 {
 	cmd = "EX020;";
 	wait_char(';', 8, FL450D_WAIT_TIME, "get CW spot tone", ASC);
 	gett("get_cw_spot_tone");
 
 	size_t p = replystr.rfind("EX020");
-	if (p == std::string::npos) return;
+	if (p == std::string::npos) return progStatus.cw_spot_tone;
 	replystr[p+7] = 0;
 	int n = atoi(&replystr[p+5]);
 	switch (n) {
@@ -1439,6 +1439,7 @@ void RIG_FT450D::get_cw_spot_tone()
 		case 7: case 8: progStatus.cw_spot_tone = 700; break;
 		case 9: default: progStatus.cw_spot_tone = 800; break;
 	}
+	return progStatus.cw_spot_tone;
 }
 
 void RIG_FT450D::get_vox_gain()
