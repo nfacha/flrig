@@ -167,17 +167,20 @@ std::string respstr;
 int readResponse(std::string req1, std::string req2)
 {
 	int numread = 0;
-    std::string expect = req1;
+	std::string expect = req1;
 	respstr.clear();
-    if (req1.find(req2)) expect = req2; 
+	if (req1.find(req2)) expect = req2; 
 
-	if (progStatus.use_tcpip)
-        do {
-		    numread = read_from_remote(respstr);
-        } while(!respstr.find(expect));
-	else {
-		numread = RigSerial->ReadBuffer(respstr, RXBUFFSIZE, req1, req2);
-	}
+	int loop = 100;
+	do {
+		if (progStatus.use_tcpip)
+			numread = read_from_remote(respstr);
+		else
+			numread = RigSerial->ReadBuffer(respstr, RXBUFFSIZE, req1, req2);
+		if (respstr.find(expect) != std::string::npos) break;
+		MilliSleep(10);
+	} while(--loop > 0);
+
 //std::cout << "readResponse:" << std::endl;
 //std::cout << "req1: " << str2hex(req1.c_str(), req1.length()) << ", req2: " << str2hex(req2.c_str(), req2.length()) << std::endl;
 //std::cout << "resp: " << numread << ", " << str2hex(respstr.c_str(), respstr.length()) << std::endl;
