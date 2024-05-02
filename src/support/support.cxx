@@ -3238,6 +3238,7 @@ void digi_sel_on_off()
 void set_ic7610_digi_sel_on_off(void *)
 {
 	ic7610digi_sel_on_off->value(progStatus.digi_sel_on_off);
+	ic7610digi_sel_on_off->redraw();
 }
 
 void digi_sel_val()
@@ -3248,6 +3249,7 @@ void digi_sel_val()
 void set_ic7610_digi_sel_val(void *)
 {
 	ic7610_digi_sel_val->value(progStatus.digi_sel_val);
+	ic7610_digi_sel_val->redraw();
 }
 
 void dual_watch()
@@ -3257,6 +3259,8 @@ void dual_watch()
 
 void set_ic7610_dual_watch(void *)
 {
+	ic7610dual_watch->value(progStatus.dual_watch);
+	ic7610dual_watch->redraw();
 }
 
 void index_att()

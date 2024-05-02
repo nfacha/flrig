@@ -2109,32 +2109,27 @@ void RIG_IC7610::get_if_min_max_step(int &min, int &max, int &step)
 
 void RIG_IC7610::set_pbt_inner(int val)
 {
-	int shift = 128 + val * 128 / 50;
-	if (shift < 0) shift = 0;
-	if (shift > 255) shift = 255;
-
 	cmd = pre_to;
 	cmd.append("\x14\x07");
-	cmd.append(to_bcd(shift, 3));
+	cmd.append(bcd255(val + 50));
 	cmd.append(post);
+	set_trace(1, "set_pbt_inner()");
 	waitFB("set PBT inner");
-	set_trace(4, "set_pbt_inner(", IC7610_bcd_vals[shift], ") ", str2hex(cmd.c_str(), cmd.length()));
+	seth();
 }
 
 void RIG_IC7610::set_pbt_outer(int val)
 {
-	int shift = 128 + val * 128 / 50;
-	if (shift < 0) shift = 0;
-	if (shift > 255) shift = 255;
-
 	cmd = pre_to;
 	cmd.append("\x14\x08");
-	cmd.append(to_bcd(shift, 3));
+	cmd.append(bcd255(val + 50));
 	cmd.append(post);
+	set_trace(1, "set_pbt_outer()");
 	waitFB("set PBT outer");
-	set_trace(4, "set_pbt_outer(", IC7610_bcd_vals[shift], ") ", str2hex(cmd.c_str(), cmd.length()));
+	seth();
 }
 
+// response xFE xFE x93 xE0 x14 x07 xXX xXX xFD;
 int RIG_IC7610::get_pbt_inner()
 {
 	int val = 0;
@@ -2144,21 +2139,25 @@ int RIG_IC7610::get_pbt_inner()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(9, "get pbt inner")) {
+
+	get_trace(1, "get_pbt_inner()");
+	int ret = waitFOR(9, "get pbt inner");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			val = num100(replystr.substr(p+6));
-			val -= 50;
+			val = num100(replystr.substr(p+6)) - 50;
 		}
 	}
-	get_trace(2, "get_pbt_inner()", str2hex(replystr.c_str(), replystr.length()));
+
 	return val;
 }
 
 int RIG_IC7610::get_pbt_outer()
 {
-	get_dual_watch();
-	get_digi_sel();
+//	get_dual_watch();
+//	get_digi_sel();
 
 	int val = 0;
 	std::string cstr = "\x14\x08";
@@ -2167,14 +2166,17 @@ int RIG_IC7610::get_pbt_outer()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	if (waitFOR(9, "get pbt outer")) {
+
+	get_trace(1, "get_pbt_outer");
+	int ret = waitFOR(9, "get pbt outer");
+	geth();
+
+	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			val = num100(replystr.substr(p+6));
-			val -= 50;
+			val = num100(replystr.substr(p+6)) - 50;
 		}
 	}
-	get_trace(2, "get_pbt_outer()", str2hex(replystr.c_str(), replystr.length()));
 	return val;
 }
 
@@ -2216,27 +2218,30 @@ void RIG_IC7610::set_digi_sel(bool b)
 	cmd.append(post);
 	waitFB("set_digi_sel");
 	set_trace(2, "set_digi_sel()", str2hex(cmd.c_str(), cmd.length()));
+	progStatus.digi_sel_on_off = b;
 }
 
 int RIG_IC7610::get_digi_sel()
 {
-	cmd = pre_to;
-	cmd.append("\x16\x4E");
-	cmd.append(post);
-	if (waitFOR(8, "get AGC")) {
-		size_t p = replystr.find(pre_fm);
-		if (p != std::string::npos)
-			progStatus.digi_sel_on_off = replystr[p+6];
-	}
-	get_trace(2, "get_digi_sel() ", str2hex(replystr.c_str(), replystr.length()));
+	// there is no get for digi_sel
 	return progStatus.digi_sel_on_off;
+//	cmd = pre_to;
+//	cmd.append("\x16\x4E");
+//	cmd.append(post);
+//	if (waitFOR(8, "get AGC")) {
+//		size_t p = replystr.find(pre_fm);
+//		if (p != std::string::npos)
+//			progStatus.digi_sel_on_off = replystr[p+6];
+//	}
+//	get_trace(2, "get_digi_sel() ", str2hex(replystr.c_str(), replystr.length()));
+//	return progStatus.digi_sel_on_off;
 }
 
 void RIG_IC7610::set_digi_val(int v)
 {
 	cmd = pre_to;
 	cmd.append("\x14\x13");
-	cmd.append(to_bcd(v, 3));
+	cmd.append(bcd255(v));
 	cmd.append(post);
 	waitFB("set_digi_val");
 	set_trace(2, "set_digi_val()", str2hex(cmd.c_str(), cmd.length()));
@@ -2277,10 +2282,9 @@ int RIG_IC7610::get_dual_watch()
 	cmd += '\xC2';
 	cmd.append(post);
 	std::string resp = pre_fm;
-	cmd += '\x07'; cmd += '\xC2';
-	if (waitFOR(8, "get dual watch")) {
+	if (waitFOR(9, "get dual watch")) {
 		size_t p = replystr.rfind(resp);
-		progStatus.dual_watch = replystr[p+7];
+		progStatus.dual_watch = (replystr[p+6] == 0x01);
 	}
 	get_trace(2, "get_dual_watch()", str2hex(replystr.c_str(), replystr.length()));
 	Fl::awake(set_ic7610_dual_watch);
