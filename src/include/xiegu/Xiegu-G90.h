@@ -50,8 +50,8 @@ public:
 	void set_modeB(int val);
 	int  get_modeB();
 
-	void set_attenuator( int val );
-	int  get_attenuator();
+//	void set_attenuator( int val );
+//	int  get_attenuator();
 
 	void set_preamp(int val);
 	int  get_preamp();

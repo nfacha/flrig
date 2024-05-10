@@ -38,13 +38,11 @@ bool SERIALDEBUG = false;
 
 bool check_hex(const void *s, size_t len)
 {
-	unsigned char *str = (unsigned char *)s;
-	for (size_t n = 0; n < len; n++) {
-		if (str[n] == '\r' || str[n] == '\n') continue;
-		if (str[n] < 0x20) return true;
-		if (str[n] > 0x7F) return true;
-	}
-	return false;
+    unsigned char *str = (unsigned char *)s;
+    for (size_t n = 0; n < len; n++) {
+        if (!isprint(str[n])) return true;
+    }
+    return false;
 }
 
 #ifndef __WIN32__

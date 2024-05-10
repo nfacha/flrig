@@ -148,15 +148,16 @@ RIG_Xiegu_G90::RIG_Xiegu_G90() {
 	_mode_type = Xiegu_G90_mode_type;
 	adjustCIV(defaultCIV);
 
+	serial_baudrate = BR19200;
+	stopbits = 1;
 	serial_retries = 2;
+	serial_write_delay = 0;
+	serial_post_write_delay = 50;
+	serial_timeout = 100;
 
-//	serial_write_delay = 0;
-//	serial_post_write_delay = 0;
-
-	serial_timeout = 50;
-	serial_echo = false;
+	serial_echo = true;
 	serial_rtscts = false;
-	serial_rtsplus = true;
+	serial_rtsplus = false;
 	serial_dtrplus = true;
 	serial_catptt = true;
 	serial_rtsptt = false;
@@ -188,7 +189,7 @@ RIG_Xiegu_G90::RIG_Xiegu_G90() {
 	has_volume_control = 
 	has_sql_control = 
 	has_noise_control = 
-	has_attenuator_control = 
+//	has_attenuator_control = 
 	has_preamp_control = 
 	has_ptt_control = 
 	has_agc_control = 
@@ -502,6 +503,7 @@ int RIG_Xiegu_G90::get_modeB()
 	return B.imode;
 }
 
+/*
 void RIG_Xiegu_G90::set_attenuator(int val)
 {
    if (val) {
@@ -538,6 +540,7 @@ int RIG_Xiegu_G90::get_attenuator()
 	}
 	return atten_state;
 }
+*/
 
 void RIG_Xiegu_G90::set_preamp(int val)
 {
@@ -867,25 +870,12 @@ int RIG_Xiegu_G90::get_smeter()
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append( post );
-	int mtr= 0;
-	get_trace(1, "get smeter");
-	if (waitFOR(8, "get smeter")) {
-		igett("");
+	int mtr= -1;
+	if (waitFOR(9, "get smeter")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p + 7] == '\xFD') {
-				mtr = hexval(replystr[p + 6]);
-			} else {
-				mtr = 100 * hexval(replystr[p + 6]) + hexval(replystr[p + 7]);
-			}
-			if (mtr < 0) mtr = 0;
-			if (mtr > 241) mtr = 241;
-			size_t i = 0;
-			for (i = 0; i < sizeof(smtrtbl) / sizeof(*smtrtbl) - 1; i++)
-				if (mtr >= smtrtbl[i].mtr && mtr < smtrtbl[i+1].mtr)
-					break;
-			mtr = (int)ceil(smtrtbl[i].val + 
-				(smtrtbl[i+1].val - smtrtbl[i].val)*(mtr - smtrtbl[i].mtr)/(smtrtbl[i+1].mtr - smtrtbl[i].mtr));
+			mtr = fm_bcd(replystr.substr(p+6), 3);
+			mtr = (int)ceil(mtr /2.41);
 			if (mtr > 100) mtr = 100;
 		}
 	}
@@ -912,25 +902,19 @@ int RIG_Xiegu_G90::get_swr()
 	cmd.append(cstr);
 	cmd.append( post );
 	int mtr= -1;
-	get_trace(1, "get swr");
-	if (waitFOR(9, "get SWR")) 
-	{
-		igett("");
+	if (waitFOR(9, "get swr")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			if (replystr[p + 7] == '\xFD') {
-				mtr = hexval(replystr[p + 6]);
-			} else {
-				mtr = 100 * hexval(replystr[p + 6]) + hexval(replystr[p + 7]);
-			}
+			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
 			for (i = 0; i < sizeof(swrtbl) / sizeof(*swrtbl) - 1; i++)
 				if (mtr >= swrtbl[i].mtr && mtr < swrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
 			if (mtr > 255) mtr = 255;
-			mtr = (int)ceil(swrtbl[i].val + 
+			mtr = (int)ceil(swrtbl[i].val +
 				(swrtbl[i+1].val - swrtbl[i].val)*(mtr - swrtbl[i].mtr)/(swrtbl[i+1].mtr - swrtbl[i].mtr));
+
 			if (mtr > 100) mtr = 100;
 		}
 	}
@@ -950,20 +934,20 @@ void RIG_Xiegu_G90::set_noise(bool val)
 
 int RIG_Xiegu_G90::get_noise()
 {
+	int val = progStatus.noise;
 	std::string cstr = "\x16\x22";
 	std::string resp = pre_fm;
 	resp.append(cstr);
 	cmd = pre_to;
 	cmd.append(cstr);
 	cmd.append(post);
-	get_trace(1, "get noise");
 	if (waitFOR(8, "get noise")) {
-		igett("");
 		size_t p = replystr.rfind(resp);
-		if (p != std::string::npos)
-			return (replystr[p+6] ? 1 : 0);
+		if (p != std::string::npos) {
+			val = replystr[p+6];
+		}
 	}
-	return progStatus.noise;
+	return val;
 }
 
 void RIG_Xiegu_G90::get_band_selection(int v)
