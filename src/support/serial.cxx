@@ -460,7 +460,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	hex = check_hex(buf.c_str(), buf.length());
 
 	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer [%f msec]: %s",
+		"ReadBuffer1 [%f msec]: %s",
 		readtime / 1000.0,
 		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
 
@@ -471,7 +471,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	if (timedout) {
 		memset(traceinfo, 0, sizeof(traceinfo));
 		snprintf(traceinfo, sizeof(traceinfo), 
-			"ReadBuffer FAILED [%f msec] wanted %d chars, read %lu chars",
+			"ReadBuffer2 FAILED [%f msec] wanted %d chars, read %lu chars",
 			(zusec() - start) / 1000.0,
 			nchars,
 			buf.length());
@@ -798,11 +798,13 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		if (!thisread || !retval) MilliSleep(1);
 	}
 
+	hex = check_hex(sbuf.c_str(), sbuf.length());
 	double readtime = (zusec() - start) / 1000.0;
 	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer [%0.2f msec] (%u): %s",
+		"ReadBuffer3 [%0.2f msec] (%u): %s",
 		readtime, (unsigned int)sbuf.length(), 
-		(hex ? str2hex(buf.c_str(), (unsigned  int)buf.length()) : sbuf.c_str()));
+		(hex ? str2hex(sbuf.c_str(),sbuf.length()) : sbuf.c_str()));
+
 	if (progStatus.serialtrace)
 		ser_trace(2, "1:", traceinfo);
 
@@ -825,7 +827,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	if (nread >= nchars) return nread;
 
 	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer FAILED [%0.2f msec], read %d bytes",
+		"ReadBuffer4 FAILED [%0.2f msec], read %d bytes",
 		readtime, nread);
 	LOG_ERROR("%s", traceinfo);
 

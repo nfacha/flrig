@@ -353,7 +353,7 @@ int waitResponse(int timeout)
 		return 0;
 
 	MilliSleep(10);
-	if (!(n = readResponse(";", "\0xFD"))) {
+	if (!(n = readResponse(";", "\xFD"))) {
 		while (timeout > 0) {
 			if (timeout > 10) MilliSleep(10);
 			else MilliSleep(timeout);
