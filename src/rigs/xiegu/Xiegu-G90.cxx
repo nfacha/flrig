@@ -874,8 +874,14 @@ int RIG_Xiegu_G90::get_smeter()
 	if (waitFOR(9, "get smeter")) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			mtr = fm_bcd(replystr.substr(p+6), 3);
-			mtr = (int)ceil(mtr /2.41);
+			size_t i = 0;
+			for (i = 0; i < sizeof(smtrtbl) / sizeof(*smtrtbl) - 1; i++)
+				if (mtr >= smtrtbl[i].mtr && mtr < smtrtbl[i+1].mtr)
+					break;
+			if (mtr < 0) mtr = 0;
+			if (mtr > 255) mtr = 255;
+			mtr = (int)ceil(smtrtbl[i].val +
+				(smtrtbl[i+1].val - smtrtbl[i].val)*(mtr - smtrtbl[i].mtr)/(smtrtbl[i+1].mtr - smtrtbl[i].mtr));
 			if (mtr > 100) mtr = 100;
 		}
 	}
@@ -914,7 +920,6 @@ int RIG_Xiegu_G90::get_swr()
 			if (mtr > 255) mtr = 255;
 			mtr = (int)ceil(swrtbl[i].val +
 				(swrtbl[i+1].val - swrtbl[i].val)*(mtr - swrtbl[i].mtr)/(swrtbl[i+1].mtr - swrtbl[i].mtr));
-
 			if (mtr > 100) mtr = 100;
 		}
 	}
