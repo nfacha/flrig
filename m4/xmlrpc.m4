@@ -25,7 +25,7 @@ AC_DEFUN([AC_FLRIG_XMLRPC], [
   AC_ARG_VAR([XMLRPC_LIBS], [linker flags for libxmlrpc-c, overrriding xmlrpc-c-config])
 
   AC_ARG_WITH([xmlrpc],
-              AC_HELP_STRING([--with-xmlrpc], [enable xmlrpc server support @<:@autodetect@:>@]),
+              AS_HELP_STRING([--with-xmlrpc],[enable xmlrpc server support @<:@autodetect@:>@]),
               [case "${withval}" in
                 yes|no) ac_cv_want_xmlrpc="${withval}" ;;
                 *)      AC_MSG_ERROR([bad value "${withval}" for --with-xmlrpc]) ;;
