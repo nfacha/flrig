@@ -61,6 +61,7 @@
 #include "fskioUI.h"
 
 Fl_Double_Window *dlgDisplayConfig = NULL;
+Fl_Double_Window *dlgColorsDialog = NULL;
 Fl_Double_Window *dlgXcvrConfig = NULL;
 Fl_Double_Window *dlgMemoryDialog = NULL;
 Fl_Double_Window *dlgControls = NULL;
@@ -123,7 +124,7 @@ void set_combo_value()
 static bool open_serial(const char* dev)
 {
 	char targetPath[1024];
-	DWORD result = QueryDosDevice(dev, targetPath, sizeof(targetPath)/sizeof(targetPath[0]));	
+	DWORD result = QueryDosDevice(dev, targetPath, sizeof(targetPath)/sizeof(targetPath[0]));
 	return result != 0;
 }
 
@@ -484,7 +485,7 @@ void configXcvr()
 		txtCIV->value(hexstr);
 		txtCIV->activate();
 		btnCIVdefault->activate();
-		if (xcvr_name == rig_IC7200.name_ || 
+		if (xcvr_name == rig_IC7200.name_ ||
 			xcvr_name == rig_IC7300.name_ ||
 			xcvr_name == rig_IC7600.name_ ) {
 			btnUSBaudio->value(progStatus.USBaudio);
@@ -602,48 +603,56 @@ void cbFreqControlFontBrowser(Fl_Widget*, void*) {
 	selfont = fntbrowser->fontNumber();
 	lblTest->labelfont(selfont);
 	dlgDisplayConfig->redraw();
+	dlgColorsDialog->redraw();
 	fntbrowser->hide();
 }
 
 void cbPrefFont()
 {
 	fntbrowser->fontNumber(progStatus.fontnbr);
-//	fntbrowser->fontFilter(Font_Browser::FIXED_WIDTH);
-//	fntbrowser->fontFilter(Font_Browser::ALL_TYPES);
 	fntbrowser->callback(cbFreqControlFontBrowser);
 	fntbrowser->show();
 }
 
 uchar fg_red, fg_green, fg_blue;
 uchar bg_red, bg_green, bg_blue;
-uchar smeterRed, smeterGreen, smeterBlue;
-uchar peakRed, peakGreen, peakBlue;
-uchar pwrRed, pwrGreen, pwrBlue;
-uchar swrRed, swrGreen, swrBlue;
-uchar voltRed, voltGreen, voltBlue;
 
-Fl_Color bgclr;
-Fl_Color fgclr;
+uchar smeterRed = 0, smeterGreen = 180, smeterBlue = 0,
+	  pwrRed = 180, pwrGreen = 0, pwrBlue = 0,
+	  alcRed = 148, alcGreen = 0, alcBlue = 148,
+	  swrRed = 148, swrGreen = 0, swrBlue = 148,
+	  iddRed = 0, iddGreen = 0, iddBlue = 128,
+	  voltsRed = 0, voltsGreen = 0, voltsBlue = 128;
 
-Fl_Color fgsys;
+uchar smeter_peak_red = 255, smeter_peak_green = 0, smeter_peak_blue = 0,
+	  pwr_peak_red = 255, pwr_peak_green = 0, pwr_peak_blue = 0,
+	  alc_peak_red = 255, alc_peak_green = 0, alc_peak_blue = 0,
+	  swr_peak_red = 255, swr_peak_green = 0, swr_peak_blue = 0,
+	  idd_peak_red = 255, idd_peak_green = 0, idd_peak_blue = 0,
+	  volts_peak_red = 255, volts_peak_green = 0, volts_peak_blue = 0;
+
+static Fl_Color bgclr;
+static Fl_Color fgclr;
+
+static Fl_Color fgsys;
 static uchar fg_sys_red, fg_sys_green, fg_sys_blue;
 
-Fl_Color bgsys;
+static Fl_Color bgsys;
 static uchar bg_sys_red, bg_sys_green, bg_sys_blue;
 
-Fl_Color bg2sys;
+static Fl_Color bg2sys;
 static uchar bg2_sys_red, bg2_sys_green, bg2_sys_blue;
 
-Fl_Color bg_slider;
+static Fl_Color bg_slider;
 static uchar bg_slider_red, bg_slider_green, bg_slider_blue;
 
-Fl_Color btn_slider;
+static Fl_Color btn_slider;
 static uchar btn_slider_red, btn_slider_green, btn_slider_blue;
 
-Fl_Color btn_lt_color;
+static Fl_Color btn_lt_color;
 static uchar btn_lt_color_red, btn_lt_color_green, btn_lt_color_blue;
 
-Fl_Color tab_color;
+static Fl_Color tab_color;
 static uchar tab_red, tab_green, tab_blue;
 
 void cb_lighted_button()
@@ -755,6 +764,30 @@ void cb_slider_select()
 	}
 }
 
+void redraw_dialogs()
+{
+	Fl_Double_Window *wlist[] = {
+		mainwindow, tabs_dialog,
+		cwio_keyer_dialog, cwio_editor, cwio_configure,
+		FSK_keyer_dialog, FSK_configure,
+		meter_scale_dialog, meters_dialog,
+		dlgDisplayConfig, dlgColorsDialog,
+		dlgMemoryDialog, meter_filters,
+		dlgXcvrConfig,
+		NULL };
+
+//	Fl_Color bgc = fl_rgb_color( progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue );
+	for (size_t n = 0; n < sizeof(wlist) / sizeof(*wlist); n++) {
+		if (wlist[n]) {
+//			wlist[n]->color(bgc);
+			wlist[n]->redraw();
+		}
+	}
+
+	tab_tree->item_labelbgcolor(bgsys);
+	tab_tree->item_labelfgcolor(fgsys);
+}
+
 void cb_sys_defaults()
 {
 	bgsys = flrig_def_color(FL_BACKGROUND_COLOR);
@@ -776,43 +809,64 @@ void cb_sys_defaults()
 	Fl::background2(bg2_sys_red, bg2_sys_green, bg2_sys_blue);
 	Fl::foreground(fg_sys_red, fg_sys_green, fg_sys_blue);
 
-	dlgDisplayConfig->redraw();
-	mainwindow->redraw();
+	redraw_dialogs();
+}
+
+void set_system_colors()
+{
+	fgsys = fl_rgb_color( progStatus.fg_sys_red, progStatus.fg_sys_green, progStatus.fg_sys_red );
+	Fl::foreground( progStatus.fg_sys_red, progStatus.fg_sys_green, progStatus.fg_sys_red );
+	bgsys = fl_rgb_color(  progStatus.bg_sys_red, progStatus.bg_sys_green, progStatus.bg_sys_red );
+	Fl::background(   progStatus.bg_sys_red, progStatus.bg_sys_green, progStatus.bg_sys_red );
+	bg2sys = fl_rgb_color(   progStatus.bg2_sys_red, progStatus.bg2_sys_green, progStatus.bg2_sys_red );
+	Fl::background2 (   progStatus.bg2_sys_red, progStatus.bg2_sys_green, progStatus.bg2_sys_red );
+	redraw_dialogs();
 }
 
 void cb_sys_foreground()
 {
-	uchar r = fg_sys_red, g = fg_sys_green, b = fg_sys_blue;
+	uchar r = progStatus.fg_sys_red, g = progStatus.fg_sys_green, b = progStatus.fg_sys_blue;
 	if (fl_color_chooser("Foreground color", r, g, b)) {
-		fg_sys_red = r; fg_sys_green = g; fg_sys_blue = b;
+		progStatus.fg_sys_red = fg_sys_red = r;
+		progStatus.fg_sys_green = fg_sys_green = g;
+		progStatus.fg_sys_blue = fg_sys_blue = b;
 		fgsys = fl_rgb_color(r, g, b);
 		Fl::foreground(r, g, b);
-		dlgDisplayConfig->redraw();
-		mainwindow->redraw();
+		redraw_dialogs();
 	}
 }
 
 void cb_sys_background()
 {
-	uchar r = bg_sys_red, g = bg_sys_green, b = bg_sys_blue;
+	uchar r = progStatus.bg_sys_red, g = progStatus.bg_sys_green, b = progStatus.bg_sys_blue;
 	if (fl_color_chooser("Background color", r, g, b)) {
-		bg_sys_red = r; bg_sys_green = g; bg_sys_blue = b;
+		progStatus.bg_sys_red = bg_sys_red = r;
+		progStatus.bg_sys_green = bg_sys_green = g;
+		progStatus.bg_sys_blue = bg_sys_blue = b;
 		bgsys = fl_rgb_color(r, g, b);
 		Fl::background(r, g, b);
-		dlgDisplayConfig->redraw();
-		mainwindow->redraw();
+		redraw_dialogs();
 	}
 }
 
 void cb_sys_background2()
 {
-	uchar r = bg2_sys_red, g = bg2_sys_green, b = bg2_sys_blue;
+	uchar r = progStatus.bg2_sys_red, g = progStatus.bg2_sys_green, b = progStatus.bg2_sys_blue;
 	if (fl_color_chooser("Background2 color", r, g, b)) {
-		bg2_sys_red = r; bg2_sys_green = g; bg2_sys_blue = b;
+		progStatus.bg2_sys_red = bg2_sys_red = r;
+		progStatus.bg2_sys_green = bg2_sys_green = g;
+		progStatus.bg2_sys_blue = bg2_sys_blue = b;
 		bg2sys = fl_rgb_color(r, g, b);
 		Fl::background2(r, g, b);
-		dlgDisplayConfig->redraw();
-		mainwindow->redraw();
+// void Fl::background2 ( uchar r, uchar g, uchar b )
+// Changes the alternative background color.
+// This color is used as a background by Fl_Input and other text widgets.
+// This call may change fl_color(FL_FOREGROUND_COLOR) if it does not provide 
+// sufficient contrast to FL_BACKGROUND2_COLOR.
+// we want to preserve the user selection.
+		Fl::background(progStatus.bg_sys_red, progStatus.bg_sys_green, progStatus.bg_sys_blue);
+		Fl::foreground(progStatus.fg_sys_red, progStatus.fg_sys_green, progStatus.fg_sys_blue);
+		redraw_dialogs();
 	}
 }
 
@@ -824,18 +878,29 @@ void cbBacklightColor()
 		bgclr = fl_rgb_color(r, g, b);
 		lblTest->color(bgclr);
 
-		sldrRcvSignalColor->color( fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr );
-		sldrPWRcolor->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
-		sldrSWRcolor->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-		sldrVoltcolor->color(fl_rgb_color (voltRed, voltGreen, voltBlue), bgclr);
+		color_SMETER->color( fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr );
+		color_PWR->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
+		color_SWR->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
+		color_VOLTS->color(fl_rgb_color (voltsRed, voltsGreen, voltsBlue), bgclr);
+		color_ALC->color(fl_rgb_color ( alcRed, alcGreen, alcBlue), bgclr);
+		color_IDD->color(fl_rgb_color ( iddRed, iddGreen, iddBlue), bgclr);
 
-		scaleSmeterColor->color(bgclr);
-		scalePWRcolor->color(bgclr);
-		scaleSWRcolor->color(bgclr);
-		scaleVoltcolor->color(bgclr);
-		grpMeterColor->color(bgclr);
+		color_SMETER->PeakColor( fl_rgb_color (smeter_peak_red, smeter_peak_green, smeter_peak_blue) );
+		color_PWR->PeakColor(fl_rgb_color (pwr_peak_red, pwr_peak_green, pwr_peak_blue) );
+		color_SWR->PeakColor(fl_rgb_color (swr_peak_red, swr_peak_green, swr_peak_blue) );
+		color_VOLTS->PeakColor(fl_rgb_color (volts_peak_red, volts_peak_green, volts_peak_blue));
+		color_ALC->PeakColor(fl_rgb_color ( alc_peak_red, alc_peak_green, alc_peak_blue) );
+		color_IDD->PeakColor(fl_rgb_color ( idd_peak_red, idd_peak_green, idd_peak_blue) );
 
-		dlgDisplayConfig->redraw();
+		btn_change_SMETER->color(bgclr);
+		btn_change_PWR->color(bgclr);
+		btn_change_SWR->color(bgclr);
+		btn_change_ALC->color(bgclr);
+		btn_change_IDD->color(bgclr);
+		btn_change_VOLTS->color(bgclr);
+		meter_group->color(bgclr);
+
+		dlgColorsDialog->redraw();
 	}
 }
 
@@ -847,14 +912,22 @@ void cbPrefForeground()
 		fgclr = fl_rgb_color(r, g, b);
 		lblTest->labelcolor(fgclr);
 
-		scaleSmeterColor->labelcolor(fgclr);
-		scalePWRcolor->labelcolor(fgclr);
-		scaleSWRcolor->labelcolor(fgclr);
-		scaleVoltcolor->labelcolor(fgclr);
+		btn_change_SMETER->labelcolor(fgclr);
+		btn_change_PWR->labelcolor(fgclr);
+		btn_change_SWR->labelcolor(fgclr);
+		btn_change_ALC->labelcolor(fgclr);
+		btn_change_IDD->labelcolor(fgclr);
+		btn_change_VOLTS->labelcolor(fgclr);
 
-		grpMeterColor->labelcolor(fgclr);
-		dlgDisplayConfig->redraw();
+		meter_group->labelcolor(fgclr);
+		dlgColorsDialog->redraw();
 	}
+}
+
+void default_freq_display()
+{
+	lblTest->labelfont(progStatus.fontnbr);
+	lblTest->labelcolor(fl_rgb_color(progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue));
 }
 
 void default_meters()
@@ -863,117 +936,56 @@ void default_meters()
 	bg_red = 232; bg_green = 255; bg_blue = 232;
 	bgclr = fl_rgb_color( bg_red, bg_green, bg_blue);
 		lblTest->color(bgclr);
-		sldrRcvSignalColor->color( fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr );
-		sldrPWRcolor->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
-		sldrSWRcolor->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-		scaleSmeterColor->color(bgclr);
-		scalePWRcolor->color(bgclr);
-		scaleSWRcolor->color(bgclr);
-		scaleVoltcolor->color(bgclr);
-		grpMeterColor->color(bgclr);
+		color_SMETER->color( fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr );
+		color_PWR->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
+		color_SWR->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
+		btn_change_SMETER->color(bgclr);
+		btn_change_PWR->color(bgclr);
+		btn_change_SWR->color(bgclr);
+		btn_change_ALC->color(bgclr);
+		btn_change_IDD->color(bgclr);
+		btn_change_VOLTS->color(bgclr);
+		meter_group->color(bgclr);
 
 	fg_red = 0; fg_green = 0; fg_blue = 0;
 	fgclr = (Fl_Color)0;
 		lblTest->labelcolor(fgclr);
-		scaleSmeterColor->labelcolor(fgclr);
-		scalePWRcolor->labelcolor(fgclr);
-		scaleSWRcolor->labelcolor(fgclr);
-		scaleVoltcolor->labelcolor(fgclr);
-		grpMeterColor->labelcolor(fgclr);
+		btn_change_SMETER->labelcolor(fgclr);
+		btn_change_PWR->labelcolor(fgclr);
+		btn_change_SWR->labelcolor(fgclr);
+		btn_change_ALC->labelcolor(fgclr);
+		btn_change_IDD->labelcolor(fgclr);
+		btn_change_VOLTS->labelcolor(fgclr);
+		meter_group->labelcolor(fgclr);
 	smeterRed = 0; smeterGreen = 180; smeterBlue = 0;
 		c = fl_rgb_color (smeterRed, smeterGreen, smeterBlue);
-		sldrRcvSignalColor->color(c, bgclr );
-	peakRed = 255; peakGreen = 0; peakBlue = 0;
-		c = fl_rgb_color( peakRed, peakGreen, peakBlue );
-		sldrRcvSignalColor->PeakColor(c);
-		sldrPWRcolor->PeakColor(c);
-		sldrSWRcolor->PeakColor(c);
-		sldrVoltcolor->PeakColor(bgclr);
+		color_SMETER->color(c, bgclr );
 	pwrRed = 180; pwrGreen = 0; pwrBlue = 0;
 		c = fl_rgb_color( pwrRed, pwrGreen, pwrBlue );
-		sldrPWRcolor->color(c, bgclr);
-	swrRed = 148; swrGreen = 0; swrBlue = 148;
+		color_PWR->color(c, bgclr);
+	alcRed = swrRed = 148; alcGreen = swrGreen = 0; alcBlue = swrBlue = 148;
 		c = fl_rgb_color(swrRed, swrGreen, swrBlue);
-		sldrSWRcolor->color(c, bgclr);
-	voltRed = 0; voltGreen = 0; voltBlue = 128;
-	voltRed = 0; voltGreen = 0; voltBlue = 255;
-		c = fl_rgb_color(voltRed, voltGreen, voltBlue);
-		sldrVoltcolor->color(c, bgclr);
+		color_SWR->color(c, bgclr);
+		color_ALC->color(c, bgclr);
+	iddRed = voltsRed = 128; iddGreen = voltsGreen = 0; iddBlue = voltsBlue = 0;
+		c = fl_rgb_color(voltsRed, voltsGreen, voltsBlue);
+		color_VOLTS->color(c, bgclr);
+		color_IDD->color(c, bgclr);
+	smeter_peak_red = 255; smeter_peak_green = 0; smeter_peak_blue = 0;
+		c = fl_rgb_color( smeter_peak_red, smeter_peak_green, smeter_peak_blue );
+		color_SMETER->PeakColor(c);
+		color_PWR->PeakColor(c);
+		color_SWR->PeakColor(c);
+		color_VOLTS->PeakColor(c);
+		color_IDD->PeakColor(c);
+		color_ALC->PeakColor(c);
 
-	dlgDisplayConfig->redraw();
+	dlgColorsDialog->redraw();
 }
 
-void cbSMeterColor()
+void set_tab_colors()
 {
-	uchar r = smeterRed, g = smeterGreen, b = smeterBlue;
-	if (fl_color_chooser("S Meter color", r, g, b)) {
-		smeterRed = r; smeterGreen = g; smeterBlue = b;
-		sldrRcvSignalColor->color(
-			fl_rgb_color (r, g, b),
-			bgclr );
-		dlgDisplayConfig->redraw();
-	}
-}
-
-void cbPeakMeterColor()
-{
-	uchar r = peakRed, g = peakGreen, b = peakBlue;
-	if (fl_color_chooser("Peak value color", r, g, b)) {
-		peakRed = r; peakGreen = g; peakBlue = b;
-		sldrRcvSignalColor->PeakColor(fl_rgb_color (r, g, b));
-		sldrPWRcolor->PeakColor(fl_rgb_color (r, g, b));
-		sldrSWRcolor->PeakColor(fl_rgb_color (r, g, b));
-		dlgDisplayConfig->redraw();
-	}
-}
-
-void cbPwrMeterColor()
-{
-	uchar r = pwrRed, g = pwrGreen, b = pwrBlue;
-	if (fl_color_chooser("Power meter color", r, g, b)) {
-		pwrRed = r; pwrGreen = g; pwrBlue = b;
-		sldrPWRcolor->color(
-			fl_rgb_color (r, g, b),
-			bgclr );
-		dlgDisplayConfig->redraw();
-	}
-}
-
-void cbSWRMeterColor()
-{
-	uchar r = swrRed, g = swrGreen, b = swrBlue;
-	if (fl_color_chooser("SWR meter color", r, g, b)) {
-		swrRed = r; swrGreen = g; swrBlue = b;
-		sldrSWRcolor->color(
-			fl_rgb_color (swrRed, swrGreen, swrBlue),
-			bgclr );
-		dlgDisplayConfig->redraw();
-	}
-}
-
-void cbVoltMeterColor()
-{
-	uchar r = voltRed, g = voltGreen, b = voltBlue;
-	if (fl_color_chooser("Volt meter color", r, g, b)) {
-		voltRed = r; voltGreen = g; voltBlue = b;
-		sldrVoltcolor->color(
-			fl_rgb_color (voltRed, voltGreen, voltBlue),
-			bgclr );
-		dlgDisplayConfig->redraw();
-	}
-}
-
-void cb_tab_defaults()
-{
-	tab_red = 230;
-	tab_green = 230;
-	tab_blue = 230;
-
-	tab_color = fl_rgb_color( tab_red, tab_green, tab_blue);
-
-	btn_tab_color->color(tab_color);
-	btn_tab_color->redraw();
-
+	Fl_Color tab_color = fl_rgb_color( progStatus.tab_red, progStatus.tab_green, progStatus.tab_blue);
 	if (tabsGeneric) {
 		tabsGeneric->selection_color(tab_color);
 		tabsGeneric->redraw();
@@ -986,35 +998,232 @@ void cb_tab_defaults()
 		tabCmds->selection_color(tab_color);
 		tabCmds->redraw();
 	}
+}
 
+void cb_tab_defaults()
+{
+	tab_red = tab_green = tab_blue = 230;
+	tabs_color->selection_color(fl_rgb_color( 230, 230, 230 ));
 }
 
 void cb_tab_colors()
 {
 	uchar r = tab_red, g = tab_green, b = tab_blue;
 	if (fl_color_chooser("TAB color", r, g, b)) {
-		tab_red = r; tab_green = g; tab_blue = b;
+		tab_red = r;
+		tab_green = g;
+		tab_blue = b;
 		tab_color = fl_rgb_color(r, g, b);
-		btn_tab_color->color(tab_color);
-		btn_tab_color->redraw();
-
-		if (tabsGeneric) {
-			tabsGeneric->selection_color(tab_color);
-			tabsGeneric->redraw();
-		}
-		if (tabs550) {
-			tabs550->selection_color(tab_color);
-			tabs550->redraw();
-		}
-		if (tabCmds) {
-			tabCmds->selection_color(tab_color);
-			tabCmds->redraw();
-		}
+		tabs_color->selection_color(tab_color);
+		tabs_color->redraw();
 	}
 }
 
+// called to transfer color configuration to operating dialogs
+
 void setColors()
 {
+
+	Fl::background( progStatus.bg_sys_red, progStatus.bg_sys_green, progStatus.bg_sys_blue );
+	Fl::background2( progStatus.bg2_sys_red, progStatus.bg2_sys_green, progStatus.bg2_sys_blue );
+	Fl::foreground( progStatus.fg_sys_red, progStatus.fg_sys_green, progStatus.fg_sys_blue );
+
+	FreqDispA->font(selfont);
+	FreqDispB->font(selfont);
+
+	Fl_Color bgclr = fl_rgb_color (progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue);
+	Fl_Color fgclr = fl_rgb_color (progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue);
+
+	if (selrig->inuse == onB) {
+		FreqDispB->SetCOLORS( fl_rgb_color(progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue), bgclr);
+		FreqDispA->SetCOLORS(
+			fl_rgb_color(progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue),
+			fl_color_average(bgclr, FL_BLACK, 0.87));
+	} else {
+		FreqDispA->SetCOLORS( fl_rgb_color(progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue), bgclr);
+		FreqDispB->SetCOLORS(
+			fl_rgb_color(progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue),
+			fl_color_average(bgclr, FL_BLACK, 0.87));
+	}
+
+	grpMeters->color(bgclr);
+
+	meter_fill_box->color(bgclr);
+
+	meters_dialog->color(bgclr);
+
+	scaleSmeter->color(bgclr);
+	scaleSmeter->labelcolor(fgclr);
+	scaleSmeter->redraw_label();
+	scaleSmeter->redraw();
+
+	mtr_SMETER->color(bgclr);
+	mtr_SMETER->labelcolor(fgclr);
+	mtr_SMETER->redraw();
+	mtr_SMETER->redraw_label();
+
+	scalePower->color(bgclr);
+	scalePower->labelcolor(fgclr);
+	scalePower->redraw_label();
+	scalePower->redraw();
+
+	mtr_PWR->color(bgclr);
+	mtr_PWR->labelcolor(fgclr);
+	mtr_PWR->redraw_label();
+	mtr_PWR->redraw();
+
+	scaleVoltage->color(bgclr);
+	scaleVoltage->labelcolor(fgclr);
+	scaleVoltage->redraw_label();
+	scaleVoltage->redraw();
+
+	mtr_VOLTS->color(bgclr);
+	mtr_VOLTS->labelcolor(fgclr);
+	mtr_VOLTS->redraw_label();
+	mtr_VOLTS->redraw();
+
+	btnALC_IDD_SWR->color(bgclr);
+	btnALC_IDD_SWR->labelcolor(fgclr);
+	btnALC_IDD_SWR->redraw_label();
+	btnALC_IDD_SWR->redraw();
+
+	mtr_SWR->color(bgclr);
+	mtr_SWR->labelcolor(fgclr);
+	mtr_SWR->redraw_label();
+	mtr_SWR->redraw();
+
+	mtr_ALC->color(bgclr);
+	mtr_ALC->labelcolor(fgclr);
+	mtr_ALC->redraw_label();
+	mtr_ALC->redraw();
+
+	mtr_IDD->color(bgclr);
+	mtr_IDD->labelcolor(fgclr);
+	mtr_IDD->redraw_label();
+	mtr_IDD->redraw();
+
+	sldrRcvSignal->color(fl_rgb_color (progStatus.smeterRed, progStatus.smeterGreen, progStatus.smeterBlue), bgclr);
+	sldrRcvSignal->PeakColor(fl_rgb_color(progStatus.smeter_peak_red, progStatus.smeter_peak_green, progStatus.smeter_peak_blue));
+	sldrRcvSignal->redraw();
+
+	sldrFwdPwr->color(fl_rgb_color (progStatus.pwrRed, progStatus.pwrGreen, progStatus.pwrBlue), bgclr);
+	sldrFwdPwr->PeakColor(fl_rgb_color(progStatus.pwr_peak_red, progStatus.pwr_peak_green, progStatus.pwr_peak_blue));
+	sldrFwdPwr->redraw();
+
+	sldrSWR->color(fl_rgb_color (progStatus.swrRed, progStatus.swrGreen, progStatus.swrBlue), bgclr);
+	sldrSWR->PeakColor(fl_rgb_color(progStatus.swr_peak_red, progStatus.swr_peak_green, progStatus.swr_peak_blue));
+	sldrSWR->redraw();
+
+	sldrALC->color(fl_rgb_color (progStatus.alcRed, progStatus.alcGreen, progStatus.alcBlue), bgclr);
+	sldrALC->PeakColor(fl_rgb_color(progStatus.alc_peak_red, progStatus.alc_peak_green, progStatus.alc_peak_blue));
+	sldrALC->redraw();
+
+	sldrIDD->color(fl_rgb_color (progStatus.iddRed, progStatus.iddGreen, progStatus.iddBlue), bgclr);
+	sldrIDD->PeakColor(fl_rgb_color(progStatus.idd_peak_red, progStatus.idd_peak_green, progStatus.idd_peak_blue));
+	sldrIDD->redraw();
+
+	sldrVoltage->color(fl_rgb_color (progStatus.voltsRed, progStatus.voltsGreen, progStatus.voltsBlue), bgclr);
+	sldrVoltage->PeakColor(fl_rgb_color(progStatus.volts_peak_red, progStatus.volts_peak_green, progStatus.volts_peak_blue));
+	sldrVoltage->redraw();
+
+	grpMeters->redraw();
+
+	sigbar_SMETER->color(fl_rgb_color (progStatus.smeterRed, progStatus.smeterGreen, progStatus.smeterBlue), bgclr);
+	sigbar_SMETER->PeakColor(fl_rgb_color(progStatus.smeter_peak_red, progStatus.smeter_peak_green, progStatus.smeter_peak_blue));
+	sigbar_SMETER->redraw();
+
+	sigbar_PWR->color(fl_rgb_color (progStatus.pwrRed, progStatus.pwrGreen, progStatus.pwrBlue), bgclr);
+	sigbar_PWR->PeakColor(fl_rgb_color(progStatus.pwr_peak_red, progStatus.pwr_peak_green, progStatus.pwr_peak_blue));
+	sigbar_PWR->redraw();
+
+	sigbar_SWR->color(fl_rgb_color (progStatus.swrRed, progStatus.swrGreen, progStatus.swrBlue), bgclr);
+	sigbar_SWR->PeakColor(fl_rgb_color(progStatus.swr_peak_red, progStatus.swr_peak_green, progStatus.swr_peak_blue));
+	sigbar_SWR->redraw();
+
+	sigbar_ALC->color(fl_rgb_color (progStatus.alcRed, progStatus.alcGreen, progStatus.alcBlue), bgclr);
+	sigbar_ALC->PeakColor(fl_rgb_color(progStatus.alc_peak_red, progStatus.alc_peak_green, progStatus.alc_peak_blue));
+	sigbar_ALC->redraw();
+
+	sigbar_IDD->color(fl_rgb_color (progStatus.iddRed, progStatus.iddGreen, progStatus.iddBlue), bgclr);
+	sigbar_IDD->PeakColor(fl_rgb_color(progStatus.idd_peak_red, progStatus.idd_peak_green, progStatus.idd_peak_blue));
+	sigbar_IDD->redraw();
+
+	sigbar_VOLTS->color(fl_rgb_color (progStatus.voltsRed, progStatus.voltsGreen, progStatus.voltsBlue), bgclr);
+	sigbar_VOLTS->PeakColor(fl_rgb_color(progStatus.volts_peak_red, progStatus.volts_peak_green, progStatus.volts_peak_blue));
+	sigbar_VOLTS->redraw();
+
+	set_tab_colors();
+
+	Fl_Color btn_lt_color = fl_rgb_color( progStatus.lighted_btn_red, progStatus.lighted_btn_green, progStatus.lighted_btn_blue);
+
+	if (btnVol)				btnVol->selection_color(btn_lt_color);
+	if (btnNR)				btnNR->selection_color(btn_lt_color);
+	if (btnIFsh)			btnIFsh->selection_color(btn_lt_color);
+	if (btnNotch)			btnNotch->selection_color(btn_lt_color);
+	if (btnA)				btnA->selection_color(btn_lt_color);
+	if (btnB)				btnB->selection_color(btn_lt_color);
+	if (btnSplit)			btnSplit->selection_color(btn_lt_color);
+	if (btnAttenuator)		btnAttenuator->selection_color(btn_lt_color);
+	if (btnPreamp)			btnPreamp->selection_color(btn_lt_color);
+	if (btnNOISE)			btnNOISE->selection_color(btn_lt_color);
+	if (btnAutoNotch)		btnAutoNotch->selection_color(btn_lt_color);
+	if (btnTune)			btnTune->selection_color(btn_lt_color);
+	if (btn_tune_on_off)	btn_tune_on_off->selection_color(btn_lt_color);
+	if (btnPTT)				btnPTT->selection_color(btn_lt_color);
+	if (btnLOCK)			btnLOCK->selection_color(btn_lt_color);
+	if (btnAuxRTS)			btnAuxRTS->selection_color(btn_lt_color);
+	if (btnAuxDTR)			btnAuxDTR->selection_color(btn_lt_color);
+	if (btnSpot)			btnSpot->selection_color(btn_lt_color);
+	if (btn_vox)			btn_vox->selection_color(btn_lt_color);
+	if (btnCompON)			btnCompON->selection_color(btn_lt_color);
+	if (btnPOWER)			btnPOWER->selection_color(btn_lt_color);
+
+	if (btn_tt550_vox)		btn_tt550_vox->selection_color(btn_lt_color);
+	if (btn_tt550_CompON)	btn_tt550_CompON->selection_color(btn_lt_color);
+
+	Fl_Color bg_slider = fl_rgb_color(progStatus.slider_red, progStatus.slider_green, progStatus.slider_blue);
+	Fl_Color btn_slider = fl_rgb_color(progStatus.slider_btn_red, progStatus.slider_btn_green, progStatus.slider_btn_blue);
+
+	if (sldrVOLUME)			sldrVOLUME->color(bg_slider);
+	if (sldrVOLUME)			sldrVOLUME->selection_color(btn_slider);
+	if (sldrRFGAIN)			sldrRFGAIN->color(bg_slider);
+	if (sldrRFGAIN)			sldrRFGAIN->selection_color(btn_slider);
+	if (sldrSQUELCH)		sldrSQUELCH->color(bg_slider);
+	if (sldrSQUELCH)		sldrSQUELCH->selection_color(btn_slider);
+	if (sldrNR)				sldrNR->color(bg_slider);
+	if (sldrNR)				sldrNR->selection_color(btn_slider);
+	if (sldrIFSHIFT)		sldrIFSHIFT->color(bg_slider);
+	if (sldrIFSHIFT)		sldrIFSHIFT->selection_color(btn_slider);
+	if (sldrINNER)			sldrINNER->color(bg_slider);
+	if (sldrINNER)			sldrINNER->selection_color(btn_slider);
+	if (sldrOUTER)			sldrOUTER->color(bg_slider);
+	if (sldrOUTER)			sldrOUTER->selection_color(btn_slider);
+	if (sldrNOTCH)			sldrNOTCH->color(bg_slider);
+	if (sldrNOTCH)			sldrNOTCH->selection_color(btn_slider);
+	if (sldrMICGAIN)		sldrMICGAIN->color(bg_slider);
+	if (sldrMICGAIN)		sldrMICGAIN->selection_color(btn_slider);
+	if (sldrPOWER)			sldrPOWER->color(bg_slider);
+	if (sldrPOWER)			sldrPOWER->selection_color(btn_slider);
+
+	if (spnrPOWER)			spnrPOWER->color(bg_slider);
+	if (spnrVOLUME)			spnrVOLUME->color(bg_slider);
+
+	setDisplayColors();
+	update_memory_dialog_colors();
+
+	redraw_dialogs();
+}
+
+void update_colors()
+{
+	progStatus.fg_red = fg_red;
+	progStatus.fg_green = fg_green;
+	progStatus.fg_blue = fg_blue;
+
+	progStatus.bg_red = bg_red;
+	progStatus.bg_green = bg_green;
+	progStatus.bg_blue = bg_blue;
+
 	progStatus.swrRed = swrRed;
 	progStatus.swrGreen = swrGreen;
 	progStatus.swrBlue = swrBlue;
@@ -1027,25 +1236,43 @@ void setColors()
 	progStatus.smeterGreen = smeterGreen;
 	progStatus.smeterBlue = smeterBlue;
 
-	progStatus.peakRed = peakRed;
-	progStatus.peakGreen = peakGreen;
-	progStatus.peakBlue = peakBlue;
+	progStatus.alcRed = alcRed;
+	progStatus.alcGreen = alcGreen;
+	progStatus.alcBlue = alcBlue;
 
-	progStatus.voltRed = voltRed;
-	progStatus.voltGreen = voltGreen;
-	progStatus.voltBlue = voltBlue;
+	progStatus.iddRed = iddRed;
+	progStatus.iddGreen = iddGreen;
+	progStatus.iddBlue = iddBlue;
 
-	progStatus.fg_red = fg_red;
-	progStatus.fg_green = fg_green;
-	progStatus.fg_blue = fg_blue;
+	progStatus.voltsRed = voltsRed;
+	progStatus.voltsGreen = voltsGreen;
+	progStatus.voltsBlue = voltsBlue;
 
-	progStatus.bg_red = bg_red;
-	progStatus.bg_green = bg_green;
-	progStatus.bg_blue = bg_blue;
+	progStatus.smeter_peak_red = smeter_peak_red;
+	progStatus.smeter_peak_green = smeter_peak_green;
+	progStatus.smeter_peak_blue = smeter_peak_blue;
+
+	progStatus.alc_peak_red = alc_peak_red;
+	progStatus.alc_peak_green = alc_peak_green;
+	progStatus.alc_peak_blue = alc_peak_blue;
+
+	progStatus.swr_peak_red = swr_peak_red;
+	progStatus.swr_peak_green = swr_peak_green;
+	progStatus.swr_peak_blue = swr_peak_blue;
+
+	progStatus.pwr_peak_red = pwr_peak_red;
+	progStatus.pwr_peak_green = pwr_peak_green;
+	progStatus.pwr_peak_blue = pwr_peak_blue;
+
+	progStatus.idd_peak_red = idd_peak_red;
+	progStatus.idd_peak_green = idd_peak_green;
+	progStatus.idd_peak_blue = idd_peak_blue;
+
+	progStatus.volts_peak_red = volts_peak_red;
+	progStatus.volts_peak_green = volts_peak_green;
+	progStatus.volts_peak_blue = volts_peak_blue;
 
 	progStatus.fontnbr = selfont;
-	FreqDispA->font(selfont);
-	FreqDispB->font(selfont);
 
 	progStatus.fg_sys_red = fg_sys_red;
 	progStatus.fg_sys_green = fg_sys_green;
@@ -1075,150 +1302,49 @@ void setColors()
 	progStatus.tab_green = tab_green;
 	progStatus.tab_blue = tab_blue;
 
-	if (selrig->inuse == onB) {
-		FreqDispB->SetCOLORS( fl_rgb_color(fg_red, fg_green, fg_blue), bgclr);
-		FreqDispA->SetCOLORS(
-			fl_rgb_color(fg_red, fg_green, fg_blue),
-			fl_color_average(bgclr, FL_BLACK, 0.87));
-	} else {
-		FreqDispA->SetCOLORS( fl_rgb_color(fg_red, fg_green, fg_blue), bgclr);
-		FreqDispB->SetCOLORS(
-			fl_rgb_color(fg_red, fg_green, fg_blue),
-			fl_color_average(bgclr, FL_BLACK, 0.87));
-	}
+	setColors();
 
-	grpMeters->color(bgclr);
-
-	meter_fill_box->color(bgclr);
-
-	scaleSmeter->color(bgclr);
-	scaleSmeter->labelcolor(fgclr);
-	mtr_SMETER->color(bgclr);
-	mtr_SMETER->labelcolor(fgclr);
-
-
-	scalePower->color(bgclr);
-	scalePower->labelcolor(fgclr);
-	mtr_PWR->color(bgclr);
-	mtr_PWR->labelcolor(fgclr);
-
-	scaleVoltage->color(bgclr);
-	scaleVoltage->labelcolor(fgclr);
-	scaleVoltage->redraw();
-	mtr_VOLTS->color(bgclr);
-	mtr_VOLTS->labelcolor(fgclr);
-
-	btnALC_IDD_SWR->color(bgclr);
-	btnALC_IDD_SWR->labelcolor(fgclr);
-	btnALC_IDD_SWR->redraw();
-	mtr_SWR->color(bgclr);
-	mtr_SWR->labelcolor(fgclr);
-
-	sldrFwdPwr->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
-	sldrFwdPwr->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	sldrVoltage->color(fl_rgb_color (voltRed, voltGreen, voltBlue), bgclr);
-	sldrVoltage->PeakColor(bgclr);//fl_rgb_color (voltRed, voltGreen, voltBlue));
-	sldrVoltage->redraw();
-
-	sldrRcvSignal->color(fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr);
-	sldrRcvSignal->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	sldrALC->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrALC->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	sldrIDD->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrIDD->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	mtr_ALC->color(bgclr);
-	mtr_ALC->labelcolor(fgclr);
-
-	sldrIDD->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrIDD->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	mtr_IDD->color(bgclr);
-	mtr_IDD->labelcolor(fgclr);
-
-	sldrSWR->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrSWR->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
-
-	grpMeters->redraw();
-
-	if (btnVol)				btnVol->selection_color(btn_lt_color);
-	if (btnNR)				btnNR->selection_color(btn_lt_color);
-	if (btnIFsh)			btnIFsh->selection_color(btn_lt_color);
-	if (btnNotch)			btnNotch->selection_color(btn_lt_color);
-	if (btnA)				btnA->selection_color(btn_lt_color);
-	if (btnB)				btnB->selection_color(btn_lt_color);
-	if (btnSplit)			btnSplit->selection_color(btn_lt_color);
-	if (btnAttenuator)		btnAttenuator->selection_color(btn_lt_color);
-	if (btnPreamp)			btnPreamp->selection_color(btn_lt_color);
-	if (btnNOISE)			btnNOISE->selection_color(btn_lt_color);
-	if (btnAutoNotch)		btnAutoNotch->selection_color(btn_lt_color);
-	if (btnTune)			btnTune->selection_color(btn_lt_color);
-	if (btn_tune_on_off)	btn_tune_on_off->selection_color(btn_lt_color);
-	if (btnPTT)				btnPTT->selection_color(btn_lt_color);
-	if (btnLOCK)			btnLOCK->selection_color(btn_lt_color);
-	if (btnAuxRTS)			btnAuxRTS->selection_color(btn_lt_color);
-	if (btnAuxDTR)			btnAuxDTR->selection_color(btn_lt_color);
-	if (btnSpot)			btnSpot->selection_color(btn_lt_color);
-	if (btn_vox)			btn_vox->selection_color(btn_lt_color);
-	if (btnCompON)			btnCompON->selection_color(btn_lt_color);
-	if (btnPOWER)			btnPOWER->selection_color(btn_lt_color);
-
-	if (btn_tt550_vox)		btn_tt550_vox->selection_color(btn_lt_color);
-	if (btn_tt550_CompON)	btn_tt550_CompON->selection_color(btn_lt_color);
-
-	if (sldrVOLUME)			sldrVOLUME->color(bg_slider);
-	if (sldrVOLUME)			sldrVOLUME->selection_color(btn_slider);
-	if (sldrRFGAIN)			sldrRFGAIN->color(bg_slider);
-	if (sldrRFGAIN)			sldrRFGAIN->selection_color(btn_slider);
-	if (sldrSQUELCH)		sldrSQUELCH->color(bg_slider);
-	if (sldrSQUELCH)		sldrSQUELCH->selection_color(btn_slider);
-	if (sldrNR)				sldrNR->color(bg_slider);
-	if (sldrNR)				sldrNR->selection_color(btn_slider);
-	if (sldrIFSHIFT)		sldrIFSHIFT->color(bg_slider);
-	if (sldrIFSHIFT)		sldrIFSHIFT->selection_color(btn_slider);
-	if (sldrINNER)			sldrINNER->color(bg_slider);
-	if (sldrINNER)			sldrINNER->selection_color(btn_slider);
-	if (sldrOUTER)			sldrOUTER->color(bg_slider);
-	if (sldrOUTER)			sldrOUTER->selection_color(btn_slider);
-	if (sldrNOTCH)			sldrNOTCH->color(bg_slider);
-	if (sldrNOTCH)			sldrNOTCH->selection_color(btn_slider);
-	if (sldrMICGAIN)		sldrMICGAIN->color(bg_slider);
-	if (sldrMICGAIN)		sldrMICGAIN->selection_color(btn_slider);
-	if (sldrPOWER)			sldrPOWER->color(bg_slider);
-	if (sldrPOWER)			sldrPOWER->selection_color(btn_slider);
-
-	if (spnrPOWER)			spnrPOWER->color(bg_slider);
-	if (spnrVOLUME)			spnrVOLUME->color(bg_slider);
-
-	mainwindow->redraw();
 }
 
-void cb_reset_display_dialog()
+
+void cb_ResetColorsDialog()
 {
 	cb_sys_defaults();
 	cb_lighted_default();
 	cb_slider_defaults();
 	default_meters();
-	setColors();
+	cb_tab_defaults();
+	default_freq_display();
 }
 
-void cbOkDisplayDialog()
+void cbOKColorDialog()
 {
+	update_colors();
 	setColors();
+	dlgColorsDialog->hide();
+}
+
+void cbOKDisplayDialog()
+{
 	dlgDisplayConfig->hide();
 }
 
-void cbCancelDisplayDialog()
+void cbCancelColorDialog()
 {
-	dlgDisplayConfig->hide();
+	dlgColorsDialog->hide();
 }
+
+void setUIscheme()
+{
+	mnuScheme->value(mnuScheme->find_item(progStatus.ui_scheme.c_str()));
+	dlgDisplayConfig->show();
+}
+
+// called when opening the configure colors dialog
 
 void setDisplayColors()
 {
-	if (dlgDisplayConfig == NULL)
+	if (dlgDisplayConfig == NULL || dlgColorsDialog == NULL)
 		return;
 
 	swrRed = progStatus.swrRed;
@@ -1233,13 +1359,21 @@ void setDisplayColors()
 	smeterGreen = progStatus.smeterGreen;
 	smeterBlue = progStatus.smeterBlue;
 
-	peakRed = progStatus.peakRed;
-	peakGreen = progStatus.peakGreen;
-	peakBlue = progStatus.peakBlue;
+	smeter_peak_red = progStatus.smeter_peak_red;
+	smeter_peak_green = progStatus.smeter_peak_green;
+	smeter_peak_blue = progStatus.smeter_peak_blue;
 
-	voltRed = progStatus.voltRed;
-	voltGreen = progStatus.voltGreen;
-	voltBlue = progStatus.voltBlue;
+	iddRed = progStatus.iddRed;
+	iddGreen = progStatus.iddGreen;
+	iddBlue = progStatus.iddBlue;
+
+	alcRed = progStatus.alcRed;
+	alcGreen = progStatus.alcGreen;
+	alcBlue = progStatus.alcBlue;
+
+	voltsRed = progStatus.voltsRed;
+	voltsGreen = progStatus.voltsGreen;
+	voltsBlue = progStatus.voltsBlue;
 
 	fg_red = progStatus.fg_red;
 	fg_green = progStatus.fg_green;
@@ -1286,45 +1420,64 @@ void setDisplayColors()
 	lblTest->labelcolor(fl_rgb_color(fg_red, fg_green, fg_blue));
 	lblTest->color(bgclr);
 
-	scaleSmeterColor->color(bgclr);
-	scaleSmeterColor->labelcolor(fgclr);
-	scalePWRcolor->color(bgclr);
-	scalePWRcolor->labelcolor(fgclr);
-	scaleSWRcolor->color(bgclr);
-	scaleSWRcolor->labelcolor(fgclr);
-	scaleVoltcolor->color(bgclr);
-	scaleVoltcolor->labelcolor(fgclr);
-	grpMeterColor->color(bgclr);
-	grpMeterColor->labelcolor(fgclr);
+	btn_change_SMETER->color(bgclr);
+	btn_change_SMETER->labelcolor(fgclr);
+	btn_change_PWR->color(bgclr);
+	btn_change_PWR->labelcolor(fgclr);
+	btn_change_SWR->color(bgclr);
+	btn_change_SWR->labelcolor(fgclr);
+	btn_change_VOLTS->color(bgclr);
+	btn_change_VOLTS->labelcolor(fgclr);
+	btn_change_IDD->color(bgclr);
+	btn_change_IDD->labelcolor(fgclr);
+	btn_change_ALC->color(bgclr);
+	btn_change_ALC->labelcolor(fgclr);
 
-	sldrRcvSignalColor->color(
+	meter_group->color(bgclr);
+	meter_group->labelcolor(fgclr);
+
+	color_SMETER->color(
 		fl_rgb_color (smeterRed, smeterGreen, smeterBlue),
 		bgclr );
-	sldrPWRcolor->color(
+	color_PWR->color(
 		fl_rgb_color (pwrRed, pwrGreen, pwrBlue),
 		bgclr );
-	sldrSWRcolor->color(
+	color_SWR->color(
 		fl_rgb_color (swrRed, swrGreen, swrBlue),
 		bgclr );
-	sldrVoltcolor->color(
-		fl_rgb_color (voltRed, voltGreen, voltBlue),
+	color_ALC->color(
+		fl_rgb_color (alcRed, alcGreen, alcBlue),
+		bgclr );
+	color_IDD->color(
+		fl_rgb_color (iddRed, iddGreen, iddBlue),
+		bgclr );
+	color_VOLTS->color(
+		fl_rgb_color (voltsRed, voltsGreen, voltsBlue),
 		bgclr );
 
-	sldrRcvSignalColor->minimum(0);
-	sldrRcvSignalColor->maximum(100);
-	sldrRcvSignalColor->value(45);
+	color_SMETER->minimum(0);
+	color_SMETER->maximum(100);
+	color_SMETER->value(45);
 
-	sldrPWRcolor->minimum(0);
-	sldrPWRcolor->maximum(100);
-	sldrPWRcolor->value(80);
+	color_PWR->minimum(0);
+	color_PWR->maximum(100);
+	color_PWR->value(35);
 
-	sldrSWRcolor->minimum(0);
-	sldrSWRcolor->maximum(100);
-	sldrSWRcolor->value(25);
+	color_SWR->minimum(0);
+	color_SWR->maximum(100);
+	color_SWR->value(25);
 
-	sldrVoltcolor->minimum(0);
-	sldrVoltcolor->maximum(100);
-	sldrVoltcolor->value(55);
+	color_VOLTS->minimum(0);
+	color_VOLTS->maximum(16);
+	color_VOLTS->value(12);
+
+	color_ALC->minimum(0);
+	color_ALC->maximum(5);
+	color_ALC->value(1);
+
+	color_IDD->minimum(0);
+	color_IDD->maximum(25);
+	color_IDD->value(14);
 
 	btn_lt_color = fl_rgb_color( btn_lt_color_red, btn_lt_color_green, btn_lt_color_blue);
 	btn_slider = fl_rgb_color( btn_slider_red, btn_slider_green, btn_slider_blue);
@@ -1336,9 +1489,13 @@ void setDisplayColors()
 	sldrColors->color(bg_slider);
 	sldrColors->selection_color(btn_slider);
 
-	mnuScheme->value(mnuScheme->find_item(progStatus.ui_scheme.c_str()));
+	tabs_color->selection_color( fl_rgb_color( tab_red, tab_green, tab_blue ) );
 
-	dlgDisplayConfig->show();
+}
+
+void open_colors_dialog() {
+	setDisplayColors();
+	dlgColorsDialog->show();
 }
 
 void cbCloseMemory()
@@ -1406,7 +1563,7 @@ void show_controls()
 					tabs->hide();
 					progStatus.show_tabs = false;
 					mainwindow->redraw();
-				} else { 
+				} else {
 					H = WIDE_MENUH + WIDE_MAINH + WIDE_TABSH;
 
 					mainwindow->resize( X, Y, W, H);
@@ -1848,7 +2005,7 @@ void cb_send_command(std::string command, Fl_Output *resp)
 	set_trace(2, "command: ", command.c_str());
 	waitResponse(200);
 
-	std::string retstr = usehex ? 
+	std::string retstr = usehex ?
 		str2hex(respstr.c_str(), respstr.length()) :
 		respstr;
 	set_trace(2, "response: ", retstr.c_str());
@@ -2135,7 +2292,7 @@ void cwlog_edit_entry()
 
 void cwlog_view()
 {
-	if (!cwlog_viewer) { 
+	if (!cwlog_viewer) {
 		cwlog_viewer = new_cwlogbook_dialog();
 		if (!progStatus.cw_log_name.empty()) {
 			txt_cwlog_file->value(progStatus.cw_log_name.c_str());
@@ -2201,7 +2358,7 @@ void cwlog_save_as()
 		case -1:
 			fl_message ("ERROR: %s", fnfc.errmsg());
 			return; // ERROR
-		case 1: 
+		case 1:
 			return; // CANCEL
 		default:
 			progStatus.cw_log_name = fnfc.filename();
@@ -2227,7 +2384,7 @@ void cwlog_open()
 		case -1:
 			fl_message ("ERROR: %s", fnfc.errmsg());
 			return; // ERROR
-		case 1: 
+		case 1:
 			return; // CANCEL
 		default:
 			progStatus.cw_log_name = fnfc.filename();
@@ -2260,7 +2417,7 @@ void cwlog_new()
 		case -1:
 			fl_message ("ERROR: %s", fnfc.errmsg());
 			return; // ERROR
-		case 1: 
+		case 1:
 			return; // CANCEL
 		default:
 			progStatus.cw_log_name = fnfc.filename();
@@ -2289,7 +2446,7 @@ void cwlog_export_adif()
 		case -1:
 			fl_message ("ERROR: %s", fnfc.errmsg());
 			return; // ERROR
-		case 1: 
+		case 1:
 			return; // CANCEL
 		default:
 			break;
@@ -2361,7 +2518,7 @@ void cwlog_export_adif()
 				<< "<RST_SENT:" << cw_rst_out.length() << ">" << cw_rst_out
 				<< "<STX:" << cw_log_nbr.length() << ">" << cw_log_nbr
 				<< "<NOTES:" << qso_notes.length() << ">" << qso_notes
-				<< "<EOR>" << std::endl;
+				<< "<EOR->" << std::endl;
 	}
 	oExport.close();
 }
@@ -2396,7 +2553,7 @@ void cwlog_import_adif()
 		case -1:
 			fl_message ("ERROR: %s", fnfc.errmsg());
 			return; // ERROR
-		case 1: 
+		case 1:
 			return; // CANCEL
 		default:
 			break;

@@ -30,6 +30,7 @@
 #include "support.h"
 
 extern Fl_Double_Window *dlgDisplayConfig;
+extern Fl_Double_Window *dlgColorsDialog;
 extern Fl_Double_Window *dlgXcvrConfig;
 extern Fl_Double_Window *dlgMemoryDialog;
 extern Fl_Double_Window *dlgControls;
@@ -62,5 +63,65 @@ extern void cwlog_save_as();
 
 extern void cwlog_export_adif();
 extern void cwlog_import_adif();
+
+extern void default_meters();
+
+
+//----------------------------------------------------------------------
+extern uchar fg_red, fg_green, fg_blue;
+extern uchar bg_red, bg_green, bg_blue;
+
+extern uchar smeterRed;
+extern uchar smeterGreen;
+extern uchar smeterBlue;
+extern uchar pwrRed;
+extern uchar pwrGreen;
+extern uchar pwrBlue;
+extern uchar alcRed;
+extern uchar alcGreen;
+extern uchar alcBlue;
+extern uchar swrRed;
+extern uchar swrGreen;
+extern uchar swrBlue;
+extern uchar iddRed;
+extern uchar iddGreen;
+extern uchar iddBlue;
+extern uchar voltsRed;
+extern uchar voltsGreen;
+extern uchar voltsBlue;
+
+extern uchar smeter_peak_red;
+extern uchar smeter_peak_green;
+extern uchar smeter_peak_blue;
+extern uchar pwr_peak_red;
+extern uchar pwr_peak_green;
+extern uchar pwr_peak_blue;
+extern uchar alc_peak_red;
+extern uchar alc_peak_green;
+extern uchar alc_peak_blue;
+extern uchar swr_peak_red;
+extern uchar swr_peak_green;
+extern uchar swr_peak_blue;
+extern uchar idd_peak_red;
+extern uchar idd_peak_green;
+extern uchar idd_peak_blue;
+extern uchar volts_peak_red;
+extern uchar volts_peak_green;
+extern uchar volts_peak_blue;
+
+extern void cbOKDisplayDialog();
+extern void cbOKColorDialog();
+extern void cbCancelColorDialog();
+extern void cb_ResetColorsDialog();
+extern void redraw_dialogs();
+
+extern void update_colors();
+extern void setColors();
+extern void set_system_colors();
+extern void open_colors_dialog();
+
+extern void update_memory_dialog_colors();
+
+//----------------------------------------------------------------------
 
 #endif // __DIALOGS_H__

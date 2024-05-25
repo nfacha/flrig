@@ -66,6 +66,7 @@ extern Fl_Double_Window* XcvrDialog();
 extern Fl_Double_Window* MetersDialog();
 extern Fl_Double_Window* power_meter_scale_select();
 extern Fl_Double_Window* DisplayDialog();
+extern Fl_Double_Window* ColorsDialog();
 extern Fl_Double_Window* Memory_Dialog();
 extern Fl_Double_Window* Wide_rig_window();
 extern Fl_Double_Window* Small_rig_window();
@@ -451,6 +452,26 @@ extern Fl_Button *pref_slider_select;
 extern Fl_Button *prefslider_defaults;
 extern Fl_Button *btnReset;
 extern Fl_Button *btnCancel;
+
+extern Fl_Group  *meter_group;
+
+extern Fl_Button *btn_change_SMETER;
+extern Fl_Button *btn_change_PWR;
+extern Fl_Button *btn_change_SWR;
+extern Fl_Button *btn_change_ALC;
+extern Fl_Button *btn_change_IDD;
+extern Fl_Button *btn_change_VOLTS;
+
+extern Fl_SigBar *color_SMETER;
+extern Fl_SigBar *color_PWR;
+extern Fl_SigBar *color_SWR;
+extern Fl_SigBar *color_ALC;
+extern Fl_SigBar *color_IDD;
+extern Fl_SigBar *color_VOLTS;
+
+extern Fl_Tabs   *tabs_color;
+extern Fl_Group  *tab_color1;
+extern Fl_Group  *tab_color2;
 
 extern Fl_Return_Button *btnOkDisplayDialog;
 extern Fl_Light_Button *btn_lighted;

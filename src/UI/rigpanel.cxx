@@ -39,6 +39,8 @@
 #include "fsk.h"
 #include "fskioUI.h"
 
+#include "fileselect.h"
+
 Fl_Light_Button *btnPOWER = (Fl_Light_Button *)0;
 
 // controls for touch screen interface
@@ -471,8 +473,60 @@ static void cb_mnu_embed_tabs(Fl_Menu_*, void*) {
 		
 }
 
+static void cb_save_as_prefs(Fl_Menu_*, void*) {
+	std::string deffname = RigHomeDir;
+	deffname.append("NEW.UI");
+	std::string fname = FSEL::saveas(
+		"Save as prefs file",
+		"*.UI.prefs",
+		deffname.c_str());
+	if (fname.empty()) return;
+	size_t p = fname.find(".prefs");
+	if (p != std::string::npos) fname.erase(p);
+	p = fname.rfind("/");
+	if (p != std::string::npos) fname.erase(0, p + 1);
+	p = fname.rfind("\\");
+	if (p != std::string::npos) fname.erase(0, p+ 1);
+	p = fname.rfind(".UI");
+	if (p == std::string::npos) fname.append(".UI");
+	progStatus.ui_name = fname;
+	progStatus.saveScheme(fname);
+}
+
+static void cb_save_prefs(Fl_Menu_*, void*) {
+	std::string deffname = RigHomeDir;
+	deffname.append(progStatus.ui_name);
+	progStatus.saveScheme(deffname);
+}
+
+static void cb_load_prefs(Fl_Menu_*, void*) {
+	std::string defname = RigHomeDir;
+	defname.append("default.UI");
+	std::string fname = FSEL::select(
+		"Load prefs from file",
+		"*.UI.prefs",
+		defname.c_str());
+	if (fname.empty())
+		return;
+	size_t p = fname.find(".prefs");
+	if (p != std::string::npos) fname.erase(p);
+	p = fname.rfind("/");
+	if (p != std::string::npos) fname.erase(0, p + 1);
+	p = fname.rfind("\\");
+	if (p != std::string::npos) fname.erase(0, p+ 1);
+	progStatus.ui_name = fname;
+	progStatus.loadScheme(fname);
+	set_system_colors();
+	setColors();
+	Fl::scheme(progStatus.ui_scheme.c_str());
+}
+
 static void cb_mnuColorConfig(Fl_Menu_*, void*) {
-	setDisplayColors();
+	open_colors_dialog();
+}
+
+static void cb_mnuUIConfig(Fl_Menu_*, void*) {
+	setUIscheme();
 }
 
 static void cb_mnu_show_meters(Fl_Menu_ *, void *) {
@@ -587,12 +641,12 @@ static void cb_mnuAbout(Fl_Menu_*, void*) {
 	about();
 }
 
-static void cb_btnALC_IDD_SWR(Fl_Button*, void*) {
-	cbALC_IDD_SWR();
-}
-
 static void cb_btnAGC(Fl_Button*, void*) {
 	cbAGC();
+}
+
+static void cb_btnALC_IDD_SWR(Fl_Button*, void*) {
+        cbALC_IDD_SWR();
 }
 
 static void cb_scalePower(Fl_Button*, void*) {
@@ -1318,6 +1372,8 @@ void cb_offset(Fl_Button *b, void*)
 #include "ui_touch.cxx"
 
 #include "ui_setup.cxx"
+
+#include "ui_colors.cxx"
 
 #include "ui_memory.cxx"
 

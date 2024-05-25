@@ -2308,8 +2308,11 @@ void updateSelect() {
 	if (!numinlist) return;
 	sortList();
 // stripe lines
-	int bg1, bg2, bg_clr;
+	int bg1, bg2, bg_clr, txt_clr;
+	txt_clr = FL_BLACK;
 	bg1 = FL_WHITE; bg2 = FL_LIGHT2;
+//	bg1 = fl_rgb_color(progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue);
+//	bg2 = fl_rgb_color(progStatus.bg_red * 0.4, progStatus.bg_green * 0.4, progStatus.bg_blue * 0.4);
 
 	for (int n = 0; n < numinlist; n++) {
 		memset(szline, 0, sizeof(szline));
@@ -2320,20 +2323,20 @@ void updateSelect() {
 		}
 		bg_clr = (n % 2) ? bg1 : bg2;
 		snprintf(szline, sizeof(szline), "\
-@F%d@S%d@B%d@r%.3f\t\
-@F%d@S%d@B%d@.|\t\
-@F%d@S%d@B%d@r%s\t\
-@F%d@S%d@B%d@.|\t\
-@F%d@S%d@B%d@r%s\t\
-@F%d@S%d@B%d@.|\t\
-@F%d@S%d@B%d@.%s",
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, oplist[n].freq / 1000.0,
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr,
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, selrig->get_bwname_(oplist[n].iBW, oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr,
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, selrig->get_modename_(oplist[n].imode),
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr,
-			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, szatag );
+@F%d@S%d@B%u@C%u@r%.3f\t\
+@F%d@S%d@B%u@C%u@.|\t\
+@F%d@S%d@B%u@C%u@r%s\t\
+@F%d@S%d@B%u@C%u@.|\t\
+@F%d@S%d@B%u@C%u@r%s\t\
+@F%d@S%d@B%u@C%u@.|\t\
+@F%d@S%d@B%u@C%u@.%s",
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr, oplist[n].freq / 1000.0,
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr,
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr, selrig->get_bwname_(oplist[n].iBW, oplist[n].imode),
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr,
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr, selrig->get_modename_(oplist[n].imode),
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr,
+			progStatus.memfontnbr, progStatus.memfontsize, bg_clr, txt_clr, szatag );
 		FreqSelect->add (szline);
 	}
 	inAlphaTag->value("");
@@ -4023,6 +4026,7 @@ void TRACED(close_UI)
 		dlgDisplayConfig,
 		dlgXcvrConfig,
 		dlgMemoryDialog,
+		dlgColorsDialog,
 		meters_dialog,
 		tracewindow,
 		cwio_keyer_dialog,

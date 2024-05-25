@@ -69,7 +69,7 @@ Fl_Double_Window* win_meters() {
 	sigbar_SMETER->minimum(0);
 	sigbar_SMETER->maximum(100);
 	sigbar_SMETER->color(fl_rgb_color (progStatus.smeterRed, progStatus.smeterGreen, progStatus.smeterBlue), bgclr);
-	sigbar_SMETER->PeakColor(fl_rgb_color(progStatus.peakRed, progStatus.peakGreen, progStatus.peakBlue));
+	sigbar_SMETER->PeakColor(fl_rgb_color(progStatus.smeter_peak_red, progStatus.smeter_peak_green, progStatus.smeter_peak_blue));
 	sigbar_SMETER->show();
 
 	sigbar_PWR = new Fl_SigBar(5, sigbar_SMETER->y() + sigbar_SMETER->h() + 2, 200, 6);
@@ -86,7 +86,7 @@ Fl_Double_Window* win_meters() {
 	sigbar_PWR->minimum(0);
 	sigbar_PWR->maximum(100);
 	sigbar_PWR->color(fl_rgb_color (progStatus.pwrRed, progStatus.pwrGreen, progStatus.pwrBlue), bgclr);
-	sigbar_PWR->PeakColor(fl_rgb_color(progStatus.peakRed, progStatus.peakGreen, progStatus.peakBlue));
+	sigbar_PWR->PeakColor(fl_rgb_color(progStatus.pwr_peak_red, progStatus.pwr_peak_green, progStatus.pwr_peak_blue));
 	sigbar_PWR->show();
 
 	mtr_PWR = new Fl_Box(2, sigbar_PWR->y() + sigbar_PWR->h() + 2, 206, 20);
@@ -115,7 +115,7 @@ Fl_Double_Window* win_meters() {
 	sigbar_SWR->minimum(0);
 	sigbar_SWR->maximum(100);
 	sigbar_SWR->color(fl_rgb_color (progStatus.swrRed, progStatus.swrGreen, progStatus.swrBlue), bgclr);
-	sigbar_SWR->PeakColor(fl_rgb_color(progStatus.peakRed, progStatus.peakGreen, progStatus.peakBlue));
+	sigbar_SWR->PeakColor(fl_rgb_color(progStatus.swr_peak_red, progStatus.swr_peak_green, progStatus.swr_peak_blue));
 	sigbar_SWR->show();
 
 	mtr_ALC = new Fl_Box(2, sigbar_SWR->y() + sigbar_SWR->h() + 2, 206, 20);
@@ -142,8 +142,8 @@ Fl_Double_Window* win_meters() {
 	sigbar_ALC->hide();
 	sigbar_ALC->minimum(0);
 	sigbar_ALC->maximum(100);
-	sigbar_ALC->color(fl_rgb_color (progStatus.swrRed, progStatus.swrGreen, progStatus.swrBlue), bgclr);
-	sigbar_ALC->PeakColor(fl_rgb_color(progStatus.peakRed, progStatus.peakGreen, progStatus.peakBlue));
+	sigbar_ALC->color(fl_rgb_color (progStatus.alcRed, progStatus.alcGreen, progStatus.alcBlue));
+	sigbar_ALC->PeakColor(fl_rgb_color(progStatus.alc_peak_red, progStatus.alc_peak_green, progStatus.alc_peak_blue));
 	sigbar_ALC->show();
 
 	mtr_IDD = new Fl_Box(2, sigbar_ALC->y() + sigbar_ALC->h() + 2, 206, 20);
@@ -165,8 +165,8 @@ Fl_Double_Window* win_meters() {
 	sigbar_IDD->hide();
 	sigbar_IDD->minimum(0);
 	sigbar_IDD->maximum(25);
-	sigbar_IDD->color(fl_rgb_color (progStatus.swrRed, progStatus.swrGreen, progStatus.swrBlue), bgclr);
-	sigbar_IDD->PeakColor(fl_rgb_color(progStatus.peakRed, progStatus.peakGreen, progStatus.peakBlue));
+	sigbar_IDD->color(fl_rgb_color (progStatus.iddRed, progStatus.iddGreen, progStatus.iddBlue), bgclr);
+	sigbar_IDD->PeakColor(fl_rgb_color(progStatus.idd_peak_red, progStatus.idd_peak_green, progStatus.idd_peak_blue));
 	sigbar_IDD->show();
 
 	sigbar_VOLTS = new Fl_SigBar(5, sigbar_IDD->y() + sigbar_IDD->h() + 2, 200, 6);
@@ -182,8 +182,8 @@ Fl_Double_Window* win_meters() {
 	sigbar_VOLTS->hide();
 	sigbar_VOLTS->minimum(6);
 	sigbar_VOLTS->maximum(16);
-	sigbar_VOLTS->color(fl_rgb_color (progStatus.voltRed, progStatus.voltGreen, progStatus.voltBlue), bgclr);
-	sigbar_VOLTS->PeakColor(bgclr);
+	sigbar_VOLTS->color(fl_rgb_color (progStatus.voltsRed, progStatus.voltsGreen, progStatus.voltsBlue), bgclr);
+	sigbar_VOLTS->PeakColor(fl_rgb_color(progStatus.volts_peak_red, progStatus.volts_peak_green, progStatus.volts_peak_blue));
 	sigbar_VOLTS->show();
 
 	mtr_VOLTS = new Fl_Box(2, sigbar_VOLTS->y() + sigbar_VOLTS->h() + 2, 206, 20);

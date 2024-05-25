@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------------------
-// Copyright (C) 2014
+// Copyright (C) 2014-2024
 //              David Freese, W1HKJ
 //
-// This file is part of flrig.
+// This file is part of flrig
 //
 // flrig is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,34 +21,16 @@
 #ifndef FILESELECT_H
 #define FILESELECT_H
 
-#ifdef __WIN32__
-#  define FSEL_THREAD 1
-#endif
+#include <config.h>
 
-class Fl_Native_File_Chooser;
+namespace FSEL {
 
-class FSEL
-{
-public:
-    static void create(void);
-    static void destroy(void);
-    static const char* select(const char* title, const char* filter, const char* def = 0, int* fsel = 0);
-    static const char* saveas(const char* title, const char* filter, const char* def = 0, int* fsel = 0);
-    static const char* dir_select(const char* title, const char* filter, const char* def = 0);
-    ~FSEL();
-private:
-    FSEL();
-    FSEL(const FSEL&);
-    FSEL& operator=(const FSEL&);
+	void create(void);
+	void destroy(void);
+	const char* select(const char* title, const char* filter, const char* def = 0, int *fsel = NULL);
+	const char* saveas(const char* title, const char* filter, const char* def = 0, int *fsel = NULL);
+	const char* dir_select(const char* title, const char* filter, const char* def = 0);
 
-    const char* get_file(void);
-#if FSEL_THREAD
-    static void* thread_func(void* arg);
-#endif
-private:
-    static FSEL* inst;
-    Fl_Native_File_Chooser* chooser;
-    int result;
-};
+}
 
 #endif // FILESELECT_H

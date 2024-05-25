@@ -92,9 +92,9 @@ void TRACED(adjust_small_ui)
 			btnPOWER->redraw();
 			btnPOWER->show();
 		}
-		if (mnuSchema) mnuSchema->set();
+		if (mnuScheme) mnuSchema->set();
 	} else {
-		if (mnuSchema) mnuSchema->clear();
+		if (mnuScheme) mnuSchema->clear();
 		y = grpMeters->y() + grpMeters->h() - 18;
 		if (selrig->has_volume_control) {
 			y += 20;

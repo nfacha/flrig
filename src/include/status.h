@@ -50,6 +50,8 @@ struct status {
 	int		ddX;
 	int		ddY;
 
+	std::string ui_name;
+
 	std::string	xcvr_serial_port;
 	int		serial_baudrate;
 	int		stopbits;
@@ -86,6 +88,7 @@ struct status {
 
 	std::string	cmedia_device;
 	std::string	cmedia_gpio_line;
+
 	int		cmedia_ptt;
 
 	std::string	tmate2_device;
@@ -180,6 +183,7 @@ struct status {
 	int		break_in;
 	double	cw_qsk;
 	double	cw_delay;
+
 	bool	vox_onoff;
 	int		vox_gain;
 	int		vox_anti;
@@ -284,7 +288,6 @@ struct status {
 	bool	tt550_at11_hiZ;
 
 // =========================
-//and others
 	double	vfo_adj;
 	int		bfo_freq;
 	int		rit_freq;
@@ -292,11 +295,15 @@ struct status {
 	int		bpf_center;
 	bool	use_bpf_center;
 
+// =========================
 // IC706MKIIG filters
 	bool	use706filters;
 	std::string	ssb_cw_wide;		//FL-103
 	std::string	ssb_cw_normal;		//FL-272
 	std::string	ssb_cw_narrow;		//FL-232
+// optional filter std::strings
+// "EMPTY", "NARR", "NORM", "WIDE", "MED",
+// "FL-101", "FL-232", "FL-100", "FL-223", "FL-103"
 
 // =========================
 // User command buttons
@@ -398,73 +405,6 @@ struct status {
 
    std::string	label_on_exit4;
    std::string	cmd_on_exit4;
-
-// =========================
-	int		bg_red;
-	int		bg_green;
-	int		bg_blue;
-
-	int		fg_red;
-	int		fg_green;
-	int		fg_blue;
-
-	int		swrRed;
-	int		swrGreen;
-	int		swrBlue;
-
-	int		pwrRed;
-	int		pwrGreen;
-	int		pwrBlue;
-
-	int		smeterRed;
-	int		smeterGreen;
-	int		smeterBlue;
-
-	int		peakRed;
-	int		peakGreen;
-	int		peakBlue;
-
-	int		voltRed;
-	int		voltGreen;
-	int		voltBlue;
-	int		display_voltmeter;
-
-	int		fg_sys_red;
-	int		fg_sys_green;
-	int		fg_sys_blue;
-
-	int		bg_sys_red;
-	int		bg_sys_green;
-	int		bg_sys_blue;
-
-	int		bg2_sys_red;
-	int		bg2_sys_green;
-	int		bg2_sys_blue;
-
-	int		slider_red;
-	int		slider_green;
-	int		slider_blue;
-
-	int		slider_btn_red;
-	int		slider_btn_green;
-	int		slider_btn_blue;
-
-	int		lighted_btn_red;
-	int		lighted_btn_green;
-	int		lighted_btn_blue;
-
-	int		tab_red;
-	int		tab_green;
-	int		tab_blue;
-
-	Fl_Font	fontnbr;
-
-	bool	tooltips;
-
-	std::string	ui_scheme;
-
-//	std::string	server_port;
-//	std::string	server_addr;
 
 	std::string xmlrig_addr;
 	std::string xmlrig_port;
@@ -580,12 +520,113 @@ struct status {
 	int  fsk_log_dupcheck;
 	int  fsk_log_nbr;
 
+	int		display_voltmeter;
+
+//----------------------------------------------------------------------
+// UI scheme items
+//----------------------------------------------------------------------
+	bool	ui_changed;
+
+	int		bg_red;
+	int		bg_green;
+	int		bg_blue;
+
+	int		fg_red;
+	int		fg_green;
+	int		fg_blue;
+
+	int		swrRed;
+	int		swrGreen;
+	int		swrBlue;
+
+	int		pwrRed;
+	int		pwrGreen;
+	int		pwrBlue;
+
+	int		smeterRed;
+	int		smeterGreen;
+	int		smeterBlue;
+
+	int		voltsRed;
+	int		voltsGreen;
+	int		voltsBlue;
+
+	int		iddRed;
+	int		iddGreen;
+	int		iddBlue;
+
+	int		alcRed;
+	int		alcGreen;
+	int		alcBlue;
+
+	int		smeter_peak_red;
+	int		smeter_peak_green;
+	int		smeter_peak_blue;
+
+	int		swr_peak_red;
+	int		swr_peak_green;
+	int		swr_peak_blue;
+
+	int		pwr_peak_red;
+	int		pwr_peak_green;
+	int		pwr_peak_blue;
+
+	int		alc_peak_red;
+	int		alc_peak_green;
+	int		alc_peak_blue;
+
+	int		idd_peak_red;
+	int		idd_peak_green;
+	int		idd_peak_blue;
+
+	int		volts_peak_red;
+	int		volts_peak_green;
+	int		volts_peak_blue;
+
+	int		fg_sys_red;
+	int		fg_sys_green;
+	int		fg_sys_blue;
+
+	int		bg_sys_red;
+	int		bg_sys_green;
+	int		bg_sys_blue;
+
+	int		bg2_sys_red;
+	int		bg2_sys_green;
+	int		bg2_sys_blue;
+
+	int		slider_red;
+	int		slider_green;
+	int		slider_blue;
+
+	int		slider_btn_red;
+	int		slider_btn_green;
+	int		slider_btn_blue;
+
+	int		lighted_btn_red;
+	int		lighted_btn_green;
+	int		lighted_btn_blue;
+
+	int		tab_red;
+	int		tab_green;
+	int		tab_blue;
+
+	Fl_Font	fontnbr;
+
+	bool	tooltips;
+
+	std::string	ui_scheme;
+//----------------------------------------------------------------------
+
+	void saveScheme(std::string);
+	void loadScheme(std::string);
 	void saveLastState();
 	void loadLastState();
 	bool loadXcvrState(std::string);
 	void UI_laststate();
 
 	std::string info();
+
 };
 
 extern status progStatus;

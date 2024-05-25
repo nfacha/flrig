@@ -49,7 +49,13 @@ Fl_Menu_Item menu_small_menu[] = {
  {_("Embed tabs"), 0, (Fl_Callback*)cb_mnu_embed_tabs, 0, 130, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Tooltips"), 0,  (Fl_Callback*)cb_mnuTooltips, 0, 130, FL_NORMAL_LABEL, 0, 14, 0},
  {_("Voltmeter"), 0, (Fl_Callback*)cb_mnuVoltmeter, 0, 130, FL_NORMAL_LABEL, 0, 14, 0},
- {_("User Interface"), 0,  (Fl_Callback*)cb_mnuColorConfig, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Configuration"), 0, 0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("User Interface"), 0,  (Fl_Callback*)cb_mnuUIConfig, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Controls Colors"), 0,  (Fl_Callback*)cb_mnuColorConfig, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Save prefs"), 0, (Fl_Callback*)cb_save_prefs, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Save As prefs"), 0, (Fl_Callback*)cb_save_as_prefs, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {_("Load prefs"), 0, (Fl_Callback*)cb_load_prefs, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0},
  {_("&Memory"), 0, 0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
@@ -318,6 +324,8 @@ Fl_Group *small_main_group(int X, int Y, int W, int H)
 	btnPOWER = new Fl_Light_Button(2, 305, 50, 18, _("Pwr"));
 	btnPOWER->tooltip(_("Enable/Disable Power adjuster"));
 	btnPOWER->value(1);
+	btnPOWER->down_box(FL_THIN_DOWN_BOX);
+	btnPOWER->labelsize(12);
 	btnPOWER-> callback((Fl_Callback*) cb_btnPOWER);
 
 	sldrPOWER = new Fl_Wheel_Value_Slider(54, 305, 156, 18, "");
@@ -589,12 +597,16 @@ CTRL  click: FreqB -> FreqA\
 
 	btn_tune_on_off = new Fl_Light_Button(294, 325, 20, 18, "");
 	btn_tune_on_off->tooltip("Tuner On/Off");
+	btn_tune_on_off->down_box(FL_THIN_DOWN_BOX);
+	btn_tune_on_off->labelsize(12);
 	btn_tune_on_off->callback((Fl_Callback*)cb_btn_tune_on_off);
 
 	btnTune = new Fl_Button(
 		btn_tune_on_off->x() + btn_tune_on_off->w(),
 		btn_tune_on_off->y(), 40, 18, _("Tune"));
 	btnTune->tooltip(_("Manual Tune"));
+	btnTune->down_box(FL_THIN_DOWN_BOX);
+	btnTune->labelsize(12);
 	btnTune->callback((Fl_Callback*)cb_btnTune);
 
 	btnPTT = new Fl_Light_Button(
@@ -602,6 +614,8 @@ CTRL  click: FreqB -> FreqA\
 		btnTune->y(), 60, 18, _("PTT"));
 //	362, 325, 60, 18, _("PTT"));
 	btnPTT->tooltip(_("Xmt On/Off"));
+	btnPTT->down_box(FL_THIN_DOWN_BOX);
+	btnPTT->labelsize(12);
 	btnPTT->callback((Fl_Callback*)cb_btnPTT);
 
 	sm_grp1 = new Fl_Group(1, 62, 210, 60);

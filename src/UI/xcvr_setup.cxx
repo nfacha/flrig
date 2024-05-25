@@ -2712,7 +2712,7 @@ extern Fl_Double_Window *dlgXcvrConfig;
 
 Fl_Double_Window* XcvrDialog() {
 
-	int W = 675, H = 260;
+	int W = 675, H = 280;
 
 	Fl_Double_Window* w = new Fl_Double_Window(W, H, _("Configuration"));
 	w->size_range(W, H, W, H);
@@ -2730,7 +2730,9 @@ Fl_Double_Window* XcvrDialog() {
 	tab_tree->root_label(_("Configure"));
 	tab_tree->selectmode(FL_TREE_SELECT_SINGLE);
 	tab_tree->connectorstyle(FL_TREE_CONNECTOR_DOTTED);
-	tab_tree->connectorwidth(14); // default is 17
+//	tab_tree->connectorwidth(16); // default is 17
+	tab_tree->item_labelbgcolor(fl_rgb_color (progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue));
+	tab_tree->item_labelfgcolor(fl_rgb_color( progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue ));
 
 	tabXCVR     = createXCVR(xtabs, ytree, wtabs, htree, _("Xcvr"));
 	tabCMEDIA   = createCmediaTab(xtabs, ytree, wtabs, htree, ("PTT-Cmedia"));

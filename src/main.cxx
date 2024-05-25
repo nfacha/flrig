@@ -223,7 +223,7 @@ void set_platform_ui(void)
 	   progdefaults.WaterfallFontsize = 12;
 	   progdefaults.RxFontsize = 12;
 	   progdefaults.TxFontsize = 12;
-#elif defined(__WOE32__)
+#elif defined(__WOE32__)cb_sys_foreground
 	   Fl::set_font(FL_HELVETICA, "Tahoma");
 	   FL_NORMAL_SIZE = 11;
 	   progdefaults.WaterfallFontnbr = FL_HELVETICA;
@@ -527,7 +527,7 @@ int main (int argc, char *argv[])
 
 	meters_dialog = win_meters();
 
-	progStatus.UI_laststate();
+//	progStatus.UI_laststate();
 
 	meters_dialog->resize(progStatus.metersX, progStatus.metersY, 210, 190);
 	if (progStatus.meters_dialog_visible)
@@ -545,6 +545,7 @@ int main (int argc, char *argv[])
 	fntbrowser = new Font_Browser;
 	dlgMemoryDialog = Memory_Dialog();
 	dlgDisplayConfig = DisplayDialog();
+	dlgColorsDialog = ColorsDialog();
 
 	Fl::lock();
 
@@ -633,6 +634,8 @@ int main (int argc, char *argv[])
 	}
 	mainwindow->xclass(KNAME);
 
+	progStatus.UI_laststate();
+
 #if defined(__WIN32__)
 #  ifndef IDI_ICON
 #    define IDI_ICON 101
@@ -667,6 +670,8 @@ int main (int argc, char *argv[])
 	}
 
 	Fl::add_timeout(0.1, startup);
+
+	redraw_dialogs();
 
 	return Fl::run();
 

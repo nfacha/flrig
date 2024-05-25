@@ -56,12 +56,14 @@ status progStatus = {
 	600,		// int memW;
 	164,		// int memH;
 
-    785,        // int metersX;
-    50,         // int metersy;
-    false,		// bool meters_dialog_visible;
+	785,        // int metersX;
+	50,         // int metersy;
+	false,		// bool meters_dialog_visible;
 
 	20,			// int ddX;
 	20,			// int ddY;
+
+	"default",	// std::string ui_name
 
 	"NONE",		// std::string xcvr_serial_port;
 	0,			// int serial_baudrate;
@@ -177,6 +179,7 @@ status progStatus = {
 	0,			// int	show_tabs;
 	true,       // bool first_use;			true only during program start
 	"",			// std::string visible_tab;
+
 	true,		// bool hrd_buttons
 	FL_WHEN_CHANGED,	// int sliders_button
 
@@ -250,6 +253,7 @@ status progStatus = {
 	true,		// bool	restore_comp_on_off;
 	true,		// bool	restore_comp_level;
 
+//============= transceiver specific prameters
 //tt550 controls
 	80,			// tt550_line_out;
 	1,			// tt550_agc_level;
@@ -283,6 +287,7 @@ status progStatus = {
 	false,		// tt550_use_xmt_bw;
 
 	25,			// tt550_AM_level;
+
 	0,			// tt550_encoder_step;
 	1,			// tt550_encoder_sensitivity;
 	2000,		// tt550_keypad_timeout;
@@ -391,89 +396,27 @@ status progStatus = {
 
 	"1",			// std::string	label_on_start1;
 	"",				// std::string	cmd_on_start1;
+
 	"2",			// std::string	label_on_start2;
 	"",				// std::string	cmd_on_start2;
+
 	"3",			// std::string	label_on_start3;
 	"",				// std::string	cmd_on_start3;
+
 	"4",			// std::string	label_on_start4;
 	"",				// std::string	cmd_on_start4;
 
 	"1",			// std::string	label_on_exit1;
 	"",				// std::string	cmd_on_exit1;
+
 	"2",			// std::string	label_on_exit2;
 	"",				// std::string	cmd_on_exit2;
+
 	"3",			// std::string	label_on_exit3;
 	"",				// std::string	cmd_on_exit3;
+
 	"4",			// std::string	label_on_exit4;
 	"",				// std::string	cmd_on_exit4;
-
-// =========================
-
-	232,		// int	 bg_red;
-	255,		// int	 bg_green;
-	232,		// int	 bg_blue;
-
-	0,			// int	 fg_red;
-	0,			// int	 fg_green;
-	0,			// int	 fg_blue;
-
-	148,		// int	swrRed;
-	0,			// int	swrGreen;
-	148,		// int	swrBlue;
-
-	180,		// int	pwrRed;
-	0,			// int	pwrGreen;
-	0,			// int	pwrBlue;
-
-	0,			// int	smeterRed;
-	180,		// int	smeterGreen;
-	0,			//int	smeterBlue;
-
-	255,		// int	peakRed;
-	0,			// int	peakGreen;
-	0,			// int	peakBlue;
-
-	0,			// int	voltRed;
-	0,			// int	voltGreen;
-	255,		// int	voltBlue;
-	0,			// int	display_voltmeter;
-
-	0,			// int	fg_sys_red;
-	0,			// int	fg_sys_green;
-	0,			// int	fg_sys_blue;
-
-	0xc0,		// int	bg_sys_red;
-	0xc0,		// int	bg_sys_green;
-	0xc0,		// int	bg_sys_blue;
-
-	255,		// int	bg2_sys_red;
-	255,		// int	bg2_sys_green;
-	255,		// int	bg2_sys_blue;
-
-	232,		// int		slider_red;
-	255,		// int		slider_green;
-	232,		// int		slider_blue;
-
-	0,			// int		slider_btn_red;
-	0,			// int		slider_btn_green;
-	128,		// int		slider_btn_blue;
-
-	255,		// int		lighted_btn_red;
-	255,		// int		lighted_btn_green;
-	0,			// int		lighted_btn_blue;
-
-	230,		// int		tab_red;
-	230,		// int		tab_green;
-	230,		// int		tab_blue;
-
-	FL_COURIER,	// Fl_Font fontnbr;
-
-	false,		// bool	 tooltips;
-
-	"base",		// std::string ui_scheme
-
-//	"7362",		// std::string server_port
-//	"127.0.0.1",// std::string server_address
 
 	"127.0.0.1", // std::string xmlrig_addr;
 	"12345",	// std::string xmlrig_port;
@@ -488,6 +431,7 @@ status progStatus = {
 
 	"40001",	// std::string tci_port
 	"127.0.0.1",// std::string tci address
+
 	10,			// int  tci_center;
 
 	false,		// bool xcvr auto on
@@ -600,7 +544,300 @@ status progStatus = {
 	1,			// int fsk_log_dupcheck;
 	0,			// int fsk_log_nbr
 
+	0,			// int	display_voltmeter;
+
+//----------------------------------------------------------------------
+// UI scheme items
+//----------------------------------------------------------------------
+	false,		// bool	ui_changed;
+
+	232,		// int	 bg_red;
+	255,		// int	 bg_green;
+	232,		// int	 bg_blue;
+
+	0,			// int	 fg_red;
+	0,			// int	 fg_green;
+	0,			// int	 fg_blue;
+
+	148,		// int	swrRed;
+	0,			// int	swrGreen;
+	148,		// int	swrBlue;
+
+	180,		// int	pwrRed;
+	0,			// int	pwrGreen;
+	0,			// int	pwrBlue;
+
+	0,			// int	smeterRed;
+	180,		// int	smeterGreen;
+	0,			//int	smeterBlue;
+
+	0,			// int	voltsRed;
+	0,			// int	voltsGreen;
+	255,		// int	voltsBlue;
+
+	128,		// int	iddRed;
+	0,			// int	iddGreen;
+	0,			// int	iddBlue;
+
+	0,			// int	alcRed;
+	0,			// int	alcGreen;
+	255,		// int	alcBlue;
+
+	255,		// int	smeter_peak_red;
+	0,			// int	smeter_peak_green;
+	0,			// int	smeter_peak_blue;
+
+	255,		// int	swr_peak_red;
+	0,			// int	swr_peak_green;
+	0,			// int	swr_peak_blue;
+
+	255,		// int	pwr_peak_red;
+	0,			// int	pwr_peak_green;
+	0,			// int	pwr_peak_blue;
+
+	255,		// int	alc_peak_red;
+	0,			// int	alc_peak_green;
+	0,			// int	alc_peak_blue;
+
+	255,		// int	idd_peak_red;
+	0,			// int	idd_peak_green;
+	0,			// int	idd_peak_blue;
+
+	255,		// int	volts_peak_red;
+	0,			// int	volts_peak_green;
+	0,			// int	volts_peak_blue;
+
+	0,			// int	fg_sys_red;
+	0,			// int	fg_sys_green;
+	0,			// int	fg_sys_blue;
+
+	0xc0,		// int	bg_sys_red;
+	0xc0,		// int	bg_sys_green;
+	0xc0,		// int	bg_sys_blue;
+
+	255,		// int	bg2_sys_red;
+	255,		// int	bg2_sys_green;
+	255,		// int	bg2_sys_blue;
+
+	232,		// int		slider_red;
+	255,		// int		slider_green;
+	232,		// int		slider_blue;
+
+	0,			// int		slider_btn_red;
+	0,			// int		slider_btn_green;
+	128,		// int		slider_btn_blue;
+
+	255,		// int		lighted_btn_red;
+	255,		// int		lighted_btn_green;
+	0,			// int		lighted_btn_blue;
+
+	230,		// int		tab_red;
+	230,		// int		tab_green;
+	230,		// int		tab_blue;
+
+	FL_COURIER,	// Fl_Font fontnbr;
+
+	false,		// bool	 tooltips;
+
+	"base",		// std::string ui_scheme
+//----------------------------------------------------------------------
+
 };
+
+void status::saveScheme(std::string sch_name)
+{
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
+
+	spref.set("ui_scheme", ui_scheme.c_str());
+
+	spref.set("fontnbr", fontnbr);
+
+	spref.set("fg_red", fg_red);
+	spref.set("fg_green", fg_green);
+	spref.set("fg_blue", fg_blue);
+
+	spref.set("bg_red", bg_red);
+	spref.set("bg_green", bg_green);
+	spref.set("bg_blue", bg_blue);
+
+	spref.set("smeter_red", smeterRed);
+	spref.set("smeter_green", smeterGreen);
+	spref.set("smeter_blue", smeterBlue);
+
+	spref.set("power_red", pwrRed);
+	spref.set("power_green", pwrGreen);
+	spref.set("power_blue", pwrBlue);
+
+	spref.set("swr_red", swrRed);
+	spref.set("swr_green", swrGreen);
+	spref.set("swr_blue", swrBlue);
+
+	spref.set("alc_red", alcRed);
+	spref.set("alc_green", alcGreen);
+	spref.set("alc_blue", alcBlue);
+
+	spref.set("idd_red", iddRed);
+	spref.set("idd_green", iddGreen);
+	spref.set("idd_blue", iddBlue);
+
+	spref.set("volts_red", voltsRed);
+	spref.set("volts_green", voltsGreen);
+	spref.set("volts_blue", voltsBlue);
+
+	spref.set("smeter_peak_red", smeter_peak_red);
+	spref.set("smeter_peak_green", smeter_peak_green);
+	spref.set("smeter_peak_blue", smeter_peak_blue);
+
+	spref.set("pwr_peak_red", pwr_peak_red);
+	spref.set("pwr_peak_green", pwr_peak_green);
+	spref.set("pwr_peak_blue", pwr_peak_blue);
+
+	spref.set("swr_peak_red", swr_peak_red);
+	spref.set("swr_peak_green", swr_peak_green);
+	spref.set("swr_peak_blue", swr_peak_blue);
+
+	spref.set("alc_peak_red", alc_peak_red);
+	spref.set("alc_peak_green", alc_peak_green);
+	spref.set("alc_peak_blue", alc_peak_blue);
+
+	spref.set("idd_peak_red", idd_peak_red);
+	spref.set("idd_peak_green", idd_peak_green);
+	spref.set("idd_peak_blue", idd_peak_blue);
+
+	spref.set("volts_peak_red", volts_peak_red);
+	spref.set("volts_peak_green", volts_peak_green);
+	spref.set("volts_peak_blue", volts_peak_blue);
+
+	spref.set("fg_sys_red", fg_sys_red);
+	spref.set("fg_sys_green", fg_sys_green);
+	spref.set("fg_sys_blue", fg_sys_blue);
+
+	spref.set("bg_sys_red", bg_sys_red);
+	spref.set("bg_sys_green", bg_sys_green);
+	spref.set("bg_sys_blue", bg_sys_blue);
+
+	spref.set("bg2_sys_red", bg2_sys_red);
+	spref.set("bg2_sys_green", bg2_sys_green);
+	spref.set("bg2_sys_blue", bg2_sys_blue);
+
+	spref.set("slider_red", slider_red);
+	spref.set("slider_green", slider_green);
+	spref.set("slider_blue", slider_blue);
+
+	spref.set("slider_btn_red", slider_btn_red);
+	spref.set("slider_btn_green", slider_btn_green);
+	spref.set("slider_btn_blue", slider_btn_blue);
+
+	spref.set("lighted_btn_red", lighted_btn_red);
+	spref.set("lighted_btn_green", lighted_btn_green);
+	spref.set("lighted_btn_blue", lighted_btn_blue);
+
+	spref.set("tab_red", tab_red);
+	spref.set("tab_green", tab_green);
+	spref.set("tab_blue", tab_blue);
+
+}
+
+void status::loadScheme(std::string sch_name)
+{
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
+
+	if (spref.entryExists("ui_scheme")) {
+
+		char defbuffer[MAX_DEFBUFFER_SIZE];
+		spref.get("ui_scheme", defbuffer, "gtk+", MAX_DEFBUFFER_SIZE);
+		ui_scheme = defbuffer;
+
+		int i = (int)fontnbr;
+		spref.get("fontnbr", i, i); fontnbr = (Fl_Font)i;
+		i = 0;
+
+		spref.get("fg_red", fg_red, fg_red);
+		spref.get("fg_green", fg_green, fg_green);
+		spref.get("fg_blue", fg_blue, fg_blue);
+
+		spref.get("bg_red", bg_red, bg_red);
+		spref.get("bg_green", bg_green, bg_green);
+		spref.get("bg_blue", bg_blue, bg_blue);
+
+		spref.get("smeter_red", smeterRed, smeterRed);
+		spref.get("smeter_green", smeterGreen, smeterGreen);
+		spref.get("smeter_blue", smeterBlue, smeterBlue);
+
+		spref.get("power_red", pwrRed, pwrRed);
+		spref.get("power_green", pwrGreen, pwrGreen);
+		spref.get("power_blue", pwrBlue, pwrBlue);
+
+		spref.get("swr_red", swrRed, swrRed);
+		spref.get("swr_green", swrGreen, swrGreen);
+		spref.get("swr_blue", swrBlue, swrBlue);
+
+		spref.get("alc_red", alcRed, alcRed);
+		spref.get("alc_green", alcGreen, alcGreen);
+		spref.get("alc_blue", alcBlue, alcBlue);
+
+		spref.get("idd_red", iddRed, iddRed);
+		spref.get("idd_green", iddGreen, iddGreen);
+		spref.get("idd_blue", iddBlue, iddBlue);
+
+		spref.get("volts_red", voltsRed, voltsRed);
+		spref.get("volts_green", voltsGreen, voltsGreen);
+		spref.get("volts_blue", voltsBlue, voltsBlue);
+
+		spref.get("smeter_peak_red", smeter_peak_red, smeter_peak_red);
+		spref.get("smeter_peak_green", smeter_peak_green, smeter_peak_green);
+		spref.get("smeter_peak_blue", smeter_peak_blue, smeter_peak_blue);
+
+		spref.get("swr_peak_red", swr_peak_red, swr_peak_red);
+		spref.get("swr_peak_green", swr_peak_green, swr_peak_green);
+		spref.get("swr_peak_blue", swr_peak_blue, swr_peak_blue);
+
+		spref.get("pwr_peak_red", pwr_peak_red, pwr_peak_red);
+		spref.get("pwr_peak_green", pwr_peak_green, pwr_peak_green);
+		spref.get("pwr_peak_blue", pwr_peak_blue, pwr_peak_blue);
+
+		spref.get("alc_peak_red", alc_peak_red, alc_peak_red);
+		spref.get("alc_peak_green", alc_peak_green, alc_peak_green);
+		spref.get("alc_peak_blue", alc_peak_blue, alc_peak_blue);
+
+		spref.get("idd_peak_red", idd_peak_red, idd_peak_red);
+		spref.get("idd_peak_green", idd_peak_green, idd_peak_green);
+		spref.get("idd_peak_blue", idd_peak_blue, idd_peak_blue);
+
+		spref.get("volts_peak_red", volts_peak_red, volts_peak_red);
+		spref.get("volts_peak_green", volts_peak_green, volts_peak_green);
+		spref.get("volts_peak_blue", volts_peak_blue, volts_peak_blue);
+
+		spref.get("fg_sys_red", fg_sys_red, fg_sys_red);
+		spref.get("fg_sys_green", fg_sys_green, fg_sys_green);
+		spref.get("fg_sys_blue", fg_sys_blue, fg_sys_blue);
+
+		spref.get("bg_sys_red", bg_sys_red, bg_sys_red);
+		spref.get("bg_sys_green", bg_sys_green, bg_sys_green);
+		spref.get("bg_sys_blue", bg_sys_blue, bg_sys_blue);
+
+		spref.get("bg2_sys_red", bg2_sys_red, bg2_sys_red);
+		spref.get("bg2_sys_green", bg2_sys_green, bg2_sys_green);
+		spref.get("bg2_sys_blue", bg2_sys_blue, bg2_sys_blue);
+
+		spref.get("slider_red", slider_red, slider_red);
+		spref.get("slider_green", slider_green, slider_green);
+		spref.get("slider_blue", slider_blue, slider_blue);
+
+		spref.get("slider_btn_red", slider_btn_red, slider_btn_red);
+		spref.get("slider_btn_green", slider_btn_green, slider_btn_green);
+		spref.get("slider_btn_blue", slider_btn_blue, slider_btn_blue);
+
+		spref.get("lighted_btn_red", lighted_btn_red, lighted_btn_red);
+		spref.get("lighted_btn_green", lighted_btn_green, lighted_btn_green);
+		spref.get("lighted_btn_blue", lighted_btn_blue, lighted_btn_blue);
+
+		spref.get("tab_red", tab_red, tab_red);
+		spref.get("tab_green", tab_green, tab_green);
+		spref.get("tab_blue", tab_blue, tab_blue);
+
+	}
+}
 
 void status::saveLastState()
 {
@@ -619,12 +856,12 @@ void status::saveLastState()
 		memW = dlgMemoryDialog->w();
 		memH = dlgMemoryDialog->h();
 	}
-    
-    if (meters_dialog)
-    {
-        metersX = meters_dialog->x();
-        metersY = meters_dialog->y();
-    }
+	
+	if (meters_dialog)
+	{
+		metersX = meters_dialog->x();
+		metersY = meters_dialog->y();
+	}
 
 	mainX = mX;
 	mainY = mY;
@@ -655,12 +892,14 @@ void status::saveLastState()
 	spref.set("memw", memW);
 	spref.set("memh", memH);
 
-    spref.set("metersx", metersX);
-    spref.set("metersy", metersY);
-    spref.set("meters_dialog_visible", meters_dialog->shown());
+	spref.set("metersx", metersX);
+	spref.set("metersy", metersY);
+	spref.set("meters_dialog_visible", meters_dialog->shown());
 
 	spref.set("ddx", ddX);
 	spref.set("ddy", ddY);
+
+	spref.set("ui_name", ui_name.c_str());
 
 	spref.set("xcvr_serial_port", xcvr_serial_port.c_str());
 	spref.set("serial_baudrate", serial_baudrate);
@@ -1034,71 +1273,12 @@ void status::saveLastState()
 	spref.set("ex_label4", label_on_exit4.c_str());
 	spref.set("ex_cmd4", cmd_on_exit4.c_str());
 
-	spref.set("fg_red", fg_red);
-	spref.set("fg_green", fg_green);
-	spref.set("fg_blue", fg_blue);
-
-	spref.set("bg_red", bg_red);
-	spref.set("bg_green", bg_green);
-	spref.set("bg_blue", bg_blue);
-
-	spref.set("smeter_red", smeterRed);
-	spref.set("smeter_green", smeterGreen);
-	spref.set("smeter_blue", smeterBlue);
-
-	spref.set("power_red", pwrRed);
-	spref.set("power_green", pwrGreen);
-	spref.set("power_blue", pwrBlue);
-
-	spref.set("swr_red", swrRed);
-	spref.set("swr_green", swrGreen);
-	spref.set("swr_blue", swrBlue);
-
-	spref.set("peak_red", peakRed);
-	spref.set("peak_green", peakGreen);
-	spref.set("peak_blue", peakBlue);
-
-	spref.set("volt_red", voltRed);
-	spref.set("volt_green", voltGreen);
-	spref.set("volt_blue", voltBlue);
 	spref.set("display_voltmeter", display_voltmeter);
-
-	spref.set("fg_sys_red", fg_sys_red);
-	spref.set("fg_sys_green", fg_sys_green);
-	spref.set("fg_sys_blue", fg_sys_blue);
-
-	spref.set("bg_sys_red", bg_sys_red);
-	spref.set("bg_sys_green", bg_sys_green);
-	spref.set("bg_sys_blue", bg_sys_blue);
-
-	spref.set("bg2_sys_red", bg2_sys_red);
-	spref.set("bg2_sys_green", bg2_sys_green);
-	spref.set("bg2_sys_blue", bg2_sys_blue);
-
-	spref.set("slider_red", slider_red);
-	spref.set("slider_green", slider_green);
-	spref.set("slider_blue", slider_blue);
-
-	spref.set("slider_btn_red", slider_btn_red);
-	spref.set("slider_btn_green", slider_btn_green);
-	spref.set("slider_btn_blue", slider_btn_blue);
-
-	spref.set("lighted_btn_red", lighted_btn_red);
-	spref.set("lighted_btn_green", lighted_btn_green);
-	spref.set("lighted_btn_blue", lighted_btn_blue);
-
-	spref.set("tab_red", tab_red);
-	spref.set("tab_green", tab_green);
-	spref.set("tab_blue", tab_blue);
-
 	spref.set("fontnbr", fontnbr);
 
 	spref.set("tooltips", tooltips);
 
 	spref.set("ui_scheme", ui_scheme.c_str());
-
-//	spref.set("server_port", server_port.c_str());
-//	spref.set("server_addr", server_addr.c_str());
 
 	spref.set("xmlrig_port", xmlrig_port.c_str());
 	spref.set("xmlrig_addr", xmlrig_addr.c_str());
@@ -1261,6 +1441,7 @@ void status::saveLastState()
 	spref.set("FSK_DUPCHECK", fsk_log_dupcheck);
 	spref.set("FSK_LOG_NBR", fsk_log_nbr);
 
+	saveScheme(ui_name);
 }
 
 bool status::loadXcvrState(std::string xcvr)
@@ -1289,9 +1470,9 @@ bool status::loadXcvrState(std::string xcvr)
 		spref.get("memw", memW, memW);
 		spref.get("memh", memH, memH);
 
-        spref.get("metersx", metersX, metersX);
-        spref.get("metersy", metersY, metersY);
-        spref.get("meters_dialog_visible", i, i); meters_dialog_visible = i;
+		spref.get("metersx", metersX, metersX);
+		spref.get("metersy", metersY, metersY);
+		spref.get("meters_dialog_visible", i, i); meters_dialog_visible = i;
 
 		spref.get("ddX", ddX, ddX);
 		spref.get("ddY", ddY, ddY);
@@ -1308,6 +1489,10 @@ bool status::loadXcvrState(std::string xcvr)
 			if (mainW < TOUCH_MAINW) mainW = TOUCH_MAINW;
 		}
 
+		spref.get("ui_name", defbuffer, "default", MAX_DEFBUFFER_SIZE);
+		ui_name = defbuffer;
+
+		memset(defbuffer, 0, MAX_DEFBUFFER_SIZE);
 		spref.get("xcvr_serial_port", defbuffer, "NONE", MAX_DEFBUFFER_SIZE);
 		xcvr_serial_port = defbuffer;
 		if (xcvr_serial_port.find("tty") == 0)
@@ -1804,75 +1989,10 @@ bool status::loadXcvrState(std::string xcvr)
 		spref.get("ex_cmd4", defbuffer, cmd_on_exit4.c_str(), MAX_DEFBUFFER_SIZE);
 		cmd_on_exit4 = defbuffer;
 
-		spref.get("fg_red", fg_red, fg_red);
-		spref.get("fg_green", fg_green, fg_green);
-		spref.get("fg_blue", fg_blue, fg_blue);
-
-		spref.get("bg_red", bg_red, bg_red);
-		spref.get("bg_green", bg_green, bg_green);
-		spref.get("bg_blue", bg_blue, bg_blue);
-
-		spref.get("smeter_red", smeterRed, smeterRed);
-		spref.get("smeter_green", smeterGreen, smeterGreen);
-		spref.get("smeter_blue", smeterBlue, smeterBlue);
-
-		spref.get("power_red", pwrRed, pwrRed);
-		spref.get("power_green", pwrGreen, pwrGreen);
-		spref.get("power_blue", pwrBlue, pwrBlue);
-
-		spref.get("swr_red", swrRed, swrRed);
-		spref.get("swr_green", swrGreen, swrGreen);
-		spref.get("swr_blue", swrBlue, swrBlue);
-
-		spref.get("peak_red", peakRed, peakRed);
-		spref.get("peak_green", peakGreen, peakGreen);
-		spref.get("peak_blue", peakBlue, peakBlue);
-
-		spref.get("volt_red", voltRed, voltRed);
-		spref.get("volt_green", voltGreen, voltGreen);
-		spref.get("volt_blue", voltBlue, voltBlue);
 		spref.get("display_voltmeter", display_voltmeter, display_voltmeter);
 
-		spref.get("fg_sys_red", fg_sys_red, fg_sys_red);
-		spref.get("fg_sys_green", fg_sys_green, fg_sys_green);
-		spref.get("fg_sys_blue", fg_sys_blue, fg_sys_blue);
-
-		spref.get("bg_sys_red", bg_sys_red, bg_sys_red);
-		spref.get("bg_sys_green", bg_sys_green, bg_sys_green);
-		spref.get("bg_sys_blue", bg_sys_blue, bg_sys_blue);
-
-		spref.get("bg2_sys_red", bg2_sys_red, bg2_sys_red);
-		spref.get("bg2_sys_green", bg2_sys_green, bg2_sys_green);
-		spref.get("bg2_sys_blue", bg2_sys_blue, bg2_sys_blue);
-
-		spref.get("slider_red", slider_red, slider_red);
-		spref.get("slider_green", slider_green, slider_green);
-		spref.get("slider_blue", slider_blue, slider_blue);
-
-		spref.get("slider_btn_red", slider_btn_red, slider_btn_red);
-		spref.get("slider_btn_green", slider_btn_green, slider_btn_green);
-		spref.get("slider_btn_blue", slider_btn_blue, slider_btn_blue);
-
-		spref.get("lighted_btn_red", lighted_btn_red, lighted_btn_red);
-		spref.get("lighted_btn_green", lighted_btn_green, lighted_btn_green);
-		spref.get("lighted_btn_blue", lighted_btn_blue, lighted_btn_blue);
-
-		spref.get("tab_red", tab_red, tab_red);
-		spref.get("tab_green", tab_green, tab_green);
-		spref.get("tab_blue", tab_blue, tab_blue);
-
-		i = (int)fontnbr;
-		spref.get("fontnbr", i, i); fontnbr = (Fl_Font)i;
 		i = 0;
 		if (spref.get("tooltips", i, i)) tooltips = i;
-
-		spref.get("ui_scheme", defbuffer, "gtk+", MAX_DEFBUFFER_SIZE);
-		ui_scheme = defbuffer;
-
-//		spref.get("server_port", defbuffer, "7362", MAX_DEFBUFFER_SIZE);
-//		server_port = defbuffer;
-//		spref.get("server_addr", defbuffer, "127.0.0.1", MAX_DEFBUFFER_SIZE);
-//		server_addr = defbuffer;
 
 		spref.get("xmlrig_port", defbuffer, "12345", MAX_DEFBUFFER_SIZE);
 		xmlrig_port = defbuffer;
@@ -2069,6 +2189,8 @@ bool status::loadXcvrState(std::string xcvr)
 			FSK_msgs[n] = defbuffer;
 		}
 
+		loadScheme(ui_name);
+
 		return true; 
 	}
 	return false;
@@ -2087,19 +2209,24 @@ void status::loadLastState()
 		xcvrpref.get("last_xcvr_used", defbuffer, "NONE", MAX_DEFBUFFER_SIZE);
 		xcvr_name = defbuffer;
 	}
-//	xcvrpref.get("xml_port", xmlport, xmlport);
 
 	loadXcvrState(xcvr_name);
 }
 
 void status::UI_laststate()
 {
+// void Fl::background2 ( uchar r, uchar g, uchar b )
+// Changes the alternative background color.
+// This color is used as a background by Fl_Input and other text widgets.
+// This call may change fl_color(FL_FOREGROUND_COLOR) if it does not provide 
+// sufficient contrast to FL_BACKGROUND2_COLOR.
+// we want to preserve the user selection.  ordering of Fl:: sequence is important
+	Fl::background2( bg2_sys_red, bg2_sys_green, bg2_sys_blue);
+	Fl::background( bg_sys_red, bg_sys_green, bg_sys_blue);
+	Fl::foreground( fg_sys_red, fg_sys_green, fg_sys_blue);
+
 	Fl_Color bgclr = fl_rgb_color(bg_red, bg_green, bg_blue);
 	Fl_Color fgclr = fl_rgb_color(fg_red, fg_green, fg_blue);
-
-	Fl::background( bg_sys_red, bg_sys_green, bg_sys_blue);
-	Fl::background2( bg2_sys_red, bg2_sys_green, bg2_sys_blue);
-	Fl::foreground( fg_sys_red, fg_sys_green, fg_sys_blue);
 
 	FreqDispA->SetCOLORS( fgclr, bgclr );
 	FreqDispA->font(fontnbr);
@@ -2114,21 +2241,21 @@ void status::UI_laststate()
 	btnALC_IDD_SWR->labelcolor(fgclr);
 
 	sldrFwdPwr->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
-	sldrFwdPwr->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sldrFwdPwr->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	sldrRcvSignal->color(fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr);
-	sldrRcvSignal->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sldrRcvSignal->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	sldrALC->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrALC->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sldrALC->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	sldrSWR->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrSWR->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sldrSWR->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	sldrIDD->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sldrIDD->PeakColor(fl_rgb_color (peakRed, peakGreen, peakBlue));
+	sldrIDD->PeakColor(fl_rgb_color (smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
-	sldrVoltage->color(fl_rgb_color (voltRed, voltGreen, voltBlue), bgclr);
+	sldrVoltage->color(fl_rgb_color (voltsRed, voltsGreen, voltsBlue), bgclr);
 	sldrVoltage->PeakColor(bgclr);
 
 	scaleVoltage->color(bgclr);
@@ -2137,26 +2264,26 @@ void status::UI_laststate()
 	mtr_SMETER->color(bgclr);
 	mtr_SMETER->labelcolor(fgclr);
 	sigbar_SMETER->color(fl_rgb_color (smeterRed, smeterGreen, smeterBlue), bgclr);
-	sigbar_SMETER->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sigbar_SMETER->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	mtr_PWR->color(bgclr);
 	mtr_PWR->labelcolor(fgclr);
 	sigbar_PWR->color(fl_rgb_color (pwrRed, pwrGreen, pwrBlue), bgclr);
-	sigbar_PWR->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sigbar_PWR->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	mtr_SWR->color(bgclr);
 	mtr_SWR->labelcolor(fgclr);
 	sigbar_SWR->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sigbar_SWR->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sigbar_SWR->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	mtr_ALC->color(bgclr);
 	mtr_ALC->labelcolor(fgclr);
 	sigbar_ALC->color(fl_rgb_color (swrRed, swrGreen, swrBlue), bgclr);
-	sigbar_ALC->PeakColor(fl_rgb_color(peakRed, peakGreen, peakBlue));
+	sigbar_ALC->PeakColor(fl_rgb_color(smeter_peak_red, smeter_peak_green, smeter_peak_blue));
 
 	mtr_VOLTS->color(bgclr);
 	mtr_VOLTS->labelcolor(fgclr);
-	sigbar_VOLTS->color(fl_rgb_color (voltRed, voltGreen, voltBlue), bgclr);
+	sigbar_VOLTS->color(fl_rgb_color (voltsRed, voltsGreen, voltsBlue), bgclr);
 	sigbar_VOLTS->PeakColor(bgclr);
 
 // set scale for both voltage display
@@ -2279,6 +2406,9 @@ void status::UI_laststate()
 	btnUser22->label(label22.c_str()); btnUser22->redraw_label();
 	btnUser23->label(label23.c_str()); btnUser23->redraw_label();
 	btnUser24->label(label24.c_str()); btnUser24->redraw_label();
+
+	op_yaesu_select60->selection_color(FL_BACKGROUND_COLOR);
+	op_yaesu_select60->labelcolor(FL_FOREGROUND_COLOR);
 
 	Fl::scheme(ui_scheme.c_str());
 }

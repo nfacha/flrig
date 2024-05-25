@@ -69,24 +69,27 @@ void cbFreqSelectFontBrowser(Fl_Widget*, void*) {
 	if (progStatus.memfontsize < 10) progStatus.memfontsize = 10;
 	fntSelectbrowser->hide();
 
+	Fl_Color header_color = fl_rgb_color(progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue);
+	Fl_Color label_color = fl_contrast( fl_rgb_color( progStatus.fg_red * .8, progStatus.fg_green * .8, progStatus.fg_blue * .8), header_color); 
+
 	char hdrline[256];
 	header->clear();
 	snprintf(hdrline, sizeof(hdrline),
-			"\
-@F%d@S%d@B%d@cFrequency\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cBW\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cMode\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cComments",
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247,
-		progStatus.memfontnbr, progStatus.memfontsize, 247 );
+		"\
+@F%d@S%d@B%u@C%u@cFrequency\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cBW\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cMode\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cComments",
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color);
 	header->add(hdrline);
 	header->redraw();
 
@@ -171,28 +174,32 @@ Fl_Double_Window* Memory_Dialog() {
 		Fl_Group *mm_grp1b = new Fl_Group(66, 0, 534, 155);
 		mm_grp1b->box(FL_FLAT_BOX);
 
+		Fl_Color header_color = fl_rgb_color(progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue);
+		Fl_Color label_color = fl_rgb_color( progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue ); 
+
 		header = new Fl_Browser(66, 0, 532, 24, "");
 		header->column_widths(freq_sel_widths);
-		header->color(247);
+		header->color(header_color);
+
 		char hdrline[256];
+		header->clear();
 		snprintf(hdrline, sizeof(hdrline),
 			"\
-@F%d@S%d@B%d@cFrequency\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cBW\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cMode\t\
-@F%d@S%d@B%d|\t\
-@F%d@S%d@B%d@cComments",
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247,
-			progStatus.memfontnbr, progStatus.memfontsize, 247 );
+@F%d@S%d@B%u@C%u@cFrequency\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cBW\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cMode\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cComments",
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color);
 		header->add(hdrline);
-		header->callback( (Fl_Callback*)cb_header );
 
 		FreqSelect = new Fl_Browser2(66, 24, 532, 131);
 		FreqSelect->tooltip(
@@ -240,3 +247,35 @@ _("Left click => in Tag field to edit\n[Enter] => when done to update"));
 	return w;
 }
 
+void update_memory_dialog_colors()
+{
+	if (progStatus.memfontsize > 18) progStatus.memfontsize = 18;
+	if (progStatus.memfontsize < 10) progStatus.memfontsize = 10;
+
+	Fl_Color header_color = fl_rgb_color(progStatus.bg_red, progStatus.bg_green, progStatus.bg_blue);
+	Fl_Color label_color = fl_rgb_color( progStatus.fg_red, progStatus.fg_green, progStatus.fg_blue ); 
+
+	char hdrline[256];
+	header->clear();
+	snprintf(hdrline, sizeof(hdrline),
+			"\
+@F%d@S%d@B%u@C%u@cFrequency\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cBW\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cMode\t\
+@F%d@S%d@B%u@C%u|\t\
+@F%d@S%d@B%u@C%u@cComments",
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
+		progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color);
+	header->add(hdrline);
+	header->redraw();
+
+	updateSelect();
+
+}

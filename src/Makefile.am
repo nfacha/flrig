@@ -230,6 +230,8 @@ flrig_SOURCES += \
 	rigs/yaesu/FTdx3000.cxx \
 	rigs/yaesu/FT5000.cxx \
 	rigs/yaesu/FTdx9000.cxx \
+	fileselector/flnfc_common.cxx \
+	fileselector/fileselect.cxx \
 	support/debug.cxx \
 	support/dialogs.cxx \
 	support/gpio_ptt.cxx \
@@ -298,6 +300,7 @@ EXTRA_DIST = \
 	UI/ui_small.cxx \
 	UI/ui_touch.cxx \
 	UI/ui_setup.cxx \
+	UI/ui_colors.cxx \
 	UI/ui_memory.cxx \
 	UI/xcvr_setup.cxx \
 	UI/meters_setup.cxx \
@@ -319,6 +322,7 @@ EXTRA_DIST = \
 	include/morse.h \
 	include/debug.h \
 	include/dialogs.h \
+	include/fileselect.h \
 	include/flbrowser2.h \
 	include/flinput2.h \
 	include/flslider2.h \

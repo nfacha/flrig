@@ -322,6 +322,7 @@ extern void cbCancelXcvrDialog();
 extern void initCommPortTable ();
 extern void configXcvr();
 extern void setColors();
+extern void setUIscheme();
 extern void setDisplayColors();
 extern void openMemoryDialog();
 extern void cbCloseMemory();
@@ -333,12 +334,9 @@ extern void cbPrefFont();
 extern void cbPrefBackground();
 extern void cbPrefForeground();
 
-extern void cbSMeterColor();
-extern void cbPwrMeterColor();
-extern void cbSWRMeterColor();
-extern void cbPeakMeterColor();
 extern void cbBacklightColor();
-extern void cbVoltMeterColor();
+
+extern void cbPeakMeterColor();
 
 extern void cb_sys_defaults();
 extern void cb_sys_foreground();
