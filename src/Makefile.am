@@ -230,7 +230,6 @@ flrig_SOURCES += \
 	rigs/yaesu/FTdx3000.cxx \
 	rigs/yaesu/FT5000.cxx \
 	rigs/yaesu/FTdx9000.cxx \
-	fileselector/flnfc_common.cxx \
 	fileselector/fileselect.cxx \
 	support/debug.cxx \
 	support/dialogs.cxx \
