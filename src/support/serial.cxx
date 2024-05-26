@@ -253,9 +253,11 @@ bool Cserial::getPTT() {
 
 void Cserial::SetPTT(bool ON)
 {
+	serptt = ON;
 	if (fd < 0) {
 		if (progStatus.serialtrace || SERIALDEBUG) {
-			snprintf(traceinfo, sizeof(traceinfo), "SetPTT(...) fd < 0");
+			snprintf(traceinfo, sizeof(traceinfo), "SetPTT(...) fd < 0, PTT = %s",
+				(ON ? "ON" : "OFF") );
 			ser_trace(1, traceinfo);
 		}
 		LOG_ERROR("ptt fd < 0");
@@ -288,7 +290,6 @@ void Cserial::SetPTT(bool ON)
 		}
 		ioctl(fd, TIOCMSET, &state);
 	}
-	serptt = ON;
 }
 
 void Cserial::setRTS(bool b)
@@ -448,7 +449,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 				}
 
 // test for icom echo
-				if (buf[3] & 0xFF == 0xE0) { 
+				if ((buf[3] & 0xFF) == 0xE0) { 
 					size_t pos = buf.find('\xfd');
 					if (pos != std::string::npos) {
 						if (progStatus.serialtrace) {
@@ -812,7 +813,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 				}
 
 				// test for icom echo
-				if (buf[3] & 0xFF == 0xE0) { 
+				if ((buf[3] & 0xFF) == 0xE0) { 
 					size_t pos = buf.find('\xfd');
 					if (pos != std::string::npos) {
 						hex = check_hex(buf.c_str(), buf.length());

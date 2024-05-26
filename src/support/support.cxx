@@ -3589,7 +3589,6 @@ void doPTT(int on)
 	PTT = on;
 	rigPTT(on);
 	btnPTT->value(on);
-
 	MilliSleep(progStatus.serial_post_write_delay);
 	for (int n = 0; n < 100; n++) {
 		if (on == chkptt()) break;

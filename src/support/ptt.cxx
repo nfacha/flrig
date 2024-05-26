@@ -84,8 +84,8 @@ void rigPTT(bool on)
 		return;
 
 	if (progStatus.serial_catptt == PTT_BOTH || progStatus.serial_catptt == PTT_SET)		selrig->set_PTT_control(on);
-	else if (progStatus.serial_dtrptt == PTT_BOTH || progStatus.serial_dtrptt == PTT_SET)	RigSerial->SetPTT(on);
-	else if (progStatus.serial_rtsptt == PTT_BOTH || progStatus.serial_rtsptt == PTT_SET)	RigSerial->SetPTT(on);
+	else if (progStatus.serial_dtrptt == PTT_BOTH || progStatus.serial_dtrptt == PTT_SET)	{ RigSerial->SetPTT(on); selrig->set_PTT_control(on); }
+	else if (progStatus.serial_rtsptt == PTT_BOTH || progStatus.serial_rtsptt == PTT_SET)	{ RigSerial->SetPTT(on); selrig->set_PTT_control(on); }
 
 	else if (SepSerial->IsOpen() && 
 		(progStatus.sep_dtrptt == PTT_BOTH || progStatus.sep_dtrptt == PTT_SET))		SepSerial->SetPTT(on);
