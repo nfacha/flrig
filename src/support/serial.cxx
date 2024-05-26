@@ -406,8 +406,8 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	FD_ZERO (&rfds);
 	FD_SET (fd, &rfds);
 
-	bool     timedout = false,
-			 echo = false;
+	bool     timedout = false;
+
 	int      bytes = 0;
 	size_t   retval = 0,
 			 maxchars = nchars + bytes_written,
@@ -428,55 +428,82 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 			}
 		}
 
-		// test for icom echo
+// This block only for CI-V strings
 		if (buf.length() >= 4) {
+			// make sure we have the 0xfd for Icom
 			if ( ((buf[0] & 0xFF) == 0xFE) && 
-				 ((buf[1] & 0xFF) == 0xFE) &&
-				 ((buf[3] & 0xFF) == 0xE0) ) {
-				echo = true;
+				 ((buf[1] & 0xFF) == 0xFE)) {
+				// if our last char isn't 0xfd get some more
+				if (buf.back() != '\xfd') {
+					if (progStatus.serialtrace) {
+						hex = check_hex(buf.c_str(), buf.length());
+						double readtime = (zusec() - start) / 1000.0;
+						snprintf(traceinfo, sizeof(traceinfo), 
+							"Icom get more data [%0.2f msec] (%u): %s",
+							readtime, (unsigned int)buf.length(), 
+							(hex ? str2hex(buf.c_str(),buf.length()) : buf.c_str()));
+						ser_trace(2, "0:", traceinfo);
+					}
+					continue;
+				}
+
+// test for icom echo
+				if (buf[3] & 0xFF == 0xE0) { 
+					size_t pos = buf.find('\xfd');
+					if (pos != std::string::npos) {
+						if (progStatus.serialtrace) {
+							hex = check_hex(buf.c_str(), buf.length());
+							double readtime = (zusec() - start) / 1000.0;
+							snprintf(traceinfo, sizeof(traceinfo), 
+								"ReadEcho [%0.2f msec] (%u): %s",
+								readtime, (unsigned int)buf.length(), 
+								(hex ? str2hex(buf.c_str(),buf.length()) : buf.c_str()));
+							ser_trace(2, "1:", traceinfo);
+						}
+						buf = buf.substr(pos + 1);
+					}
+				}
 			}
 		}
+// end ICOM CI-V parsing
 
-		if (buf.length() >= (echo ? maxchars : (size_t)nchars)) break;
+		if ( buf.length() >= (size_t)nchars) break;
 
 		if ( !find1.empty() && 
-			( buf.find(find1) != std::string::npos ) &&
-			( buf.find(find1) == (buf.length() - find1.length()) ) ) break;
+			(buf.find(find1) != std::string::npos) &&
+			(buf.find(find1) == (buf.length() - find1.length()) ) ) break;
 
-		if ( !find2.empty() && 
+		// This covers the Icom case of either 0xFA or 0xFD
+        if ( !find2.empty() &&
 			( buf.find(find2) != std::string::npos ) &&
-			( buf.find(find2) == (buf.length() - find2.length())) ) break;
+			(buf.find(find2) == (buf.length() - find2.length()) ) ) break;
 
 		MilliSleep(1);
 	}
 
-	if (echo)
-		buf = buf.substr(bytes_written);
-	if (buf.length() > (size_t)nchars) buf.erase(nchars);
-
 	size_t readtime = zusec() - start;
-
-	memset(traceinfo, 0, sizeof(traceinfo));
-	hex = check_hex(buf.c_str(), buf.length());
-
-	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer1 [%f msec]: %s",
-		readtime / 1000.0,
-		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
-
-	LOG_DEBUG("%s", traceinfo);
-	if (progStatus.serialtrace)
-		ser_trace(1, traceinfo);
 
 	if (timedout) {
 		memset(traceinfo, 0, sizeof(traceinfo));
 		snprintf(traceinfo, sizeof(traceinfo), 
-			"ReadBuffer2 FAILED [%f msec] wanted %d chars, read %lu chars",
+			"ReadBuffer FAILED [%f msec] wanted %d chars, read %lu chars",
 			(zusec() - start) / 1000.0,
 			nchars,
 			buf.length());
 		LOG_ERROR("%s", traceinfo);
 
+		if (progStatus.serialtrace)
+			ser_trace(1, traceinfo);
+	} else {
+		memset(traceinfo, 0, sizeof(traceinfo));
+		hex = check_hex(buf.c_str(), buf.length());
+
+		snprintf(traceinfo, sizeof(traceinfo), 
+			"ReadBuffer [%f msec]: %s",
+			readtime / 1000.0,
+			(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
+
+		LOG_DEBUG("%s", traceinfo);
 		if (progStatus.serialtrace)
 			ser_trace(1, traceinfo);
 	}
@@ -747,88 +774,104 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		if (p != std::string::npos) s2.replace(p,1,"<lf>");
 	}
 
-//	bool  find_two = (!find1.empty() && !find2.empty());
-//	bool  find_one = (!find1.empty() && find2.empty());
-
-//	if (find_two)
-//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer: %s  |  %s", s1.c_str(), s2.c_str());
-//	else if (find_one)
-//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer XXX: %s", s1.c_str());
-//	else
-//		snprintf(traceinfo, sizeof(traceinfo), "ReadBuffer: %d chars", nchars);
-
-//	LOG_DEBUG("%s", traceinfo);
-//	if (progStatus.serialtrace)
-//		ser_trace(1, traceinfo);
-
 	memset(traceinfo, 0, sizeof(traceinfo));
 
 	long unsigned int thisread = 0;
 	size_t maxchars = nchars + nBytesWritten;
 	double start = zusec();
+	int nread = 0;
 
-	bool echo = false;
 	bool retval = false;
 
-	std::string sbuf;
-	sbuf.clear();
+	buf.clear();
 
 	while ( (zusec() - start) < (progStatus.serial_timeout * 1000.0) ) {
 		memset(uctemp, 0, sizeof(uctemp));
 		if ( (retval = ReadFile (hComm, uctemp, maxchars, &thisread, NULL)) ) {
 			for (size_t n = 0; n < thisread && n < sizeof(uctemp); n++) {
-				sbuf += uctemp[n];
+				buf += uctemp[n];
+				++nread;
 			}
 		}
-		// test for icom echo
-		if ((sbuf.length() >= (size_t)nchars) && ((sbuf[3] & 0xFF) == 0xE0))
-			echo = true;
+		// This block only for CI-V strings
+		if (buf.length() >= 4) {
+			// make sure we have the 0xfd for Icom
+			if ( ((buf[0] & 0xFF) == 0xFE) && 
+				 ((buf[1] & 0xFF) == 0xFE)) {
+				// if our last char isn't 0xfd get some more
+				if (buf.back() != '\xfd') {
+					hex = check_hex(buf.c_str(), buf.length());
+					double readtime = (zusec() - start) / 1000.0;
+					snprintf(traceinfo, sizeof(traceinfo), 
+						"Icom get more data [%0.2f msec] (%u): %s",
+						readtime, (unsigned int)buf.length(), 
+						(hex ? str2hex(buf.c_str(),buf.length()) : buf.c_str()));
+					if (progStatus.serialtrace)
+						ser_trace(2, "0:", traceinfo);
+					continue;
+				}
 
-		if ( sbuf.length() >= (echo ? maxchars : (size_t)nchars) ) break;
+				// test for icom echo
+				if (buf[3] & 0xFF == 0xE0) { 
+					size_t pos = buf.find('\xfd');
+					if (pos != std::string::npos) {
+						hex = check_hex(buf.c_str(), buf.length());
+						double readtime = (zusec() - start) / 1000.0;
+						snprintf(traceinfo, sizeof(traceinfo), 
+							"ReadEcho [%0.2f msec] (%u): %s",
+							readtime, (unsigned int)buf.length(), 
+							(hex ? str2hex(buf.c_str(),buf.length()) : buf.c_str()));
+						if (progStatus.serialtrace)
+							ser_trace(2, "1:", traceinfo);
+						buf = buf.substr(pos + 1);
+					}
+					nread = buf.length();
+				}
+			}
+		}
+// end ICOM CI-V parsing
+
+		if ( buf.length() >= (size_t)nchars) break;
 
 		if ( !find1.empty() && 
-			(sbuf.find(find1) != std::string::npos) &&
-			(sbuf.find(find1) == (sbuf.length() - find1.length()) ) ) break;
+			(buf.find(find1) != std::string::npos) &&
+			(buf.find(find1) == (buf.length() - find1.length()) ) ) break;
 
 		// This covers the Icom case of either 0xFA or 0xFD
         if ( !find2.empty() &&
-			( sbuf.find(find2) != std::string::npos ) &&
-			(sbuf.find(find2) == (sbuf.length() - find2.length()) ) ) break;
+			( buf.find(find2) != std::string::npos ) &&
+			(buf.find(find2) == (buf.length() - find2.length()) ) ) break;
 
 		if (!thisread || !retval) MilliSleep(1);
 	}
 
-	hex = check_hex(sbuf.c_str(), sbuf.length());
+	hex = check_hex(buf.c_str(), buf.length());
 	double readtime = (zusec() - start) / 1000.0;
 	snprintf(traceinfo, sizeof(traceinfo), 
 		"ReadBuffer3 [%0.2f msec] (%u): %s",
-		readtime, (unsigned int)sbuf.length(), 
-		(hex ? str2hex(sbuf.c_str(),sbuf.length()) : sbuf.c_str()));
+		readtime, (unsigned int)buf.length(), 
+		(hex ? str2hex(buf.c_str(),buf.length()) : buf.c_str()));
 
 	if (progStatus.serialtrace)
 		ser_trace(2, "1:", traceinfo);
 
-	if (echo)
-		sbuf = sbuf.substr(nBytesWritten);
-	if (sbuf.length() > (size_t)nchars) sbuf.erase(nchars);
 
-	buf = sbuf;
-	int nread = (int)buf.length();
+#if 0
+	snprintf(traceinfo, sizeof(traceinfo), 
+	"ReadBuffer [%0.2f msec] (%d): %s",
+		readtime, nread, 
+		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
 
-//	snprintf(traceinfo, sizeof(traceinfo), 
-//		"ReadBuffer [%0.2f msec] (%d): %s",
-//		readtime, nread, 
-//		(hex ? str2hex(buf.c_str(), buf.length()) : buf.c_str()));
-
-//	LOG_DEBUG("%s", traceinfo);
-//	if (progStatus.serialtrace)
-//		ser_trace(1, traceinfo);
+	LOG_DEBUG("%s", traceinfo);
+	if (progStatus.serialtrace)
+		ser_trace(1, traceinfo);
+#endif
 
 	if (nread >= nchars) return nread;
 
 	snprintf(traceinfo, sizeof(traceinfo), 
-		"ReadBuffer4 FAILED [%0.2f msec], read %d bytes",
-		readtime, nread);
+		"ReadBuffer4 FAILED [%0.2f msec], read %d bytes, expected %d bytes",
+		readtime, nread, nchars);
 	LOG_ERROR("%s", traceinfo);
 
 	if (progStatus.serialtrace)

@@ -252,6 +252,7 @@ private:
 	unsigned char uctemp[4096];
 
 	int		failed_;
+
 };
 
 #endif // __WIN32__
