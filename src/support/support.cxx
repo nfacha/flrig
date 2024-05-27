@@ -2732,7 +2732,7 @@ void cb_selectA()
 
 	guard_lock serial_lock(&mutex_serial, "cb_selectA()");
 	selrig->selectA();
-	xml_trace(3, "cb_selectA() ", printXCVR_STATE(vfoA).c_str());
+	xml_trace(2, "cb_selectA() ", printXCVR_STATE(vfoA).c_str());
 
 	return;
 }
@@ -2744,7 +2744,7 @@ void cb_selectB()
 
 	guard_lock serial_lock(&mutex_serial, "cb_selectB()");
 	selrig->selectB();
-	xml_trace(3, "cb_selectB() ", printXCVR_STATE(vfoB).c_str());
+	xml_trace(2, "cb_selectB() ", printXCVR_STATE(vfoB).c_str());
 
 	return;
 }
