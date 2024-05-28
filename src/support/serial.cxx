@@ -411,7 +411,6 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 
 	int      bytes = 0;
 	size_t   retval = 0,
-			 maxchars = nchars + bytes_written,
 			 start = 0;
 
 	buf.clear();
