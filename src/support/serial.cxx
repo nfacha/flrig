@@ -435,7 +435,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 			if ( ((buf[0] & 0xFF) == 0xFE) && 
 				 ((buf[1] & 0xFF) == 0xFE)) {
 				// if our last char isn't 0xfd get some more
-				if (buf.back() != '\xfd') {
+				if (buf[buf.length() - 1] != '\xfd') {
 					if (progStatus.serialtrace) {
 						hex = check_hex(buf.c_str(), buf.length());
 						double readtime = (zusec() - start) / 1000.0;
@@ -804,7 +804,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 			if ( ((buf[0] & 0xFF) == 0xFE) && 
 				 ((buf[1] & 0xFF) == 0xFE)) {
 				// if our last char isn't 0xfd get some more
-				if (buf.back() != '\xfd') {
+				if (buf[buf.length() - 1] != '\xfd') {
 					hex = check_hex(buf.c_str(), buf.length());
 					double readtime = (zusec() - start) / 1000.0;
 					snprintf(traceinfo, sizeof(traceinfo), 
