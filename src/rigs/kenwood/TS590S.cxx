@@ -1305,6 +1305,62 @@ void RIG_TS590S::set_PTT_control(int val)
 	sendCommand(cmd, 0);
 }
 
+// Read SWR and ALC
+static bool read_alc = false;
+static int alc_val = 0;
+
+int RIG_TS590S::get_swr(void)
+{
+	int mtr = 0;
+
+	read_alc = false;
+
+	cmd = "RM;";
+	if (wait_char(';', 24, 100, "get swr/alc", ASC) < 24) return 0;
+
+	size_t p = replystr.find("RM3");
+	if (p != std::string::npos) {
+		replystr[p + 7] = 0;
+		alc_val = atoi(&replystr[p + 3]);
+		alc_val *= 100;
+		alc_val /= 15;
+		if (alc_val > 100) alc_val = 100;
+		read_alc = true;
+	}
+
+	p = replystr.find("RM1");
+	if (p == std::string::npos) return 0;
+
+	replystr[p + 7] = 0;
+	mtr = atoi(&replystr[p + 3]);
+	mtr *= 50;
+	mtr /= 15;
+	if (mtr > 100) mtr = 100;
+
+	return mtr;
+}
+
+// Read ALC
+int RIG_TS590S::get_alc(void)
+{
+	if (read_alc) {
+		read_alc = false;
+		return alc_val;
+	}
+	cmd = "RM;";
+	if (wait_char(';', 24, 100, "get alc", ASC) < 24) return 0;
+
+	size_t p = replystr.find("RM3");
+	if (p == std::string::npos) return 0;
+
+	replystr[p + 7] = 0;
+	alc_val = atoi(&replystr[p + 3]);
+	alc_val *= 100;
+	alc_val /= 15;
+	if (alc_val > 100) alc_val = 100;
+	return alc_val;
+}
+
 /*
 void RIG_TS590S::selectA()
 {
@@ -1473,60 +1529,6 @@ void RIG_TS590S::tune_rig()
 {
 	cmd = "AC111;";
 	sendCommand(cmd, 0);
-}
-
-static bool read_alc = false;
-static int alc_val = 0;
-
-int RIG_TS590S::get_swr(void)
-{
-	int mtr = 0;
-
-	read_alc = false;
-
-	cmd = "RM;";
-	if (wait_char(';', 8, 100, "get swr/alc", ASC) < 8) return 0;
-
-	size_t p = replystr.find("RM3");
-	if (p != std::string::npos) {
-		replystr[p + 7] = 0;
-		alc_val = atoi(&replystr[p + 3]);
-		alc_val *= 100;
-		alc_val /= 15;
-		if (alc_val > 100) alc_val = 100;
-		read_alc = true;
-	}
-
-	p = replystr.find("RM1");
-	if (p == std::string::npos) return 0;
-
-	replystr[p + 7] = 0;
-	mtr = atoi(&replystr[p + 3]);
-	mtr *= 50;
-	mtr /= 15;
-	if (mtr > 100) mtr = 100;
-
-	return mtr;
-}
-
-int RIG_TS590S::get_alc(void)
-{
-	if (read_alc) {
-		read_alc = false;
-		return alc_val;
-	}
-	cmd = "RM;";
-	if (wait_char(';', 8, 100, "get alc", ASC) < 8) return 0;
-
-	size_t p = replystr.find("RM3");
-	if (p == std::string::npos) return 0;
-
-	replystr[p + 7] = 0;
-	alc_val = atoi(&replystr[p + 3]);
-	alc_val *= 100;
-	alc_val /= 15;
-	if (alc_val > 100) alc_val = 100;
-	return alc_val;
 }
 
 // val 0 .. 100

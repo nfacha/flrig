@@ -75,8 +75,8 @@ enum TS590SMODES { LSB, USB, CW, FM, AM, FSK, CWR, FSKR, LSBD, USBD, FMD, AMD };
 	int  get_bwB();
 
 	int  get_smeter();
-//	int  get_swr();
-//	int  get_alc();
+	int  get_swr();
+	int  get_alc();
 	int  get_power_out();
 	double get_power_control();
 //	void set_volume_control(int val);
