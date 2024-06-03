@@ -200,6 +200,7 @@ Fl_Double_Window* Memory_Dialog() {
 			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color,
 			progStatus.memfontnbr, progStatus.memfontsize, header_color, label_color);
 		header->add(hdrline);
+		header->callback( (Fl_Callback*)cb_header);
 
 		FreqSelect = new Fl_Browser2(66, 24, 532, 131);
 		FreqSelect->tooltip(
