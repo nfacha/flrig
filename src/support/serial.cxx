@@ -872,7 +872,8 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		ser_trace(1, traceinfo);
 #endif
 
-	if (nread >= nchars) return nread;
+	if ( ( nread >= nchars ) || ( !hex && (strchr(buf.c_str(),';') != NULL ) ) )
+		return nread;
 
 	snprintf(traceinfo, sizeof(traceinfo), 
 		"ReadBuffer4 FAILED [%0.2f msec], read %d bytes, expected %d bytes",
