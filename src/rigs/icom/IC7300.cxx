@@ -149,11 +149,11 @@ static std::vector<std::string>IC7300_bk_labels;
 static const char *vIC7300_bk_labels[] = {"BK-IN", "SEMI", "FULL"};
 
 // use generic
-//static std::vector<std::string>IC7300_an_labels;
-//static const char *vIC7300_an_labels[] = {"AN off", "AN on"};
+static std::vector<std::string>IC7300_an_labels;
+static const char *vIC7300_an_labels[] = {"AN", "AN on"};
 
 static std::vector<std::string>IC7300_nb_labels;
-static const char *vIC7300_nb_labels[] = {"NB", "on"};
+static const char *vIC7300_nb_labels[] = {"NB", "NB on"};
 
 static GUI IC7300_widgets[]= {
 	{ btnVol,        2, 125,  50 },	//0
@@ -197,8 +197,8 @@ void RIG_IC7300::initialize()
 	VECTOR (IC7300_nb_labels, vIC7300_nb_labels);
 	nb_labels_  = IC7300_nb_labels;
 
-//	VECTOR (IC7300_an_labels, vIC7300_an_labels);
-//	an_labels_  = IC7300_an_labels;
+	VECTOR (IC7300_an_labels, vIC7300_an_labels);
+	an_labels_  = IC7300_an_labels;
 
 	name_ = IC7300name_;
 	modes_ = IC7300modes_;
@@ -2040,6 +2040,7 @@ void RIG_IC7300::set_nb_level(int val)
 	cmd.append("\x14\x12");
 	cmd.append(bcd255(val));
 	cmd.append( post );
+	noise_blanker_label( val ? "NB on" : "NB", val);
 	set_trace(1, "set nb level");
 	waitFB("set NB level");
 	seth();
@@ -2077,6 +2078,7 @@ void RIG_IC7300::set_noise_reduction(int val)
 	set_trace(1, "set noise reduction");
 	waitFB("set NR");
 	seth();
+	noise_reduction_label( "NR", val);
 }
 
 int RIG_IC7300::get_noise_reduction()
