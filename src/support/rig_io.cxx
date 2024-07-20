@@ -298,7 +298,7 @@ bool waitCommand(
 		}
 	}
 
-	int tod_start = zmsec();
+	ullint tod_start = zmsec();
 
 // minimimum time to wait for a response
 	int timeout = (int)((nread * 2)*11000.0/RigSerial->Baud()

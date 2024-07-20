@@ -46,14 +46,14 @@
 #include "tod_clock.h"
 #include "timeops.h"
 
-size_t zmsec()
+ullint zmsec()
 {
 	static struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
 }
 
-size_t zusec()
+ullint zusec()
 {
 	static struct timeval tv;
 	gettimeofday(&tv, NULL);

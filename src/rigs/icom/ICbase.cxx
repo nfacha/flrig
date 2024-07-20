@@ -107,7 +107,7 @@ void RIG_ICOM::ICtrace(std::string cmd, std::string hexstr)
 	rig_trace(2, cmd.c_str(), s1.c_str());
 }
 
-bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
+bool RIG_ICOM::waitFOR(size_t n, const char *sz, ullint timeout)
 {
 	static char sztemp[200];
 	memset(sztemp, 0, 200);
@@ -132,8 +132,8 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 		return replystr.length();
 	}
 
-	size_t tstart = 0;
-	size_t tout = 0;
+	ullint tstart = 0;
+	ullint tout = 0;
 	size_t pcheck = 0;
 	size_t peor = 0;
 
@@ -202,7 +202,7 @@ bool RIG_ICOM::waitFOR(size_t n, const char *sz, unsigned long timeout)
 // waitFB - This function sends the command in the 'cmd' member string (via 'waitFOR'),
 //          specifying the number of bytes in the expected resposne.  'waitFOR' already
 //          knows the construction of the response message so this seems superfluous.
-bool RIG_ICOM::waitFB(const char *sz, unsigned long timeout)
+bool RIG_ICOM::waitFB(const char *sz, ullint timeout)
 {
 #if SERIAL_DEBUG
 fprintf(serlog, "waitFB\n");

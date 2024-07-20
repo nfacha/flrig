@@ -22,8 +22,11 @@
 #ifndef TOD_H_
 #define TOD_H_
 
-extern size_t zmsec();
-extern size_t zusec();
+typedef unsigned long long int ullint;
+
+extern ullint zmsec();
+extern ullint zusec();
+
 extern char *ztime();
 
 #endif // TOD_H_

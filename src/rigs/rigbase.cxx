@@ -521,8 +521,8 @@ int rigbase::waitN(int n, int timeout, const char *sz, int pr)
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 	}
 
-	size_t tstart = zmsec();
-	size_t tout = tstart + progStatus.serial_timeout; // minimum of 100 msec
+	ullint tstart = zmsec();
+	ullint tout = tstart + progStatus.serial_timeout; // minimum of 100 msec
 	std::string tempstr;
 	int nret;
 
@@ -588,8 +588,8 @@ int rigbase::wait_char(int ch, int n, int timeout, const char *sz, int pr)
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 	}
 
-	size_t tstart = zmsec();
-	size_t tout = tstart + timeout;
+	ullint tstart = zmsec();
+	ullint tout = tstart + timeout;
 	std::string tempstr;
 	int nret;
 
@@ -660,8 +660,8 @@ int rigbase::wait_crlf(std::string cmd, std::string sz, int nr, int timeout, int
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 	}
 
-	size_t tstart = zmsec();
-	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
+	ullint tstart = zmsec();
+	ullint tout = zmsec() + timeout + progStatus.serial_timeout;
 	std::string tempstr;
 	int nret;
 
@@ -734,8 +734,8 @@ int rigbase::wait_string(std::string sz, int nr, int timeout, int pr)
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 	}
 
-	size_t tstart = zmsec();
-	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
+	ullint tstart = zmsec();
+	ullint tout = zmsec() + timeout + progStatus.serial_timeout;
 	std::string tempstr;
 	int nret;
 
@@ -803,8 +803,9 @@ int rigbase::waitfor(int nr, int timeout, int pr)
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
 	}
 
-	size_t tstart = zmsec();
-	size_t tout = zmsec() + timeout + progStatus.serial_timeout;
+	ullint tstart = zmsec();
+	ullint tout = zmsec() + timeout + progStatus.serial_timeout;
+
 	std::string tempstr;
 	int nret;
 

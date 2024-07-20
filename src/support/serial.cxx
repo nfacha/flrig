@@ -410,14 +410,15 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 	bool     timedout = false;
 
 	int      bytes = 0;
-	size_t   retval = 0,
-			 start = 0;
+	ullint   retval = 0,
+			 start = 0,
+			 tout = progStatus.serial_timeout * 1000;
 
 	buf.clear();
 
 	start = zusec();
 
-	while ( (zusec() - start) < (progStatus.serial_timeout * 1000.0) ) {
+	while ( (zusec() - start) < tout ) {
 		memset(uctemp, 0, sizeof(uctemp));
 		ioctl( fd, FIONREAD, &bytes);
 		if (bytes) {
@@ -481,7 +482,7 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 		MilliSleep(1);
 	}
 
-	size_t readtime = zusec() - start;
+	ullint readtime = zusec() - start;
 
 	if (timedout) {
 		memset(traceinfo, 0, sizeof(traceinfo));
@@ -778,14 +779,18 @@ int  Cserial::ReadBuffer (std::string &buf, int nchars, std::string find1, std::
 
 	long unsigned int thisread = 0;
 	size_t maxchars = nchars + nBytesWritten;
-	double start = zusec();
+	ullint start = 0;
+	ullint tout = progStatus.serial_timeout * 1000;
+
 	int nread = 0;
 
 	bool retval = false;
 
 	buf.clear();
 
-	while ( (zusec() - start) < (progStatus.serial_timeout * 1000.0) ) {
+	start = zusec();
+
+	while ( (zusec() - start) < tout ) {
 		memset(uctemp, 0, sizeof(uctemp));
 		if ( (retval = ReadFile (hComm, uctemp, maxchars, &thisread, NULL)) ) {
 			for (size_t n = 0; n < thisread && n < sizeof(uctemp); n++) {
