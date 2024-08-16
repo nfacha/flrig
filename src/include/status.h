@@ -143,6 +143,8 @@ struct status {
 
 	bool	spkr_on;
 	int		volume;
+	int		volume_A;
+	int		volume_B;
 	double	power_level;
 	double	power_limit;
 	bool	enable_power_limit;
@@ -151,6 +153,10 @@ struct status {
 	int		notch_val;
 	bool	shift;
 	int		shift_val;
+	bool	shift_A;
+	int		shift_val_A;
+	bool	shift_B;
+	int		shift_val_B;
 	bool	pbt_lock;
 	int		pbt_inner;
 	int		pbt_outer;

@@ -156,6 +156,8 @@ status progStatus = {
 
 	false,		// bool spkr_on;
 	20,			// int  volume;
+	20,			// int  volume_A;
+	20,			// int  volume_B;
 	0,			// double  power_level;
 	100,		// double power_limit;
 	false,		// bool enable_power_limit
@@ -164,6 +166,10 @@ status progStatus = {
 	0,			// int  notch_val;
 	false,		// bool shift;
 	0,			// int  shift_val;
+	false,		// bool shift_A;
+	0,			// int  shift_val_A;
+	false,		// bool shift_B;
+	0,			// int  shift_val_B;
 	0,			// bool pbt_lock;
 	0,			// int  pbt_inner;
 	0,			// int  pbt_outer;
@@ -1012,6 +1018,8 @@ void status::saveLastState()
 
 	spref.set("bool_spkr_on", spkr_on);
 	spref.set("int_volume", volume);
+	spref.set("int_volume_A", volume_A);
+	spref.set("int_volume_B", volume_B);
 	spref.set("dbl_power", power_level);
 	spref.set("power_limit", power_limit);
 	spref.set("enable_power_limit", enable_power_limit);
@@ -1020,6 +1028,10 @@ void status::saveLastState()
 	spref.set("int_notch", notch_val);
 	spref.set("bool_shift", shift);
 	spref.set("int_shift", shift_val);
+	spref.set("bool_shift_A", shift_A);
+	spref.set("int_shift_A", shift_val_A);
+	spref.set("bool_shift_B", shift_B);
+	spref.set("int_shift_b", shift_val_B);
 
 	spref.set("pbt_lock", pbt_lock);
 	spref.set("pbt_inner", pbt_inner);
@@ -1639,14 +1651,22 @@ bool status::loadXcvrState(std::string xcvr)
 
 		if (spref.get("bool_spkr_on", i, i)) spkr_on = i;
 		spref.get("int_volume", volume, volume);
+		spref.get("int_volume_A", volume_A, volume_A);
+		spref.get("int_volume_A", volume_B, volume_B);
+
 		spref.get("dbl_power", power_level, power_level);
 		spref.get("power_limit", power_limit, power_limit);
 		if (spref.get("enable_power_limit", i, i)) enable_power_limit = i;
 		spref.get("int_mic", mic_gain, mic_gain);
 		if (spref.get("bool_notch", i, i)) notch = i;
 		spref.get("int_notch", notch_val, notch_val);
+
 		if (spref.get("bool_shift", i, i)) shift = i;
 		spref.get("int_shift", shift_val, shift_val);
+		if (spref.get("bool_shift_A", i, i)) shift_A = i;
+		spref.get("int_shift_A", shift_val_A, shift_val_A);
+		if (spref.get("bool_shift_B", i, i)) shift_B = i;
+		spref.get("int_shift_B", shift_val_B, shift_val_B);
 
 		if (spref.get("pbt_lock", i, pbt_lock)) pbt_lock = i;
 		if (spref.get("pbt_inner", i, pbt_inner)) pbt_inner = i;

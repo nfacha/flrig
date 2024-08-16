@@ -142,20 +142,17 @@ int  RIG_K4::adjust_bandwidth(int m)
 
 int  RIG_K4::def_bandwidth(int m)
 {
-/*
-std::cout << vK4modes_[0] << ":" << mode_bwA[0] << ":" << mode_bwB[0] << ", " <<
-			 vK4modes_[1] << ":" << mode_bwA[1] << ":" << mode_bwB[1] << ", " <<
-			 vK4modes_[2] << ":" << mode_bwA[2] << ":" << mode_bwB[2] << ", " <<
-			 vK4modes_[3] << ":" << mode_bwA[3] << ":" << mode_bwB[3] << ", " <<
-			 vK4modes_[4] << ":" << mode_bwA[4] << ":" << mode_bwB[4] << ", " <<
-			 vK4modes_[5] << ":" << mode_bwA[5] << ":" << mode_bwB[5] << ", " <<
-			 vK4modes_[6] << ":" << mode_bwA[6] << ":" << mode_bwB[6] << ", " <<
-			 vK4modes_[7] << ":" << mode_bwA[7] << ":" << mode_bwB[7] << std::endl;
-*/
+	int width = -1;
 	if (m < 0 || m > 7) return 0;
-	int width = (inuse == onA ? mode_bwA[m] : mode_bwB[m]);
-	if (width == -1)
-		return mode_def_bw[m];
+	if (inuse == onA) {
+		width = mode_bwA[m];
+		if (width == -1) width = mode_def_bw[m];
+		mode_bwA[m] = width;
+	} else {
+		width = mode_bwA[m];
+		if (width == -1) width = mode_def_bw[m];
+		mode_bwB[m] = width;
+	}
 	return width;
 }
 
@@ -204,11 +201,6 @@ void RIG_K4::initialize()
 	set_trace(1, "set K4 advanced mode");
 	sendCommand(cmd);
 	sett("");
-
-//	cmd = "SWT49;"; // Fine tuning (1 Hz mode)
-//	set_trace(1, "set 1 Hz fine tuning");
-//	sendCommand(cmd);
-//	sett("");
 
 	cmd = "OM;"; // request options to get power level
 	get_trace(1, "get options");
@@ -614,8 +606,8 @@ void K4_return(int val)
 
 int RIG_K4::next_attenuator()
 {
-		if (atten_state < 7) atten_state++;
-		else atten_state = 0;
+	if (atten_state < 7) atten_state++;
+	else atten_state = 0;
 
 	return atten_state;
 }

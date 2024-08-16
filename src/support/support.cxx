@@ -880,7 +880,11 @@ void read_volume()
 	}
 	if (vol != progStatus.volume) {
 		if (vol <= 1 && !btnVol->value()) return;
-		progStatus.volume = vol;
+		if (xcvr_name == rig_K4.name_) {
+			if (selrig->isOnA()) progStatus.volume_A = vol;
+			else progStatus.volume_B = vol;
+		} else
+			progStatus.volume = vol;
 		if (vol <= 1 && btnVol->value())
 			Fl::awake(update_volume, (void*)&nlzero);
 		else
@@ -3292,12 +3296,16 @@ void setVolume() // UI call
 	int set;
 	if (spnrVOLUME) set = spnrVOLUME->value();
 	else set = sldrVOLUME->value();
-	progStatus.volume = set;
+	if (xcvr_name == rig_K4.name_) {
+		if (selrig->isOnA()) progStatus.volume_A = set;
+		else progStatus.volume_B = set;
+	} else
+		progStatus.volume = set;
 
 	if (btnVol->value() == 0) return;
 
 	guard_lock serial_lock(&mutex_serial, "27");
-	selrig->set_volume_control(progStatus.volume);
+	selrig->set_volume_control(set);
 }
 
 void setVolumeControl(void* d) // called by xml_server
