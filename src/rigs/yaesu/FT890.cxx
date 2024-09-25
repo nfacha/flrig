@@ -22,10 +22,12 @@
 
 const char FT890name_[] = "FT-890";
 
+enum {FT_LSB, FT_USB, FT_CWW, FT_CWN, FT_AMW, FT_AMN, FT_FM};
+
 static std::vector<std::string>FT890modes_;
 static const char *vFT890modes_[] = {
-		"LSB", "USB", "CW", "CW-N", "AM", "AM-N", "FM", "FM-N"};
-static const int FT890_mode_val[] =  { 0, 1, 2, 3, 4, 5, 6, 7 };
+		"LSB", "USB", "CW-W", "CW-N", "AM-W", "AM-N", "FM" };
+static const int FT890_mode_val[] =  { 0, 1, 2, 3, 4, 5, 6 };
 
 static const char FT890_mode_type[] = { 'L', 'U', 'U', 'U', 'U' };
 
@@ -247,11 +249,23 @@ bool RIG_FT890::get_info()
 				   (replystr[3] & 0xFF) ) );
 
 		switch (replystr[6] & 0x07) {
-			case 0: A.imode = ((replystr[6] & 0x40) == 0x40) ? 1 : 0; break;
-			case 1: A.imode = ((replystr[6] & 0x40) == 0x40) ? 3 : 2; break;
-			case 2: A.imode = ((replystr[6] & 0x80) == 0x80) ? 5 : 4; break;
-			case 3: A.imode = ((replystr[6] & 0x80) == 0x80) ? 7 : 6; break;
+			case 0: A.imode = FT_LSB; break;
+			case 1: A.imode = FT_USB; break;
+			case 2: A.imode = FT_CWW; break;
+			case 3: A.imode = FT_AMW; break;
+			case 4: A.imode = FT_FM; break;
 			default: A.imode = 0;
+		}
+
+// After the base mode has been determined, we need to check for the narrow filters.
+// We need to verify the base mode, as the narrow mode bits remain on until changed.
+
+		if (((replystr[8] & 0x80) == 0x80) && (A.imode == FT_CWW)) {
+			A.imode = FT_CWN;
+		}
+
+		if (((replystr[8] & 0x40) == 0x40) && (A.imode == FT_AMW)) {
+			A.imode = FT_AMN;
 		}
 
 std::cout << "Info: " << str2hex(replystr.c_str(), replystr.length()) << std::endl;
@@ -264,11 +278,23 @@ std::cout << "   A: " << A.freq << ", " << vFT890modes_[A.imode] << std::endl;
 				   (replystr[12] & 0xFF) ) );
 
 		switch (replystr[15] & 0x07) {
-			case 0: B.imode = ((replystr[15] & 0x40) == 0x40) ? 1 : 0; break;
-			case 1: B.imode = ((replystr[15] & 0x40) == 0x40) ? 3 : 2; break;
-			case 2: B.imode = ((replystr[15] & 0x80) == 0x80) ? 5 : 4; break;
-			case 3: B.imode = ((replystr[15] & 0x80) == 0x80) ? 7 : 6; break;
+			case 0: B.imode = FT_LSB; break;
+			case 1: B.imode = FT_USB; break;
+			case 2: B.imode = FT_CWW; break;
+			case 3: B.imode = FT_AMW; break;
+			case 4: B.imode = FT_FM; break;
 			default: B.imode = 0;
+		}
+
+// After the base mode has been determined, we need to check for the narrow filters.
+// We need to verify the base mode, as the narrow mode bits remain on until changed.
+
+		if (((replystr[17] & 0x80) == 0x80) && (B.imode == FT_CWW)) {
+			B.imode = FT_CWN;
+		}
+
+		if (((replystr[17] & 0x40) == 0x40) && (B.imode == FT_AMW)) {
+			B.imode = FT_AMN;
 		}
 
 std::cout << "   B: " << B.freq << ", " << vFT890modes_[B.imode] << std::endl;
@@ -319,7 +345,6 @@ unsigned long long RIG_FT890::get_vfoA ()
 void RIG_FT890::set_vfoA (unsigned long long freq)
 {
 	A.freq = freq;
-
 	freq /=10; // 890 does not support 1 Hz resolution
 	cmd = to_bcd_be(freq, 8);
 	cmd += 0x0A;
@@ -352,7 +377,7 @@ void RIG_FT890::set_vfoB(unsigned long long freq)
 	B.freq = freq;
 	freq /=10; // 890 does not support 1 Hz resolution
 	cmd = to_bcd_be(freq, 8);
-	cmd += 0x8A;
+	cmd += 0x0A; // Not 0x8A, as it is the same as vfo-a
 	sendCommand(cmd);
 	showresp(WARN, HEX, "set vfo B", cmd, replystr);
 }
@@ -361,7 +386,7 @@ void RIG_FT890::set_modeB(int val)
 {
 	B.imode = val;
 	init_cmd();
-	cmd[3] = FT890_mode_val[val] | 0x80;
+	cmd[3] = FT890_mode_val[val];
 	cmd[4] = 0x0C;
 	sendCommand(cmd);
 	showresp(WARN, HEX, "set mode B", cmd, replystr);
