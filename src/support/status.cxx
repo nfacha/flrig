@@ -677,7 +677,11 @@ status progStatus = {
 
 void status::saveScheme(std::string sch_name)
 {
+#if FLDIGI_FLTK_API_MINOR < 4
 	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
+#else
+	Fl_Preferences spref(std::string(RigHomeDir).append("flrig.prefs").c_str(), "w1hkj", sch_name.c_str(), (Fl_Preferences::Root)0);
+#endif
 
 	spref.set("ui_scheme", ui_scheme.c_str());
 
@@ -771,7 +775,11 @@ void status::saveScheme(std::string sch_name)
 
 void status::loadScheme(std::string sch_name)
 {
+#if FLDIGI_FLTK_API_MINOR < 4
 	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
+#else
+	Fl_Preferences spref(std::string(RigHomeDir).append("flrig.prefs").c_str(), "w1hkj", sch_name.c_str(), (Fl_Preferences::Root)0);
+#endif
 
 	if (spref.entryExists("ui_scheme")) {
 
