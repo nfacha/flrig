@@ -148,7 +148,7 @@ Fl_Double_Window* win_meters() {
 
 	mtr_IDD = new Fl_Box(2, sigbar_ALC->y() + sigbar_ALC->h() + 2, 206, 20);
 	mtr_IDD->box(FL_FLAT_BOX);
-	mtr_IDD->image(image_idd25);
+	mtr_IDD->image(image_idd5);
 	mtr_IDD->color(bgclr);
 	mtr_IDD->labelcolor(fgclr);
 
@@ -164,7 +164,7 @@ Fl_Double_Window* win_meters() {
 	sigbar_IDD->when(FL_WHEN_CHANGED);
 	sigbar_IDD->hide();
 	sigbar_IDD->minimum(0);
-	sigbar_IDD->maximum(25);
+	sigbar_IDD->maximum(5);
 	sigbar_IDD->color(fl_rgb_color (progStatus.iddRed, progStatus.iddGreen, progStatus.iddBlue), bgclr);
 	sigbar_IDD->PeakColor(fl_rgb_color(progStatus.idd_peak_red, progStatus.idd_peak_green, progStatus.idd_peak_blue));
 	sigbar_IDD->show();

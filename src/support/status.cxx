@@ -227,7 +227,8 @@ status progStatus = {
 	4,			// int rx_peak;
 	1,			// int pwr_avg;
 	4,			// int pwr_peak;
-	4,			// int pwr_scale ==> Autoselect
+	9,			// int pwr_scale ==> Autoselect
+	4,			// int idd_scale ==> Autoselect
 
 	1,			// bool sync_clock
 	1,			// bool sync_gmt

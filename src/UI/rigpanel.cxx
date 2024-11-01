@@ -417,6 +417,7 @@ static const char *mtr_scales[] = {
 "50 watt",
 "100 watt",
 "200 watt",
+"200 watt log",
 "Auto scaled"};
 
 void select_power_meter_scales() {

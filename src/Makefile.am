@@ -491,6 +491,7 @@ EXTRA_DIST = \
 	images/volts.xbm \
 	images/volts13.xbm \
 	images/volts50.xbm \
+	images/idd5.xbm \
 	images/idd25.xbm \
 	images/idd50.xbm \
 	cwio/cwioUI.fl \

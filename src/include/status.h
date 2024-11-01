@@ -215,6 +215,7 @@ struct status {
 	int		pwr_avg;
 	int		pwr_peak;
 	int		pwr_scale;
+	int		idd_scale;
 
 	bool	sync_clock;
 	bool	sync_gmt;

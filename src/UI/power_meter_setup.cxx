@@ -26,6 +26,7 @@ Fl_Button *sel_25 = (Fl_Button *)0;
 Fl_Button *sel_50 = (Fl_Button *)0;
 Fl_Button *sel_100 = (Fl_Button *)0;
 Fl_Button *sel_200 = (Fl_Button *)0;
+Fl_Button *sel_200log = (Fl_Button *)0;
 Fl_Button *sel_auto = (Fl_Button *)0;
 
 Fl_Output *pwr_scale_description=(Fl_Output *)0;
@@ -78,8 +79,14 @@ static void cb_sel_200(Fl_Button*, void*) {
 	set_power_controlImage(0);
 }
 
-static void cb_sel_auto(Fl_Button*, void*) {
+static void cb_sel_200log(Fl_Button*, void*) {
 	progStatus.pwr_scale = 8;
+	pwr_scale_description->value(mtr_scales[progStatus.pwr_scale]);
+	set_power_controlImage(0);
+}
+
+static void cb_sel_auto(Fl_Button*, void*) {
+	progStatus.pwr_scale = 9;
 	pwr_scale_description->value(mtr_scales[progStatus.pwr_scale]);
 	if (selrig->has_power_control)
 		set_power_controlImage(sldrPOWER->value());
@@ -93,7 +100,7 @@ static void cb_close_select(Fl_Button *b, void*) {
 }
 
 Fl_Double_Window* power_meter_scale_select() {
-	Fl_Double_Window* w = new Fl_Double_Window(455, 230, _("Select Power Meter Scale"));
+	Fl_Double_Window* w = new Fl_Double_Window(455, 270, _("Select Power Meter Scale"));
 
 	sel_5 = new Fl_Button(8, 5, 218, 40, _("5 watt"));
 	sel_5->tooltip(_("Press to select"));
@@ -159,18 +166,26 @@ Fl_Double_Window* power_meter_scale_select() {
 	sel_200->callback((Fl_Callback*)cb_sel_200);
 	sel_200->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
 
-	sel_auto = new Fl_Button(8, 185, 218, 40, _("Auto scaled"));
+	sel_200log = new Fl_Button(8, 185, 218, 40, _("200 watt log"));
+	sel_200log->tooltip(_("Press to select"));
+	sel_200log->color((Fl_Color)215);
+	sel_200log->image(image_p200log);
+	sel_200log->labelsize(12);
+	sel_200log->callback((Fl_Callback*)cb_sel_200log);
+	sel_200log->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
+
+	sel_auto = new Fl_Button(234, 185, 218, 40, _("Auto scaled"));
 	sel_auto->tooltip(_("Press to select"));
 	sel_auto->color((Fl_Color)215);
 	sel_auto->labelsize(12);
 	sel_auto->callback((Fl_Callback*)cb_sel_auto);
 	sel_auto->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
 
-	pwr_scale_description = new Fl_Output(234, 185, 131, 24, _("Selected Meter"));
+	pwr_scale_description = new Fl_Output(8, 230, 131, 24, _("Selected Meter"));
 	pwr_scale_description->align(Fl_Align(FL_ALIGN_BOTTOM));
 	pwr_scale_description->value(mtr_scales[progStatus.pwr_scale]);
 
-	Fl_Button *close_select = new Fl_Button(370, 185, 80, 24, _("Close"));
+	Fl_Button *close_select = new Fl_Button(234, 230, 80, 24, _("Close"));
 	close_select->callback((Fl_Callback*)cb_close_select);
 
 	w->end();

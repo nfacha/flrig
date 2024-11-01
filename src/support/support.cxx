@@ -1198,7 +1198,12 @@ void set_ptt(void *d)
 		    btnALC_IDD_SWR->image(meter_image == SWR_IMAGE ? image_swr : image_alc40db);
         }
         else {
-		    btnALC_IDD_SWR->image(meter_image == SWR_IMAGE ? image_swr : image_alc);
+			if (meter_image == IDD_IMAGE)  ;
+//				btnALC_IDD_SWR->image(image_idd));
+			else if (meter_image == ALC_IMAGE)
+				btnALC_IDD_SWR->image(image_alc);
+			else
+				btnALC_IDD_SWR->image(image_swr);
         }
 		btnALC_IDD_SWR->redraw();
 		btnALC_IDD_SWR->show();
@@ -3386,7 +3391,7 @@ static int img = -1;
 
 void set_power_controlImage(double pwr)
 {
-	if ((progStatus.pwr_scale == 8 && pwr <= 5.0) || (progStatus.pwr_scale == 0)) {
+	if ((progStatus.pwr_scale == 9 && pwr <= 5.0) || (progStatus.pwr_scale == 0)) {
 		if (img != 1) {
 			img = 1;
 			scalePower->image(image_p5);
@@ -3401,7 +3406,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 10.0) || (progStatus.pwr_scale == 1)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 10.0) || (progStatus.pwr_scale == 1)) {
 		if (img != 2) {
 			img = 2;
 			scalePower->image(image_p10);
@@ -3416,7 +3421,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 15.0) || (progStatus.pwr_scale == 2)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 15.0) || (progStatus.pwr_scale == 2)) {
 		if (img != 3) {
 			img = 3;
 			scalePower->image(image_p15);
@@ -3431,7 +3436,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 20.0) || (progStatus.pwr_scale == 3)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 20.0) || (progStatus.pwr_scale == 3)) {
 		if (img != 4) {
 			img = 4;
 			scalePower->image(image_p20);
@@ -3446,7 +3451,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 25.0) || (progStatus.pwr_scale == 4)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 25.0) || (progStatus.pwr_scale == 4)) {
 		if (img != 5) {
 			img = 5;
 			scalePower->image(image_p25);
@@ -3461,7 +3466,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 50.0) || (progStatus.pwr_scale == 5)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 50.0) || (progStatus.pwr_scale == 5)) {
 		if (img != 6) {
 			img = 6;
 			scalePower->image(image_p50);
@@ -3476,7 +3481,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr <= 100.0) || (progStatus.pwr_scale == 6)) {
+	else if ((progStatus.pwr_scale == 9 && pwr <= 100.0) || (progStatus.pwr_scale == 6)) {
 		if (img != 6) {
 			img = 6;
 			scalePower->image(image_p100);
@@ -3491,7 +3496,7 @@ void set_power_controlImage(double pwr)
 			sigbar_PWR->redraw();
 		}
 	}
-	else if ((progStatus.pwr_scale == 8 && pwr > 100.0) || (progStatus.pwr_scale == 7)) {
+	else if ((progStatus.pwr_scale == 9 && pwr > 100.0) || (progStatus.pwr_scale == 7)) {
 		if (img != 8) {
 			img = 8;
 			scalePower->image(image_p200);
@@ -3500,6 +3505,21 @@ void set_power_controlImage(double pwr)
 			scalePower->redraw();
 
 			mtr_PWR->image(image_p200);
+			mtr_PWR->redraw();
+			sigbar_PWR->maximum(200.0);
+			sigbar_PWR->minimum(0.0);
+			sigbar_PWR->redraw();
+		}
+	}
+	else if ((progStatus.pwr_scale == 9 && pwr > 100.0) || (progStatus.pwr_scale == 8)) {
+		if (img != 9) {
+			img = 9;
+			scalePower->image(image_p200log);
+			sldrFwdPwr->maximum(200.0);
+			sldrFwdPwr->minimum(0.0);
+			scalePower->redraw();
+
+			mtr_PWR->image(image_p200log);
 			mtr_PWR->redraw();
 			sigbar_PWR->maximum(200.0);
 			sigbar_PWR->minimum(0.0);
@@ -3744,16 +3764,55 @@ void setRFGAINControl(void* d)
 
 void updateIDD(void *)
 {
+	if (iddval <= 5.0) {
+		mtr_IDD->image(image_idd5);
+		sigbar_IDD->maximum(5);
+	} else if (iddval <= 25.0) {
+		mtr_IDD->image(image_idd25);
+		sigbar_IDD->maximum(25);
+	} else {
+		mtr_IDD->image(image_idd50);
+		sigbar_IDD->maximum(50);
+	}
+	mtr_IDD->redraw();
 	sigbar_IDD->value(iddval);
 	sigbar_IDD->redraw();
 
-	if (meter_image != IDD_IMAGE) return;
-	sldrRcvSignal->hide();
-	sldrSWR->hide();
-	sldrALC->hide();
-	sldrIDD->show();
-	sldrIDD->value(iddval);
-	sldrIDD->redraw();
+	if (meter_image == IDD_IMAGE) {
+		sldrRcvSignal->hide();
+		sldrSWR->hide();
+		sldrALC->hide();
+		btnALC_IDD_SWR->redraw_label();
+		btnALC_IDD_SWR->redraw();
+		sldrIDD->redraw();
+		sldrIDD->show();
+		if (iddval <= 5.0) {
+			btnALC_IDD_SWR->image(image_idd5);
+			sldrIDD->value(iddval);
+			sldrIDD->maximum(5);
+		} else if (iddval <= 25.0) {
+			btnALC_IDD_SWR->image(image_idd25);
+			sldrIDD->value(iddval);
+			sldrIDD->maximum(25);
+		} else {
+			btnALC_IDD_SWR->image(image_idd50);
+			sldrIDD->value(iddval);
+			sldrIDD->maximum(50);
+		}
+		sigbar_IDD->value(iddval);
+		sigbar_IDD->redraw();
+	}
+//	 else if (meter_image == SWR_IMAGE) {
+//		sldrRcvSignal->hide();
+//		sldrALC->hide();
+//		sldrIDD->hide();
+//		sldrSWR->show();
+//	} else {
+//		sldrRcvSignal->hide();
+//		sldrSWR->hide();
+//		sldrIDD->hide();
+//		sldrALC->show();
+//	}
 }
 
 void updateALC(void *)
