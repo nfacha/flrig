@@ -1348,6 +1348,9 @@ void serviceQUE()
 				if (selrig->name_ == rig_FTdx10.name_) {
 					FTdx10_UpdateA(&vfoA);
 				}
+				if (selrig->name_ == rig_FT2000.name_) {
+					progStatus.rfgain = selrig->get_rf_gain();
+				}
 				rig_trace(2, "case sA ", printXCVR_STATE(vfoA).c_str());
 				Fl::awake(updateUI);
 			}
@@ -1362,6 +1365,9 @@ void serviceQUE()
 				}
 				if (selrig->name_ == rig_FTdx10.name_) {
 					FTdx10_UpdateB(&vfoB);
+				}
+				if (selrig->name_ == rig_FT2000.name_) {
+					progStatus.rfgain = selrig->get_rf_gain();
 				}
 				rig_trace(2, "case sB ", printXCVR_STATE(vfoB).c_str());
 				Fl::awake(updateUI);

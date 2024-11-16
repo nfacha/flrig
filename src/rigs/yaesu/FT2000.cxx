@@ -319,7 +319,10 @@ void RIG_FT2000::set_vfoB (unsigned long long freq)
 
 int RIG_FT2000::get_smeter()
 {
-	cmd = "SM0;";
+	if (inuse == onB)
+		cmd = "SM1;";
+	else
+		cmd = "SM0;";
 	int ret = wait_char(';', 7, 100, "get smeter", ASC);
 
 	rig_trace(2, "get_smeter()", replystr.c_str());
@@ -329,7 +332,7 @@ int RIG_FT2000::get_smeter()
 	if (p == std::string::npos) return 0;
 	replystr[p + 6] = 0;
 	int mtr = atoi(&replystr[p + 3]);
-	mtr = mtr * 100.0 / 256.0;
+	mtr = mtr * 100.0 / 255.0;
 	return mtr;
 }
 
@@ -1112,26 +1115,46 @@ int  RIG_FT2000::get_squelch()
 
 void RIG_FT2000::set_rf_gain(int val)
 {
-	cmd = "RG0000;";
-	if (inuse == onB) {
-		cmd[2] = '1';
-		progStatus.rfgain_B = val;
-	} else
-		progStatus.rfgain = progStatus.rfgain_A = val;
+	char szcmd[15];
 
-	for (int i = 5; i > 2; i--) {
-		cmd[i] = val % 10 + '0';
-		val /= 10;
+	if (inuse == onB) {
+		progStatus.rfgain_B = val;
+		snprintf(szcmd, sizeof(szcmd), "RG1%03d;", (100 - val) * 255 / 100);
+		cmd = szcmd;
+		set_trace(1, "set_rfgain A()");
+	} else {
+		progStatus.rfgain = progStatus.rfgain_A = val;
+		snprintf(szcmd, sizeof(szcmd), "RG0%03d;", (100 - val) * 255 / 100);
+		cmd = szcmd;
+		set_trace(1, "set_rfgain B()");
 	}
 
-	set_trace(1, "set_rfgain()");
 	sendCommand(cmd);
 	sett("");
-	showresp(WARN, ASC, "SET rfgain", cmd, replystr);
+	showresp(WARN, ASC, "SET rfgain A/B", cmd, replystr);
 }
 
 int  RIG_FT2000::get_rf_gain()
 {
+	if (inuse == onB) {
+		int RGval_B = 0;
+		cmd = rsp = "RG1";
+		cmd += ';';
+		get_trace(1, "get_rfgain() [B]");
+		wait_char(';', 7, 100, "get rfgain", ASC);
+		gett("");
+
+		size_t p = replystr.rfind(rsp);
+		if (p == std::string::npos) {
+			if (inuse == onB)
+				return progStatus.rfgain_B;
+			return progStatus.rfgain_A;
+		}
+		sscanf(replystr.c_str(), "RG1%d;", &RGval_B);
+		progStatus.rfgain_B = (255 - RGval_B) * 100 / 255;
+		return progStatus.rfgain_B;
+	}
+
 	int RGval_A = 0;
 	cmd = rsp = "RG0";
 	cmd += ';';
@@ -1145,34 +1168,7 @@ int  RIG_FT2000::get_rf_gain()
 			return progStatus.rfgain_B;
 		return progStatus.rfgain_A;
 	}
-	for (int i = 3; i < 6; i++) {
-		RGval_A *= 10;
-		RGval_A += replystr[p+i] - '0';
-	}
-
-	int RGval_B = 0;
-	cmd = rsp = "RG1";
-	cmd += ';';
-	get_trace(1, "get_rfgain() [B]");
-	wait_char(';', 7, 100, "get rfgain", ASC);
-	gett("");
-
-	p = replystr.rfind(rsp);
-	if (p == std::string::npos) {
-		if (inuse == onB)
-			return progStatus.rfgain_B;
-		return progStatus.rfgain_A;
-	}
-	for (int i = 3; i < 6; i++) {
-		RGval_B *= 10;
-		RGval_B += replystr[p+i] - '0';
-	}
-
-	progStatus.rfgain_A = ceil(RGval_A);
-	progStatus.rfgain_B = ceil(RGval_B);
-
-	if (inuse == onB)
-		return progStatus.rfgain_B;
-
+	sscanf(replystr.c_str(), "RG0%d;", &RGval_A);
+	progStatus.rfgain_A = (255 - RGval_A) * 100 / 255;
 	return progStatus.rfgain_A;
 }
