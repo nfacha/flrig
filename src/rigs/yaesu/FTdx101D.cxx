@@ -373,6 +373,26 @@ unsigned long long RIG_FTdx101D::get_vfoA ()
 	for (size_t n = 2; n < 11; n++)
 		f = f*10 + replystr[p+n] - '0';
 	freqA = f;
+
+	if (freqA >= 70000000 && freqA < 70500000) { // 70 cm band disable tuner
+		cmd = "AC;";
+		wait_char(';', 6, 100, "get tuner state", ASC);
+		if (replystr.length() >= 6) {
+			if (replystr[5] != '0') {
+				cmd = rsp = "MD0";
+				cmd += ';';
+				wait_char(';', 5, 100, "get mode A", ASC);
+				if (replystr[3] == 'E') {
+					sendCommand("MD01;");
+					sendCommand("AC000;");
+					sendCommand("MD0E;");
+				} else
+					sendCommand("AC000;");
+				MilliSleep(100);
+			}
+		}
+	}
+
 	return freqA;
 }
 
@@ -387,6 +407,16 @@ void RIG_FTdx101D::set_vfoA (unsigned long long freq)
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET vfo A", cmd, replystr);
 	sett("SET vfo A");
+	if (freq >= 70000000 && freq < 70500000) { // 70 cm band disable tuner
+		cmd = "AC;";
+		wait_char(';', 6, 100, "get tuner state", ASC);
+		if (replystr.length() >= 6) {
+			if (replystr[5] != '0') {
+				sendCommand("AC000;");
+				MilliSleep(100);
+			}
+		}
+	}
 }
 
 unsigned long long RIG_FTdx101D::get_vfoB ()
@@ -403,9 +433,28 @@ unsigned long long RIG_FTdx101D::get_vfoB ()
 	for (size_t n = 2; n < 11; n++)
 		f = f*10 + replystr[p+n] - '0';
 	freqB = f;
+
+	if (freqB >= 70000000 && freqB < 70500000) { // 70 cm band disable tuner
+		cmd = "AC;";
+		wait_char(';', 6, 100, "get tuner state", ASC);
+		if (replystr.length() >= 6) {
+			if (replystr[5] != '0') {
+				cmd = rsp = "MD1";
+				cmd += ';';
+				wait_char(';', 5, 100, "get mode B", ASC);
+				if (replystr[3] == 'E') {
+					sendCommand("MD11;");
+					sendCommand("AC000;");
+					sendCommand("MD1E;");
+				} else
+					sendCommand("AC000;");
+				MilliSleep(100);
+			}
+		}
+	}
+
 	return freqB;
 }
-
 
 void RIG_FTdx101D::set_vfoB (unsigned long long freq)
 {
@@ -418,8 +467,17 @@ void RIG_FTdx101D::set_vfoB (unsigned long long freq)
 	sendCommand(cmd);
 	showresp(WARN, ASC, "SET vfo B", cmd, replystr);
 	sett("SET vfo B");
+	if (freq >= 70000000 && freq < 70500000) { // 70 cm band disable tuner
+		cmd = "AC;";
+		wait_char(';', 6, 100, "get tuner state", ASC);
+		if (replystr.length() >= 6) {
+			if (replystr[5] != '0') {
+				sendCommand("AC000;");
+				MilliSleep(100);
+			}
+		}
+	}
 }
-
 
 bool RIG_FTdx101D::twovfos()
 {
