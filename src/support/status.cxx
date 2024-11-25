@@ -327,77 +327,101 @@ status progStatus = {
 // =========================
 	"cmd 1",		// std::string	label1;
 	"",				// std::string	command1;
+	0,				// bool expect...
 	"",				// std::string	shftcmd1;
 	"cmd 2",		// std::string	label2;
 	"",				// std::string	command2;
+	0,				// bool expect...
 	"",				// std::string	shftcmd2;
 	"cmd 3",		// std::string	label3;
 	"",				// std::string	command3;
+	0,				// bool expect...
 	"",				// std::string	shftcmd3;
 	"cmd 4",		// std::string	label4;
 	"", 			// std::string	command4;
+	0,				// bool expect...
 	"",				// std::string	shftcmd4;
 	"cmd 5",		// std::string	label5;
 	"",				// std::string	command5;
+	0,				// bool expect...
 	"",				// std::string	shftcmd5;
 	"cmd 6",		// std::string	label6;
 	"",				// std::string	command6;
+	0,				// bool expect...
 	"",				// std::string	shftcmd6;
 	"cmd 7",		// std::string	label7;
 	"",				// std::string	command7;
+	0,				// bool expect...
 	"",				// std::string	shftcmd7;
 	"cmd 8",		// std::string	label8;
 	"",				// std::string	command8;
+	0,				// bool expect...
 	"",				// std::string	shftcmd8;
 
 	"cmd 9",		// std::string	label9;
 	"",				// std::string	command9;
+	0,				// bool expect...
 	"",				// std::string	shftcmd9;
 	"cmd 10",		// std::string	label10;
 	"",				// std::string	command10;
+	0,				// bool expect...
 	"",				// std::string	shftcmd10;
 	"cmd 11",		// std::string	label11;
 	"",				// std::string	command11;
+	0,				// bool expect...
 	"",				// std::string	shftcmd11;
 	"cmd 12",		// std::string	label12;
 	"",				// std::string	command12;
+	0,				// bool expect...
 	"",				// std::string	shftcmd12;
 	"cmd 13",		// std::string	label13;
 	"",				// std::string	command13;
+	0,				// bool expect...
 	"",				// std::string	shftcmd13;
 	"cmd 14",		// std::string	label14;
 	"",				// std::string	command14;
+	0,				// bool expect...
 	"",				// std::string	shftcmd14;
 	"cmd 15",		// std::string	label15;
 	"",				// std::string	command15;
+	0,				// bool expect...
 	"",				// std::string	shftcmd15;
 	"cmd 16",		// std::string	label16;
 	"",				// std::string	command16;
+	0,				// bool expect...
 	"",				// std::string	shftcmd16;
 
 	"cmd 17",		// std::string	label17;
 	"",				// std::string	command17;
+	0,				// bool expect...
 	"",				// std::string	shftcmd17;
 	"cmd 18",		// std::string	label18;
 	"",				// std::string	command18;
+	0,				// bool expect...
 	"",				// std::string	shftcmd18;
 	"cmd 19",		// std::string	label19;
 	"",				// std::string	command19;
+	0,				// bool expect...
 	"",				// std::string	shftcmd19;
 	"cmd 20",		// std::string	label20;
 	"",				// std::string	command20;
+	0,				// bool expect...
 	"",				// std::string	shftcmd20;
 	"cmd 21",		// std::string	label21;
 	"",				// std::string	command21;
+	0,				// bool expect...
 	"",				// std::string	shftcmd21;
 	"cmd 22",		// std::string	label22;
 	"",				// std::string	command22;
+	0,				// bool expect...
 	"",				// std::string	shftcmd22;
 	"cmd 23",		// std::string	label23;
 	"",				// std::string	command23;
+	0,				// bool expect...
 	"",				// std::string	shftcmd23;
 	"cmd 24",		// std::string	label24;
 	"",				// std::string	command24;
+	0,				// bool expect...
 	"",				// std::string	shftcmd24;
 
 	"1",			// std::string	label_on_start1;
@@ -1261,6 +1285,31 @@ void status::saveLastState()
 	spref.set("command24", command24.c_str());
 	spref.set("shftcmd24", shftcmd24.c_str());
 
+	spref.set("expect1", expect1);
+	spref.set("expect2", expect1);
+	spref.set("expect3", expect1);
+	spref.set("expect4", expect1);
+	spref.set("expect5", expect1);
+	spref.set("expect6", expect1);
+	spref.set("expect7", expect1);
+	spref.set("expect8", expect1);
+	spref.set("expect9", expect1);
+	spref.set("expect10", expect1);
+	spref.set("expect11", expect1);
+	spref.set("expect12", expect1);
+	spref.set("expect13", expect1);
+	spref.set("expect14", expect1);
+	spref.set("expect15", expect1);
+	spref.set("expect16", expect1);
+	spref.set("expect17", expect1);
+	spref.set("expect18", expect1);
+	spref.set("expect19", expect1);
+	spref.set("expect20", expect1);
+	spref.set("expect21", expect1);
+	spref.set("expect22", expect1);
+	spref.set("expect23", expect1);
+	spref.set("expect24", expect1);
+
 	spref.set("st_label1", label_on_start1.c_str());
 	spref.set("st_cmd1", cmd_on_start1.c_str());
 
@@ -1968,6 +2017,31 @@ bool status::loadXcvrState(std::string xcvr)
 		command24 = defbuffer;
 		spref.get("shftcmd24", defbuffer, shftcmd24.c_str(), MAX_DEFBUFFER_SIZE);
 		shftcmd24 = defbuffer;
+
+		spref.get("expect1", expect1, expect1);
+		spref.get("expect2", expect2, expect2);
+		spref.get("expect3", expect3, expect3);
+		spref.get("expect4", expect4, expect4);
+		spref.get("expect5", expect5, expect5);
+		spref.get("expect6", expect6, expect6);
+		spref.get("expect7", expect7, expect7);
+		spref.get("expect8", expect8, expect8);
+		spref.get("expect9", expect9, expect9);
+		spref.get("expect10", expect10, expect10);
+		spref.get("expect11", expect12, expect11);
+		spref.get("expect12", expect12, expect12);
+		spref.get("expect13", expect13, expect13);
+		spref.get("expect14", expect14, expect14);
+		spref.get("expect15", expect15, expect15);
+		spref.get("expect16", expect16, expect16);
+		spref.get("expect17", expect17, expect17);
+		spref.get("expect18", expect18, expect18);
+		spref.get("expect19", expect19, expect19);
+		spref.get("expect20", expect20, expect20);
+		spref.get("expect21", expect21, expect21);
+		spref.get("expect22", expect22, expect22);
+		spref.get("expect23", expect23, expect23);
+		spref.get("expect24", expect24, expect24);
 
 		spref.get("st_label1", defbuffer, label_on_start1.c_str(), MAX_DEFBUFFER_SIZE);
 		label_on_start1 = defbuffer;

@@ -142,6 +142,7 @@ Fl_Group *tabPOLLING = (Fl_Group *)0;
 
 Fl_Group *tabSNDCMD = (Fl_Group *)0;
 	Fl_Input2 *txt_command = (Fl_Input2 *)0;
+	Fl_Check_Button *btn_expect_response = (Fl_Check_Button *)0;
 	Fl_Button *btn_icom_pre = (Fl_Button *)0;
 	Fl_Button *btn_icom_post = (Fl_Button *)0;
 	Fl_Button *btn_send_command = (Fl_Button *)0;
@@ -282,6 +283,31 @@ Fl_Group *tabCOMMANDS = (Fl_Group *)0;
 	Fl_Input2 * start_exit_text7  = (Fl_Input2 *)0;
 	Fl_Input2 * start_exit_label8 = (Fl_Input2 *)0;
 	Fl_Input2 * start_exit_text8  = (Fl_Input2 *)0;
+
+	Fl_Check_Button * canRespond1 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond2 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond3 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond4 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond5 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond6 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond7 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond8 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond9 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond10 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond11 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond12 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond13 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond14 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond15 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond16 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond17 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond18 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond19 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond20 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond21 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond22 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond23 = (Fl_Check_Button *)0;
+	Fl_Check_Button * canRespond24 = (Fl_Check_Button *)0;
 
 	Fl_Output * cmdResponse = (Fl_Output *)0;
 
@@ -796,7 +822,7 @@ static void cb_btnSetAdd(Fl_Button*, void*) {
 }
 
 static void cb_btn_send_command(Fl_Button *o, void*) {
-	cb_send_command(txt_command->value(), txt_response);
+	cb_send_command(txt_command->value(), txt_response, btn_expect_response->value());
 }
 
 static const char hexsym[] = "0123456789ABCDEF";
@@ -906,6 +932,36 @@ static void cb_shftcmdtext(Fl_Input2 *o, void *d) {
 	if (val > 23) val = 23;
 
 	*cmd[val] = o->value();
+}
+
+static void cb_canrespond(Fl_Check_Button *o, void *d) {
+	size_t val = reinterpret_cast<size_t>(d);
+	switch (val) {
+		case 1 : progStatus.expect1 = o->value(); break;
+		case 2 : progStatus.expect2 = o->value(); break;
+		case 3 : progStatus.expect3 = o->value(); break;
+		case 4 : progStatus.expect4 = o->value(); break;
+		case 5 : progStatus.expect5 = o->value(); break;
+		case 6 : progStatus.expect6 = o->value(); break;
+		case 7 : progStatus.expect7 = o->value(); break;
+		case 8 : progStatus.expect8 = o->value(); break;
+		case 9 : progStatus.expect9 = o->value(); break;
+		case 10 : progStatus.expect10 = o->value(); break;
+		case 11 : progStatus.expect11 = o->value(); break;
+		case 12 : progStatus.expect12 = o->value(); break;
+		case 13 : progStatus.expect13 = o->value(); break;
+		case 14 : progStatus.expect14 = o->value(); break;
+		case 15 : progStatus.expect15 = o->value(); break;
+		case 16 : progStatus.expect16 = o->value(); break;
+		case 17 : progStatus.expect17 = o->value(); break;
+		case 18 : progStatus.expect18 = o->value(); break;
+		case 19 : progStatus.expect19 = o->value(); break;
+		case 20 : progStatus.expect20 = o->value(); break;
+		case 21 : progStatus.expect21 = o->value(); break;
+		case 22 : progStatus.expect22 = o->value(); break;
+		case 23 : progStatus.expect23 = o->value(); break;
+		case 24 : progStatus.expect24 = o->value(); break;
+	}
 }
 
 static void cb_se_label(Fl_Input2 *o, void *d) {
@@ -1972,16 +2028,18 @@ _("Enter text as ASCII std::string\nOr sequence of hex values, x80 etc separated
 	txt_command->align(Fl_Align(FL_ALIGN_BOTTOM_LEFT));
 	txt_command->when(FL_WHEN_RELEASE);
 
-	txt_response = new Fl_Output(X + 25, Y + 80, 435, 24, _("Response to the SEND button"));
-	txt_response->align(Fl_Align(FL_ALIGN_BOTTOM_LEFT));
-
-	btn_icom_pre = new Fl_Button(X + 380, Y + 115, 80, 20, _("ICOM pre"));
+	btn_icom_pre = new Fl_Button(X + 25, Y + 90, 80, 20, _("ICOM pre"));
 	btn_icom_pre->callback((Fl_Callback*)cb_btn_icom_pre);
 
-	btn_icom_post = new Fl_Button(X + 380, Y + 145, 80, 20, _("ICOM post"));
+	btn_icom_post = new Fl_Button(X + 120, Y + 90, 80, 20, _("ICOM post"));
 	btn_icom_post->callback((Fl_Callback*)cb_btn_icom_post);
 
-	btn_send_command = new Fl_Button(X + 380, Y + 180, 80, 20, _("SEND"));
+	txt_response = new Fl_Output(X + 25, Y + 120, 435, 24, _("Response to the SEND button"));
+	txt_response->align(Fl_Align(FL_ALIGN_BOTTOM_LEFT));
+
+	btn_expect_response = new Fl_Check_Button(X + 25, Y + 170, 20, 20, _("Expect response"));
+
+	btn_send_command = new Fl_Button(X + 380, Y + 200, 80, 20, _("SEND"));
 	btn_send_command->callback((Fl_Callback*)cb_btn_send_command);
 
 	tabSNDCMD->end();
@@ -2031,6 +2089,15 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 		shftcmdtext21, shftcmdtext22, shftcmdtext23, shftcmdtext24
 		};
 
+	Fl_Check_Button *canrespond[] = {
+		canRespond1,   canRespond2,   canRespond3,   canRespond4,
+		canRespond5,   canRespond6,   canRespond7,   canRespond8,
+		canRespond9,   canRespond10,  canRespond11,  canRespond12,
+		canRespond13,  canRespond14,  canRespond15,  canRespond16,
+		canRespond17,  canRespond18,  canRespond19,  canRespond20,
+		canRespond21,  canRespond22,  canRespond23,  canRespond24
+	};
+
 	std::string *cmd[] = {
 		&progStatus.command1,  &progStatus.command2,  &progStatus.command3,  &progStatus.command4,
 		&progStatus.command5,  &progStatus.command6,  &progStatus.command7,  &progStatus.command8,
@@ -2048,6 +2115,15 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 		&progStatus.shftcmd17, &progStatus.shftcmd18, &progStatus.shftcmd19, &progStatus.shftcmd20,
 		&progStatus.shftcmd21, &progStatus.shftcmd22, &progStatus.shftcmd23, &progStatus.shftcmd24
 		};
+
+	int *expect_response[] = {
+		&progStatus.expect1,  &progStatus.expect2,  &progStatus.expect3,  &progStatus.expect4, 
+		&progStatus.expect5,  &progStatus.expect6,  &progStatus.expect7,  &progStatus.expect8, 
+		&progStatus.expect9,  &progStatus.expect10, &progStatus.expect11, &progStatus.expect12, 
+		&progStatus.expect13, &progStatus.expect14, &progStatus.expect15, &progStatus.expect16, 
+		&progStatus.expect17, &progStatus.expect18, &progStatus.expect19, &progStatus.expect20,
+		&progStatus.expect21, &progStatus.expect22, &progStatus.expect23, &progStatus.expect24
+	};
 
 	Fl_Input2 *start_exit_label[] = {
 		start_exit_label1,  start_exit_label2,  start_exit_label3,  start_exit_label4,
@@ -2093,16 +2169,24 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdbtns[n] = new Fl_Input2(X + 27, Y + 46 + (n % 4) * 40, 80, 20, lbl[n]);
 			cmdbtns[n]->align(FL_ALIGN_LEFT);
 			cmdbtns[n]->value(cmdlbls[n]->c_str());
+			cmdbtns[n]->tooltip(_("command label"));
 			cmdbtns[n]->callback((Fl_Callback*)cb_cmdlbl, reinterpret_cast<void *>(n));
 
 			cmdtexts[n] = new Fl_Input2(X + 110, Y + 46 + (n % 4) * 40, W - 110 - 2, 20, "");
 			cmdtexts[n]->align(FL_ALIGN_LEFT);
 			cmdtexts[n]->value(cmd[n]->c_str());
+			cmdtexts[n]->tooltip(_("command string"));
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
+
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
 
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);
 			shftcmdtexts[n]->value(shftcmd[n]->c_str());
+			shftcmdtexts[n]->tooltip(_("command string for shift command"));
 			shftcmdtexts[n]->callback((Fl_Callback*)cb_shftcmdtext, reinterpret_cast<void *>(n));
 		}
 
@@ -2128,6 +2212,11 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdtexts[n]->align(FL_ALIGN_LEFT);
 			cmdtexts[n]->value(cmd[n]->c_str());
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
+
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
 
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);
@@ -2159,6 +2248,11 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdtexts[n]->value(cmd[n]->c_str());
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
 
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
+
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);
 			shftcmdtexts[n]->value(shftcmd[n]->c_str());
@@ -2187,6 +2281,11 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdtexts[n]->align(FL_ALIGN_LEFT);
 			cmdtexts[n]->value(cmd[n]->c_str());
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
+
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
 
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);
@@ -2217,6 +2316,11 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdtexts[n]->value(cmd[n]->c_str());
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
 
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
+
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);
 			shftcmdtexts[n]->value(shftcmd[n]->c_str());
@@ -2245,6 +2349,11 @@ Fl_Group *createCOMMANDS(int X, int Y, int W, int H, const char *label)
 			cmdtexts[n]->align(FL_ALIGN_LEFT);
 			cmdtexts[n]->value(cmd[n]->c_str());
 			cmdtexts[n]->callback((Fl_Callback*)cb_cmdtext, reinterpret_cast<void *>(n));
+
+			canrespond[n] = new Fl_Check_Button(X + 27, Y + 66 + (n % 4) * 40, 20, 20, "");
+			canrespond[n]->value(*expect_response[n]);
+			canrespond[n]->tooltip(_("check if response expected"));
+			canrespond[n]->callback((Fl_Callback*)cb_canrespond, reinterpret_cast<void *>(n));
 
 			shftcmdtexts[n] = new Fl_Input2(X + 110, Y + 66 + (n % 4) * 40, W - 110 - 2, 20, "SHIFT");
 			shftcmdtexts[n]->align(FL_ALIGN_LEFT);

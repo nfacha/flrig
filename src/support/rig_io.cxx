@@ -167,9 +167,8 @@ std::string respstr;
 int readResponse(std::string req1, std::string req2)
 {
 	int numread = 0;
-	std::string expect = req1;
+
 	respstr.clear();
-	if (req1.find(req2) != std::string::npos) expect = req2;  
 
 	int loop = 100;
 	do {
@@ -178,8 +177,11 @@ int readResponse(std::string req1, std::string req2)
 		else
 			numread = RigSerial->ReadBuffer(respstr, RXBUFFSIZE, req1, req2);
 
-		if (respstr.find(expect) != std::string::npos) break;
+		if (!req1.empty() && respstr.find(req1) != std::string::npos) break;
+		if (!req2.empty() && respstr.find(req2) != std::string::npos) break;
+
 		MilliSleep(10);
+
 	} while(--loop > 0);
 
 //std::cout << "readResponse:" << std::endl;

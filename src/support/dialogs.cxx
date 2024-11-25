@@ -1967,7 +1967,7 @@ Fl_Color flrig_def_color(int n)
 
 extern std::string print_all();
 
-void cb_send_command(std::string command, Fl_Output *resp)
+void cb_send_command(std::string command, Fl_Output *resp, bool expect)
 {
 	if (command == "PRINT") {
 		fl_alert2("%s", print_all().c_str());
@@ -2003,7 +2003,9 @@ void cb_send_command(std::string command, Fl_Output *resp)
 
 	sendCommand(cmd);
 	set_trace(2, "command: ", command.c_str());
-	waitResponse(200);
+
+	if (expect)
+		waitResponse(progStatus.serial_timeout);
 
 	std::string retstr = usehex ?
 		str2hex(respstr.c_str(), respstr.length()) :

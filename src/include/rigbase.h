@@ -820,10 +820,10 @@ double vfo_;
 
 // date/time synchronize
 	virtual void sync_date(char *dt) {
-		printf("Synchronize date to: %s\n", dt);
+//		printf("Synchronize date to: %s\n", dt);
 	}
 	virtual void sync_clock(char *tm) {
-		printf("Sychronize time to: %s\n", tm);
+//		printf("Sychronize time to: %s\n", tm);
 	}
 
 // QCX+ menu system

@@ -4236,6 +4236,7 @@ void do_nr_label(void *)
 	btnNR->value(nrstate ? 1 : 0);
 	btnNR->label(nrlabel.c_str());
 	btnNR->redraw_label();
+	btnNR->redraw();
 }
 
 void noise_reduction_label(const char *l, int on)
@@ -4271,6 +4272,7 @@ void do_bkin_label(void *)
 {
 	btnBreakIn->label(bkin_label_.c_str());
 	btnBreakIn->redraw_label();
+	btnBreakIn->redraw();
 }
 
 void break_in_label(const char *l)
@@ -4427,14 +4429,12 @@ void cbNoise()
 	guard_lock serial_lock(&mutex_serial, "58");
 	trace(1, "cbNoise()");
 
-//	selrig->set_noise(btnNOISE->value());
-//	return;
-
 	int btn, get, cnt = 0;
 
 	btn = progStatus.noise = btnNOISE->value();
 
 	selrig->set_noise(btn);
+
 	MilliSleep(50);
 	get = selrig->get_noise();
 	while ((get != btn) && (cnt++ < 10)) {
@@ -4442,6 +4442,10 @@ void cbNoise()
 		get = selrig->get_noise();
 		Fl::awake();
 	}
+
+	vfo->noise = progStatus.noise;
+	vfo->nb_level = progStatus.nb_level;
+	update_noise( (void*)0 );
 }
 
 void cb_nb_level()
@@ -4469,15 +4473,8 @@ void cbNR()
 	trace(1, "cbNR()");
 
 	int btn = 0, set = 0, get, cnt = 0;
-	if (sldrNR) {
-		set = sldrNR->value();
-		btn = btnNR->value();
-	}
-	if (spnrNR) {
-		set = spnrNR->value();
-		btn = btnNR->value();
-	}
-
+	btn = btnNR->value();
+	set = sldrNR ? sldrNR->value() : spnrNR->value();
 
 	if (xcvr_name == rig_TS2000.name_) {
 		if (btn != -1) { // pia
@@ -4506,6 +4503,7 @@ void cbNR()
 		MilliSleep(50);
 
 		get = selrig->get_noise_reduction();
+
 		while ((get != btn) && (cnt++ < 10)) {
 			MilliSleep(progStatus.serial_post_write_delay);
 			get = selrig->get_noise_reduction();

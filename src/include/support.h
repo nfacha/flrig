@@ -394,7 +394,7 @@ extern void updateRFgain(void *d = 0);
 extern void zeroXmtMeters(void *d = 0);
 extern void set_power_controlImage(double);
 
-extern void cb_send_command(std::string cmd, Fl_Output *resp = 0);
+extern void cb_send_command(std::string cmd, Fl_Output *resp, bool expect = 0);
 extern const std::string lt_trim(const std::string& pString, const std::string& pWhitespace = " \"\t");
 extern void editAlphaTag();
 
