@@ -209,13 +209,19 @@ RIG_IC7000::RIG_IC7000() {
 	has_ptt_control =
 	has_tune_control =
 	has_rf_control =
-	has_sql_control = true;
+	has_sql_control =
+	has_agc_control =
+	has_vox_onoff =
+	has_vox_gain =
+	has_vox_anti =
+	has_vox_hang = true;
 
 	has_band_selection = true;
 
 	precision = 1;
 	ndigits = 9;
 
+	agcval = 1;
 };
 
 //======================================================================
@@ -561,7 +567,6 @@ int RIG_IC7000::get_preamp()
 
 void RIG_IC7000::set_auto_notch(int val)
 {
-	progStatus.auto_notch = an_level = val;
 	cmd = pre_to;
 	cmd += '\x16';
 	cmd += '\x41';
@@ -569,7 +574,6 @@ void RIG_IC7000::set_auto_notch(int val)
 	cmd.append( post );
 	waitFB("set AN");
 	isett("set_auto_notch()");
-	auto_notch_label(an_label(), an_level ? true : false);
 }
 
 int RIG_IC7000::get_auto_notch()
@@ -586,8 +590,13 @@ int RIG_IC7000::get_auto_notch()
 	if (ret) {
 		size_t p = replystr.rfind(resp);
 		if (p != std::string::npos) {
-			progStatus.auto_notch = an_level = replystr[p+6];
-			auto_notch_label(an_label(), an_level ? true : false);
+			if (replystr[p+6] == 0x01) {
+				auto_notch_label("AN", true);
+				return true;
+			} else {
+				auto_notch_label("AN", false);
+				return false;
+			}
 		}
 	}
 	return progStatus.auto_notch;
@@ -1230,3 +1239,87 @@ std::vector<std::string>& RIG_IC7000::bwtable(int m)
 	}
 	return IC7000_SSB_CWwidths;
 }
+
+int  RIG_IC7000::get_agc()
+{
+	cmd = pre_to;
+	cmd.append("\x16\x12");
+	cmd.append(post);
+	if (waitFOR(8, "get AGC")) {
+		size_t p = replystr.find(pre_fm);
+		if (p == std::string::npos) return agcval;
+		return (agcval = replystr[p+6]); // 1 = FAST, 2 = MID, 3 = SLOW
+	}
+	get_trace(2, "get_agc()", str2hex(replystr.c_str(), replystr.length()));
+	return agcval;
+}
+
+int RIG_IC7000::incr_agc()
+{
+	agcval++;
+	if (agcval == 4) agcval = 1;
+	cmd = pre_to;
+	cmd.append("\x16\x12");
+	cmd += agcval;
+	cmd.append(post);
+	waitFB("set AGC");
+	set_trace(2, "incr_agc()", str2hex(replystr.c_str(), replystr.length()));
+	return agcval;
+}
+
+
+static const char *agcstrs[] = {"FST", "MID", "SLO"};
+const char *RIG_IC7000::agc_label()
+{
+	return agcstrs[agcval - 1];
+}
+
+int  RIG_IC7000::agc_val()
+{
+	return (agcval);
+}
+
+
+void RIG_IC7000::set_vox_onoff()
+{
+	if (progStatus.vox_onoff) {
+		cmd.assign(pre_to).append("\x16\x46\x01").append(post);
+		waitFB("set vox ON");
+	} else {
+		cmd.assign(pre_to).append("\x16\x46");
+		cmd += '\x00';
+		cmd.append(post);
+		waitFB("set vox OFF");
+	}
+}
+
+void RIG_IC7000::set_vox_gain()
+{
+	cmd.assign(pre_to).append("\x1A\x05"); // values 0-255 = 0 - 100%
+	cmd +='\x01';
+	cmd +='\x15';
+	cmd.append(to_bcd((int)(progStatus.vox_gain * 2.55), 3));
+	cmd.append( post );
+	waitFB("SET vox gain");
+}
+
+void RIG_IC7000::set_vox_anti()
+{
+	cmd.assign(pre_to).append("\x1A\x05");  // values 0-255 = 0 - 100%
+	cmd +='\x01';
+	cmd +='\x16';
+	cmd.append(to_bcd((int)(progStatus.vox_anti * 2.55), 3));
+	cmd.append( post );
+	waitFB("SET anti-vox");
+}
+
+void RIG_IC7000::set_vox_hang()
+{
+	cmd.assign(pre_to).append("\x1A\x05");  // values 00-20 = 0.0 - 2.0 sec
+	cmd +='\x01';
+	cmd +='\x17';
+	cmd.append(to_bcd((int)(progStatus.vox_hang / 10 ), 2));
+	cmd.append( post );
+	waitFB("SET vox hang");
+}
+

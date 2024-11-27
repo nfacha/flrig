@@ -112,6 +112,16 @@ public:
 	void set_band_selection(int v);
 	void get_band_selection(int v);
 	std::vector<std::string>&  bwtable(int m);
+
+        int  get_agc();
+        int  incr_agc();
+        const char *agc_label();
+        int  agc_val();
+
+	void set_vox_onoff();
+        void set_vox_gain();
+        void set_vox_anti();
+        void set_vox_hang();
 };
 
 
