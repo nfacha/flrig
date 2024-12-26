@@ -1618,7 +1618,7 @@ void RIG_IC7600::sync_date(char *dt)
 	cmd.clear();
 	cmd.append(pre_to);
 	cmd += '\x1A'; cmd += '\x05';
-	cmd += '\x00'; cmd += '\x53';
+	cmd += '\x00'; cmd += '\x58';
 	unsigned char val;
 	val = ((dt[0] - '0') << 4) + (dt[1] - '0');
 	cmd += (val & 0xFF);
@@ -1642,7 +1642,7 @@ void RIG_IC7600::sync_clock(char *tm)
 	cmd.clear();
 	cmd.append(pre_to);
 	cmd += '\x1A'; cmd += '\x05';
-	cmd += '\x00'; cmd += '\x54';
+	cmd += '\x00'; cmd += '\x59';
 	unsigned char val;
 	val = ((tm[0] - '0') << 4) + (tm[1] - '0');
 	cmd += (val & 0xFF);
