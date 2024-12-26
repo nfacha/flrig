@@ -1131,7 +1131,7 @@ void RIG_TT550::get_302()
 
 int RIG_TT550::get_smeter()
 {
-	int sval = 0;
+	int sval = 0, raw = 0;
 	float fval;
 	int fp;
 	size_t p;
@@ -1154,8 +1154,8 @@ int RIG_TT550::get_smeter()
 	len = replystr.length();
 
 	if (replystr[0] == 'S' && len > 5) {
-		sscanf(&replystr[1], "%4x", &sval);
-		fval = sval/256.0;
+		sscanf(&replystr[1], "%4x", &raw);
+		fval = raw/256.0;
 		sval = (int)(fval * 100.0 / 18.0);
 		if (sval > 100) sval = 0;
 		smtrval = sval;
@@ -1167,6 +1167,11 @@ int RIG_TT550::get_smeter()
 		pwrval = fp;
 		Fl::awake(updateFwdPwr);
 	}
+
+	std::stringstream s;
+	s << "Get smeter: " << replystr << ", value = " << smtrval;
+	get_trace(1, s.str().c_str());
+
 
 	return sval;
 }
@@ -1212,7 +1217,7 @@ int RIG_TT550::get_power_out()
 
 	std::stringstream s;
 	s << "Get pwr: fwc " << fwdpwr << ", refpwr" << refpwr << ", swr " << swr;
-	set_trace(1, s.str().c_str());
+	get_trace(1, s.str().c_str());
 
 	return fwdpwr;
 }
