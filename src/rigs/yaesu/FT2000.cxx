@@ -379,7 +379,20 @@ double RIG_FT2000::get_power_control()
 	if (p == std::string::npos) return 0;
 	replystr[p + 5] = 0;
 	int mtr = atoi(&replystr[p + 2]);
+	mtr = (int)(100.0 * mtr / 255.0);
 	return mtr;
+}
+
+// Transceiver power level
+void RIG_FT2000::set_power_control(double val)
+{
+	int ival = (int)(val * 255 / 100);
+	cmd = "PC000;";
+	for (int i = 4; i > 1; i--) {
+		cmd[i] += ival % 10;
+		ival /= 10;
+	}
+	sendCommand(cmd, 0);
 }
 
 // Volume control return 0 ... 100
@@ -405,18 +418,6 @@ void RIG_FT2000::set_volume_control(int val)
 	for (int i = 5; i > 2; i--) {
 		cmd[i] += ivol % 10;
 		ivol /= 10;
-	}
-	sendCommand(cmd, 0);
-}
-
-// Transceiver power level
-void RIG_FT2000::set_power_control(double val)
-{
-	int ival = (int)val;
-	cmd = "PC000;";
-	for (int i = 4; i > 1; i--) {
-		cmd[i] += ival % 10;
-		ival /= 10;
 	}
 	sendCommand(cmd, 0);
 }
