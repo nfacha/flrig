@@ -302,12 +302,12 @@ bool valid_reply (std::string str)
 		get_trace (1, "no response");
 		return false;
 	}
-	if (str.find("?;") != std::string::npos) {
-		get_trace (2, "unknown command: ", str.c_str());
+	if (str.find(";") == std::string::npos) {
+		get_trace (2, "missing semicolon", str.c_str());
 		return false;
 	}
-	if (str[str.length() - 1] != ';') {
-		get_trace (2, "not terminated with ';' ", str.c_str());
+	if (str.find("?;") != std::string::npos) {
+		get_trace (2, "unknown command: ", str.c_str());
 		return false;
 	}
 	return true;
@@ -633,7 +633,7 @@ double RIG_FT991A::get_idd()
 int RIG_FT991A::get_power_out()
 {
 	cmd = rsp = "RM5";
-	sendCommand(cmd.append(";"));
+	cmd += ';';
 	wait_char(';',7, FL991A_WAIT_TIME, "get pout", ASC);
 	gett("get_power_out");
 
@@ -642,7 +642,6 @@ int RIG_FT991A::get_power_out()
 
 	size_t p = replystr.rfind(rsp);
 	if (p == std::string::npos) return 0;
-	if (p + 6 >= replystr.length()) return 0;
 	double mtr = (double)(atoi(&replystr[p+3]));
 
 	mtr = 3.8 - 0.0047 * mtr + .0022257 * mtr * mtr;

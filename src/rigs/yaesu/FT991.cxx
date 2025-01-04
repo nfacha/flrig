@@ -581,7 +581,7 @@ double RIG_FT991::get_idd()
 int RIG_FT991::get_power_out()
 {
 	cmd = rsp = "RM5";
-	sendCommand(cmd.append(";"));
+	cmd += ';';
 	wait_char(';',7, FL991_WAIT_TIME, "get pout", ASC);
 
 	size_t p = replystr.rfind(rsp);
