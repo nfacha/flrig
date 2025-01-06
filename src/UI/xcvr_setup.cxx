@@ -2864,6 +2864,7 @@ Fl_Double_Window* XcvrDialog() {
 
 	add_tree_item(tabPTTGEN);
 	add_tree_item(tabCMEDIA);
+	add_tree_item(tabGPIO);
 	add_tree_item(tabTMATE2);
 
 	add_tree_item(tabTCPIP);
