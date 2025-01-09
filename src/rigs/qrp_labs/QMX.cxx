@@ -25,7 +25,7 @@ static const char QMXname_[] = "QMX";
 
 static std::vector<std::string>vQMXmodes_;
 static const char *QMXmodes_[] = {
-	"CW-U", "CW-L", "DIGI-U", "DIGI-L"};
+	"CW-U", "CW-L", "DIGIU", "DIGIL"};
 static const char QMX_mode_type[] = { 'L', 'U' };
 static const char *QMX_mode_str[] = {
 	"MD3;", "MD7;", "MD6;", "MD9;", NULL };
