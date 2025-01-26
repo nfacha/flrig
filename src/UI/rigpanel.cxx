@@ -635,7 +635,7 @@ static void cb_mnuCLIENT(Fl_Menu_*, void*) {
 }
 
 static void cb_mnuOnLineHelp(Fl_Menu_*, void*) {
-	visit_URL((void *)("http://www.w1hkj.com/flrig-help/index.html"));
+	visit_URL((void *)("https://www.w1hkj.org/flrig-help/index.html"));
 }
 
 static void cb_mnuAbout(Fl_Menu_*, void*) {
