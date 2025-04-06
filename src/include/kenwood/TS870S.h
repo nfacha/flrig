@@ -81,8 +81,14 @@ public:
 	int  get_smeter();
 //	int  get_swr();
 	int  get_power_out();
+
 	double get_power_control();
-	
+//	void get_pc_min_max_step(double &, double &, double &) {
+	void get_pc_min_max_step(double &min, double &max, double &step) {
+		min = 10; max = 100; step = 1; }  // wbx4
+
+	void set_power_control(double val);
+
 	void set_volume_control(int val);
 	int  get_volume_control();
 
@@ -91,7 +97,6 @@ public:
 	void get_squelch_min_max_step (int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; } 
 
-	void set_power_control(double val);
 	void set_PTT_control(int val);
 	void tune_rig();
 
