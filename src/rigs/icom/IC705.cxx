@@ -41,37 +41,38 @@ const char IC705name_[] = "IC-705";
 // these are only defined in this file
 // undef'd at end of file
 #define NUM_FILTERS 3
-#define NUM_MODES  13
+#define NUM_MODES  14
 
-static int mode_filterA[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1};
-static int mode_filterB[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1};
+static int mode_filterA[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+static int mode_filterB[NUM_MODES] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
-static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 static const char *szfilter[NUM_FILTERS] = {"1", "2", "3"};
 
 enum {
 LSB705, USB705, AM705, FM705,
 CW705, CWR705, RTTY705, RTTYR705,
-LSBD705, USBD705, AMD705, FMD705, DV705
+LSBD705, USBD705, AMD705, FMD705, DV705,
+WFM705
 };
 
 static std::vector<std::string>IC705modes_;
 static const char *vIC705modes_[] =
 {	"LSB", "USB", "AM", "FM",
 	"CW", "CW-R", "RTTY", "RTTY-R",
-	"LSB-D", "USB-D", "AM-D", "FM-D", "DV"};
+	"LSB-D", "USB-D", "AM-D", "FM-D", "DV", "WFM"};
 
 char IC705_mode_type[] = {
 	'L', 'U', 'U', 'U',
 	'L', 'U', 'L', 'U',
-	'L', 'U', 'U', 'U', 'U' };
+	'L', 'U', 'U', 'U', 'U', 'U' };
 
 const char IC705_mode_nbr[] = {
 	0x00, 0x01, 0x02, 0x05,
 	0x03, 0x07, 0x04, 0x08,
-	0x00, 0x01, 0x02, 0x05, 0x17 };
+	0x00, 0x01, 0x02, 0x05, 0x17, 0x06 };
 
 static std::vector<std::string>IC705_ssb_bws;
 static const char *vIC705_ssb_bws[] =
@@ -511,6 +512,7 @@ void RIG_IC705::set_vfoB (unsigned long long freq)
 //                |                03 - CW
 //                |                04 - RTTY
 //                |                05 - FM
+//                |                06 - WFM
 //                |                07 - CW-R
 //                |                08 - RTTY-R
 //                |                17 - DV
@@ -845,7 +847,10 @@ int RIG_IC705::get_split()
 
 int RIG_IC705::get_bwA()
 {
-	if (A.imode == 3 || A.imode == 11) return 0; // FM, FM-D
+	// FM, FM-D, WFM
+	if (A.imode == FM705 || A.imode == FMD705 ||
+	    A.imode == WFM705)
+		return 0;
 
 	int current_vfo = inuse;
 	if (current_vfo == onB) selectA();
@@ -876,7 +881,10 @@ int RIG_IC705::get_bwA()
 void RIG_IC705::set_bwA(int val)
 {
 
-	if (A.imode == 3 || A.imode == 11) return; // FM, FM-D
+	// FM, FM-D, WFM
+	if (A.imode == FM705 || A.imode == FMD705 ||
+	    A.imode == WFM705)
+		return;
 
 	A.iBW = val;
 
@@ -897,7 +905,10 @@ void RIG_IC705::set_bwA(int val)
 
 int RIG_IC705::get_bwB()
 {
-	if (B.imode == 3 || B.imode == 11) return 0; // FM, FM-D
+	// FM, FM-D, WFM
+	if (B.imode == FM705 || B.imode == FMD705 ||
+	    B.imode == WFM705)
+		return 0;
 
 	int current_vfo = inuse;
 	if (current_vfo == onA) selectB();
@@ -927,7 +938,11 @@ int RIG_IC705::get_bwB()
 
 void RIG_IC705::set_bwB(int val)
 {
-	if (B.imode == 3 || B.imode == 11) return; // FM, FM-D
+	// FM, FM-D, WFM
+	if (B.imode == FM705 || B.imode == FMD705 ||
+	    B.imode == WFM705)
+		return;
+
 	B.iBW = val;
 
 	int current_vfo = inuse;
@@ -947,34 +962,44 @@ void RIG_IC705::set_bwB(int val)
 
 // LSB  USB  AM   FM   CW  CW-R  RTTY  RTTY-R  LSB-D  USB-D  AM-D  FM-D
 //  0    1    2    3   4     5    6     7      8      9       10    11
+//  DV  WFM
+//  12   13
 
 int RIG_IC705::adjust_bandwidth(int m)
 {
 	int bw = 0;
 	switch (m) {
-		case 2: case 10: // AM, AM-D
+		case AM705: case AMD705:
+			// AM, AM-D
 			bandwidths_ = IC705_am_bws;
 			bw_vals_ = IC705_bw_vals_AM;
 			bw = 19;
 			break;
-		case 3: case 11: case 12: // FM, FM-D, DV
+		case FM705: case FMD705:
+		case DV705: case WFM705:
+			// FM, FM-D, DV, WFM
 			bandwidths_ = IC705_fm_bws;
 			bw_vals_ = IC705_bw_vals_FM;
 			bw = 0;
 			break;
-		case 6: case 7: // RTTY, RTTY-R
+		case RTTY705: case RTTYR705:
+			// RTTY, RTTY-R
 			bandwidths_ = IC705_rtty_bws;
 			bw_vals_ = IC705_bw_vals_RTTY;
 			bw = 12;
 			break;
-		case 4: case 5: // CW, CW -R
+		case CW705: case CWR705:
+			// CW, CW -R
 			bandwidths_ = IC705_ssb_bws;
 			bw_vals_ = IC705_bw_vals_SSB;
 			bw = 12;
 			break;
-		case 0: case 1: // LSB, USB
-		case 8: case 9: // LSB-D, USB-D
+		case LSB705: case USB705:
+		case LSBD705: case USBD705:
 		default:
+			// CW, CW -R
+			// LSB, USB
+			// LSB-D, USB-D
 			bandwidths_ = IC705_ssb_bws;
 			bw_vals_ = IC705_bw_vals_SSB;
 			bw = 34;
