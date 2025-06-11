@@ -677,10 +677,14 @@ status progStatus = {
 
 void status::saveScheme(std::string sch_name)
 {
-#if FLDIGI_FLTK_API_MINOR < 4
-	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.org", sch_name.c_str());
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
 #else
-	Fl_Preferences spref(std::string(RigHomeDir).append("flrig.prefs").c_str(), "w1hkj", sch_name.c_str(), (Fl_Preferences::Root)0);
+	Fl_Preferences spref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		sch_name.c_str(),
+		Fl_Preferences::C_LOCALE);
 #endif
 
 	spref.set("ui_scheme", ui_scheme.c_str());
@@ -775,11 +779,16 @@ void status::saveScheme(std::string sch_name)
 
 void status::loadScheme(std::string sch_name)
 {
-#if FLDIGI_FLTK_API_MINOR < 4
-	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.org", sch_name.c_str());
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", sch_name.c_str());
 #else
-	Fl_Preferences spref(std::string(RigHomeDir).append("flrig.prefs").c_str(), "w1hkj", sch_name.c_str(), (Fl_Preferences::Root)0);
+	Fl_Preferences spref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		sch_name.c_str(),
+		Fl_Preferences::C_LOCALE);
 #endif
+
 
 	if (spref.entryExists("ui_scheme")) {
 
@@ -881,7 +890,17 @@ void status::loadScheme(std::string sch_name)
 void status::saveLastState()
 {
 	xcvr_name = selrig->name_;
-	Fl_Preferences xcvrpref(RigHomeDir.c_str(), "w1hkj.org", PACKAGE_TARNAME);
+
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences xcvrpref(RigHomeDir.c_str(), "w1hkj.com", PACKAGE_TARNAME);
+#else
+	Fl_Preferences xcvrpref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		PACKAGE_TARNAME,
+		Fl_Preferences::C_LOCALE);
+#endif
+
 	xcvrpref.set("xcvr_name", xcvr_name.c_str());
 
 	int mX = mainwindow->x();
@@ -915,7 +934,16 @@ void status::saveLastState()
 	if (tabsGeneric)
 		visible_tab = (tabsGeneric->value())->label();
 
-	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.org", xcvr_name.c_str());
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", xcvr_name.c_str());
+#else
+	Fl_Preferences spref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		xcvr_name.c_str(),
+		Fl_Preferences::C_LOCALE);
+#endif
+
 
 	spref.set("version", PACKAGE_VERSION);
 
@@ -1516,7 +1544,16 @@ void status::saveLastState()
 
 bool status::loadXcvrState(std::string xcvr)
 {
-	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.org", xcvr.c_str());
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences spref(RigHomeDir.c_str(), "w1hkj.com", xcvr.c_str());
+#else
+	Fl_Preferences spref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		xcvr.c_str(),
+		Fl_Preferences::C_LOCALE);
+#endif
+
 
 	if (spref.entryExists("version")) {
 
@@ -2301,7 +2338,16 @@ bool status::loadXcvrState(std::string xcvr)
 
 void status::loadLastState()
 {
-	Fl_Preferences xcvrpref(RigHomeDir.c_str(), "w1hkj.org", PACKAGE_TARNAME);
+#if FLRIG_FLTK_API_MINOR < 4
+	Fl_Preferences xcvrpref(RigHomeDir.c_str(), "w1hkj.com", PACKAGE_TARNAME);
+#else
+	Fl_Preferences xcvrpref(
+		RigHomeDir.c_str(),
+		"w1hkj.com",
+		PACKAGE_TARNAME,
+		Fl_Preferences::C_LOCALE);
+#endif
+
 	if (xcvrpref.entryExists("xcvr_name")) {
 		char defbuffer[MAX_DEFBUFFER_SIZE];
 		xcvrpref.get("xcvr_name", defbuffer, "NONE", MAX_DEFBUFFER_SIZE);
