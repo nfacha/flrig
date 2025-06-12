@@ -243,5 +243,6 @@ extern RIG_TCI_SUNDX	rig_tci_sundx;	// 107
 extern RIG_TCI_SUNPRO	rig_tci_sunpro;	// 108
 extern RIG_TRUSDX		rig_trusdx;		// 109
 extern RIG_SmartSDR     rig_smartsdr;   // 110
+extern RIG_IC7760	rig_IC7760; // 111
 
 #endif

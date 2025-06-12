@@ -24,6 +24,10 @@
 #include "icom/IC746.h"
 
 class RIG_IC7610 : public RIG_ICOM  {
+protected:
+	const meterpair* pwrtbl;
+	size_t pwrtbl_size;
+
 public:
 	RIG_IC7610();
 	~RIG_IC7610(){}
@@ -202,6 +206,12 @@ public:
 
 	void sync_date(char *dt);
 	void sync_clock(char *tm);
+};
+
+class RIG_IC7760 : public RIG_IC7610 {
+public:
+	RIG_IC7760();
+	~RIG_IC7760() {}
 };
 
 #endif

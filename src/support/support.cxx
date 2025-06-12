@@ -767,7 +767,7 @@ void update_preamp(void *d)
 
 void update_attenuator(void *d)
 {
-	if (selrig->name_ == rig_IC7610.name_) {
+	if (selrig->name_ == rig_IC7610.name_ || selrig->name_ == rig_IC7760.name_) {
 		ic7610att->index(progStatus.index_ic7610att);
 		return;
 	}

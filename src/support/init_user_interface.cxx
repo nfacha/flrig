@@ -1115,7 +1115,7 @@ void TRACED(init_Generic_Tabs)
 	genericUser_3->redraw();
 	genericUser_3->show();
 
-	if (selrig->name_ == rig_IC7610.name_) {
+	if (selrig->name_ == rig_IC7610.name_ || selrig->name_ == rig_IC7760.name_) {
 
 		tabsGeneric->add(tab7610);
 		tab7610->redraw();

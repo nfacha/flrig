@@ -221,6 +221,22 @@ void RIG_IC7610::initialize()
 	choice_tTONE->activate();
 }
 
+static meterpair pwrtbl_IC7610[] = {
+	{0, 0.0},
+	{21, 5.0},
+	{43,10.0},
+	{65, 15.0},
+	{83, 20.0},
+	{95, 25.0},
+	{105, 30.0},
+	{114, 35.0},
+	{124, 40.0},
+	{143, 50.0},
+	{183, 75.0},
+	{212, 100.0},
+	{255, 120.0 }
+};
+
 RIG_IC7610::RIG_IC7610() {
 	defaultCIV = 0x98;
 	adjustCIV(defaultCIV);
@@ -231,6 +247,9 @@ RIG_IC7610::RIG_IC7610() {
 	bw_vals_ = IC7610_bw_vals_SSB;
 
 	_mode_type = IC7610_mode_type;
+
+	pwrtbl = pwrtbl_IC7610;
+	pwrtbl_size = sizeof(pwrtbl_IC7610) / sizeof(meterpair);
 
 	serial_baudrate = BR19200;
 	stopbits = 1;
@@ -1514,21 +1533,6 @@ double RIG_IC7610::get_voltmeter()
 	return -1;
 }
 
-static meterpair pwrtbl[] = { 
-	{0, 0.0},
-	{21, 5.0},
-	{43,10.0}, 
-	{65, 15.0},
-	{83, 20.0}, 
-	{95, 25.0}, 
-	{105, 30.0},
-	{114, 35.0}, 
-	{124, 40.0}, 
-	{143, 50.0}, 
-	{183, 75.0},
-	{212, 100.0},
-	{255, 120.0 } };
-
 int RIG_IC7610::get_power_out(void)
 {
 	std::string cstr = "\x15\x11";
@@ -1543,15 +1547,17 @@ int RIG_IC7610::get_power_out(void)
 		if (p != std::string::npos) {
 			mtr = fm_bcd(replystr.substr(p+6), 3);
 			size_t i = 0;
-			for (i = 0; i < sizeof(pwrtbl) / sizeof(meterpair) - 1; i++)
+			for (i = 0; i < pwrtbl_size - 1; i++)
 				if (mtr >= pwrtbl[i].mtr && mtr < pwrtbl[i+1].mtr)
 					break;
 			if (mtr < 0) mtr = 0;
 			if (mtr > 255) mtr = 255;
 			mtr = (int)ceil(pwrtbl[i].val + 
 				(pwrtbl[i+1].val - pwrtbl[i].val)*(mtr - pwrtbl[i].mtr)/(pwrtbl[i+1].mtr - pwrtbl[i].mtr));
-			
-			if (mtr > 100) mtr = 100;
+
+			// clamp at latest (which is also biggest) value in pwrtbl
+			int mtr_max = pwrtbl[pwrtbl_size - 1].mtr;
+			if (mtr > mtr_max) mtr = mtr_max;
 		}
 	}
 	return mtr;
@@ -2446,6 +2452,39 @@ void RIG_IC7610::sync_clock(char *tm)
 	seth();
 }
 
+//======================================================================
+// IC-7760
+//======================================================================
+
+static const char IC7760name_[] = "IC-7760";
+
+static meterpair pwrtbl_IC7760[] = {
+	{  0, 0.0 }, // ok
+	{ 44, 10.0 }, // ?
+	{ 59, 20.0 }, // ?
+	{ 80, 40.0 },
+	{101, 60.0 },
+	{122, 80.0 },
+	{143, 100.0 }, // ok
+	{157, 120.0 },
+	{171, 140.0 },
+	{184, 160.0 },
+	{198, 180.0 },
+	{212, 200.0 } // ok
+};
+
+
+RIG_IC7760::RIG_IC7760() {
+// base class values
+        IDstr = "ID";
+        name_ = IC7760name_;
+
+	pwrtbl = pwrtbl_IC7760;
+	pwrtbl_size = sizeof(pwrtbl_IC7760) / sizeof(meterpair);
+
+	defaultCIV = 0xb2;
+	adjustCIV(defaultCIV);
+}
 
 #undef NUM_FILTERS
 #undef NUM_MODES

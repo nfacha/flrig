@@ -1836,7 +1836,7 @@ Fl_Double_Window *tabs_window()
 
 		genericUser_3->end();
 }
-		tab7610 = new Fl_Group(0, 24, small_mainW, gph - 24, _("IC7610"));
+		tab7610 = new Fl_Group(0, 24, small_mainW, gph - 24, _("7610/7760"));
 {
 			ic7610digi_sel_on_off = new Fl_Light_Button(5, tab7610->y() + 10, 70, 22, "Digi-Sel");
 			ic7610digi_sel_on_off->value(progStatus.digi_sel_on_off);

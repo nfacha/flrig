@@ -907,7 +907,8 @@ static void cb_btn_enable_keyer(Fl_Check_Button* o, void*) {
 }
 
 static void cb_btnBreakIn(Fl_Check_Button* o, void*) {
-	if (xcvr_name == rig_IC7300.name_ || xcvr_name == rig_IC7610.name_) {
+	if (xcvr_name == rig_IC7300.name_ || xcvr_name == rig_IC7610.name_
+			|| xcvr_name == rig_IC7760.name_) {
 		progStatus.break_in++;
 		if (progStatus.break_in == 3)
 			progStatus.break_in = 0;
