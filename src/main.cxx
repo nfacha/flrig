@@ -156,8 +156,11 @@ void about()
 	std::string msg = "\
 %s\n\
 Version %s\n\
-copyright W1HKJ  <w1hkj@@w1hkj.com>\n\
-Developer:  Dave,  W1HKJ";
+copyright W1HKJ  <w1hkj25@@gmail.com>\n\
+Developer:  Dave,  W1HKJ\n\
+\n\
+Dedicated to the memory of Mike Black, W9MDB,\n\
+hamlib expert, and prolific contributor to flrig.";
 	fl_message(msg.c_str(), PACKAGE_TARNAME, PACKAGE_VERSION);
 }
 

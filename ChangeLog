@@ -1,5 +1,162 @@
-2023-12-29  dave-w1hkj  <w1hkj@bellsouth.net>
+2025-04-06  dave-w1hkj  <w1hkj@bellsouth.net>
 
+	17adca9c: Version 2.0.06
+	6191ba6b: TS870S header file
+	165bb7ae: Change .com to .org
+	23ca9d3f: QMX+ digital naming
+	7d56e511: GPIO
+	2031203e: FT-991/A power out
+	9c369982: FT2000 power control
+	f8efea91: IC 7600/7610/9700 time functions
+	781335ee: TT550 debug
+
+2024-11-27  Dan  <notifications@github.com>
+
+	9693bc6d: IC7000
+
+2024-11-25  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	d1ac9251: FTdx101D
+	71f92da2: Send Command
+	6be9dfc4: FT2000 rfgain
+	24342480: FLTK 1.4.0
+
+2024-11-01  Philip Rose  <gm3zza@groups.io>
+
+	542b1076: dave-w1hkj <w1hkj@bellsouth.net>
+
+2024-11-01  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	2bc72392: IDD scales
+
+2024-09-25  Steve KB5AW  <srs@umich.edu>
+
+	1bf78b34: FT-890 update
+
+2024-08-16  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	27ecfee5: K4 controls
+	95cd0069: zsec_t
+	b82c59f8: IC7300 labels
+	75b15847: serial i/o
+
+2024-06-23  Michael Black  <mdblack98@yahoo.com>
+
+	0e7950e8: rig_io multiple string test
+
+2024-06-03  Filip Stanic YU3FMS  <filip@yu3fms.rs>
+
+	c3fc03e9: TS590 alc/swr
+
+2024-06-03  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	d4e14a92: Restore memory sort
+	8e369fa6: echo
+	565b8868: code cleanup
+	4bda3f4c: trace bug fix
+	5e045cc4: RTS/DTR PTT
+	6a5218ec: echo auto detect
+	9aefef09: remove flfnc_common
+	56cf1953: UI configuration
+	baf4a059: autoreconf update
+	52ea69c3: Warnings
+
+2024-05-13  Michael Black  <mdblack98@yahoo.com>
+
+	7bf82756: Icom Send Cmd failure
+
+2024-05-10  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	768b7fc3: G90 read smeter
+	d6fa87fa: ic7610 PBT
+	9004b285: TCP-IP read response
+	e16ef098: fdm duo
+	040e2b1f: Mode fast set/get
+
+2024-04-20  Michael Black  <mdblack98@yahoo.com>
+
+	e4842373: 991/A auto start
+
+2024-04-19  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	51a9e8d1: FT890 status
+	383dad47: Auto Notch Label
+	50c9c280: ts570 ptt
+
+2024-04-12  Michael Black  <mdblack98@yahoo.com>
+
+	b328fdb0: Cannot connect logic
+
+2024-04-08  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	03ecfa0f: Serial readbuffer
+	03979006: XML label access
+
+2024-04-06  Michael Black  <mdblack98@yahoo.com>
+
+	242e9474: TS890
+
+2024-04-05  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	03121c24: BW fast set/get
+	f8711222: UI update
+	07da7833: xml-tcp-serial
+
+2024-03-30  Black Michael  <mdblack98@yahoo.com>
+
+	e7054a4f: Win32 com port search
+
+2024-03-30  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	37297e5a: Icom transceivers mode change
+
+2024-03-29  Black Michael  <mdblack98@yahoo.com>
+
+	c4055ef7: Win32 zusec overflow
+
+2024-03-29  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	1b827f2a: QMX
+	1a081538: FT991A
+	75483df9: IC7610 continued
+	6f482945: UI tab color
+	3e111186: Xml binary client
+	c0eb8b49: Yaesu Auto ON/OFF
+	f8fdb9e3: FT747GX
+
+2024-03-08  Michael Black  <mdblack98@yahoo.com>
+
+	76bc548c: tcpip update
+
+2024-03-03  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	e6ab3bae: TCPIP connection
+
+2024-02-19  David Freese W1HKJ  <w1hkj@bellsouth.net>
+
+	e08d5ae2: Yaesu Xcvr RFgain/squelch
+
+2024-02-07  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	a55e153c: Yaesu binary
+	278c175c: FT747 check
+	ddc6281b: IC7610
+	27e7864f: LISTSIZE
+	9ff3bc67: font browser
+
+2024-01-06  Thomas Beierlein  <notifications@github.com>
+
+	1377f283: Geentoo Linux
+
+2024-01-06  Dominik DB1RUF  <db1ruf@darc.de>
+
+	9d3d9b11: TMD710 update
+
+2024-01-05  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	74c3abbb: meterpair structure
+	5f84309e: memory sort
+	6425c41b: Version 2.0.05
 	fb72498d: MinGW compile warning
 	e2ce0334: FT 891/991/991A
 	afb6943c: TMD710
