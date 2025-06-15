@@ -1,6 +1,22 @@
+2025-06-15  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	d63c827a: Version 2.0.07
+
+2025-06-12  Arkadiusz Miśkiewicz  <arekm@maven.pl>
+
+	f57e1e4a: IC-7760
+
+2025-06-11  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	33d19309: Version 2.0.06
+	19c65653: Pref file fix
+
+2025-05-01  Kenji Rikitake JJ1BDX / N6BDX  <jj1bdx@gmail.com>
+
+	2566fb15: ic705 wfm
+
 2025-04-06  dave-w1hkj  <w1hkj@bellsouth.net>
 
-	17adca9c: Version 2.0.06
 	6191ba6b: TS870S header file
 	165bb7ae: Change .com to .org
 	23ca9d3f: QMX+ digital naming
