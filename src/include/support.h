@@ -122,6 +122,8 @@ extern void yaesu891UpdateA(XCVR_STATE * newVfo);
 extern void yaesu891UpdateB(XCVR_STATE * newVfo);
 extern void redrawAGC();
 
+extern void serviceXCVR(VFOQUEUE nuvals);
+
 extern void serviceA(XCVR_STATE nuvals);
 extern void serviceB(XCVR_STATE nuvals);
 
@@ -407,7 +409,7 @@ extern double pwrval;
 extern double swrval;
 extern double alcval;
 
-extern std::queue<VFOQUEUE> srvc_reqs;
+//extern std::queue<VFOQUEUE> srvc_reqs;
 
 extern void trace(int n, ...); // all args of type const char *
 extern void trace1(int n, ...); // all args of type const char *

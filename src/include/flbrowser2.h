@@ -21,9 +21,9 @@
 #ifndef FL_BROWSER2_
 #define FL_BROWSER2_
 
-#include <FL/Fl_Browser.H>
+#include <FL/Fl_Hold_Browser.H>
 
-class Fl_Browser2 : public Fl_Browser
+class Fl_Browser2 : public Fl_Hold_Browser
 {
 public:
 	Fl_Browser2(int x, int y, int w, int h, const char* l = 0);

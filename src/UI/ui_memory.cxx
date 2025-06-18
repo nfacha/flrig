@@ -208,14 +208,15 @@ Fl_Double_Window* Memory_Dialog() {
 Left Click:     high light\n\
 Dbl Left Click: select\n\
 Right click:    select"));
-		FreqSelect->type(2);
 		FreqSelect->labelfont(4);
 		FreqSelect->labelsize(14);
 		FreqSelect->textfont(4);
 		FreqSelect->textsize(14);
+		FreqSelect->selection_color(FL_CYAN);
+
 		FreqSelect->column_widths(freq_sel_widths);
 		FreqSelect->callback((Fl_Callback*)cb_FreqSelect);
-//		FreqSelect->has_scrollbar(Fl_Browser_::BOTH_ALWAYS);
+
 
 		mm_grp1b->end();
 		mm_grp1b->resizable(FreqSelect);

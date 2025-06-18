@@ -315,24 +315,6 @@ public:
 //------------------------------------------------------------------------------
 // Request for split state
 //------------------------------------------------------------------------------
-inline void wait()
-{
-	return;
-
-	int n = 0;
-	while (!srvc_reqs.empty()) {
-		MilliSleep(10);
-		if (++n == 500) break;
-	}
-	static char s[50];
-
-	if (n == 500)
-		snprintf(s, sizeof(s), "wait for srvc_reqs timed out");
-	else
-		snprintf(s, sizeof(s), "wait for srvc reqs %d msec", 10 * n);
-
-	xml_trace(1, s);
-}
 
 class rig_get_split : public XmlRpcServerMethod {
 public:
@@ -372,8 +354,6 @@ public:
 		static char szfreq[20];
 		unsigned long long freq;
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_vfo");
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_vfo");
 
 		if (selrig->ICOMmainsub) {
@@ -476,8 +456,6 @@ public:
 			return;
 		}
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_AB");
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_AB");
 
 		xml_trace(2, "rig_get_AB: " , ((selrig->inuse == onB) ? "B" : "A"));
@@ -919,8 +897,6 @@ public :
 			return;
 		}
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_modes");
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_modes");
 
 		xml_trace(1, "rig_get_modes");
@@ -962,8 +938,7 @@ public:
 		}
 		int mode;
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_sideband");
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_sideband");
 
 		mode = vfo->imode;
@@ -996,7 +971,7 @@ public:
 		}
 
 		int mode;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_mode");
 
@@ -1033,7 +1008,7 @@ public:
 		}
 
 		int mode;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_mode");
 
@@ -1071,7 +1046,7 @@ public:
 		}
 
 		int mode;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_mode");
 
@@ -1113,10 +1088,9 @@ public :
 		}
 		XmlRpcValue bws;
 
-		wait();
+
 
 		try {
-			guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_bws");
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_bws");
 
 			int mode = (selrig->inuse == onB) ? vfoB.imode : vfoA.imode;
@@ -1179,13 +1153,12 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value()) return;
 
-		wait();
+
 
 		int BW = (selrig->inuse == onB) ? vfoB.iBW : vfoA.iBW;
 		int mode = (selrig->inuse == onB) ? vfoB.imode : vfoA.imode;
 
 		try {
-			guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_bw");
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_bw");
 
 			if (!selrig->has_bandwidth_control)
@@ -1231,13 +1204,12 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value()) return;
 
-		wait();
+
 
 		int BW = vfoA.iBW;
 		int mode = vfoA.imode;
 
 		try {
-			guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_bwA");
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_bwA");
 
 			if (!selrig->has_bandwidth_control)
@@ -1284,14 +1256,13 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value()) return;
 
-		wait();
+
 
 		int BW = vfoB.iBW;
 		int mode = vfoB.imode;
 		result[0] = result[1] = "";
 
 		try {
-			guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_bwB");
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_bwB");
 
 			if (!selrig->has_bandwidth_control)
@@ -1645,7 +1616,6 @@ public:
 			result = 0;
 			return;
 		}
-		guard_lock que_lock(&mutex_srvc_reqs, "xml rig_tune");
 		guard_lock serial_lock(&mutex_serial, "xml 13");
 		selrig->tune_rig(2);
 	}
@@ -1778,13 +1748,10 @@ public:
 			result = 0;
 			return;
 		}
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_swap");
-		guard_lock serial_lock(&mutex_serial, "xml rig_swap");
-
 		VFOQUEUE xcvr;
 		xcvr.change = SWAP;
 		xml_trace(1, "xmlrpc SWAP");
-		srvc_reqs.push(xcvr);
+		serviceXCVR(xcvr);
 	}
 
 	std::string help() { return std::string("executes vfo swap"); }
@@ -1805,14 +1772,10 @@ public:
 			return;
 		}
 
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_set_swap");
-		guard_lock serial_lock(&mutex_serial, "xml rig_set_swap");
-
 		VFOQUEUE xcvr;
 		xcvr.change = SWAP;
 		xml_trace(1, "xmlrpc SWAP");
-		srvc_reqs.push(xcvr);
-
+		serviceXCVR(xcvr);
 	}
 
 	std::string help() { return std::string("executes vfo swap"); }
@@ -1831,13 +1794,10 @@ public:
 			return;
 		}
 
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_set_verify_swap");
-		guard_lock serial_lock(&mutex_serial, "xml rig_set_verify_swap");
-
 		VFOQUEUE xcvr;
 		xcvr.change = SWAP;
 		xml_trace(1, "xmlrpc SWAP");
-		srvc_reqs.push(xcvr);
+		serviceXCVR(xcvr);
 
 	}
 
@@ -1862,14 +1822,11 @@ public:
 		}
 		int state = int(params[0]);
 		{
-			guard_lock lock(&mutex_srvc_reqs, "xml rig_set_verify_split");
-			guard_lock serial_lock(&mutex_serial, "xml rig_set_verify_split");
-
 			VFOQUEUE xcvr_split;
 			if (state) xcvr_split.change = sON;
 			else       xcvr_split.change = sOFF;
 			xml_trace(1, (state ? "rig_set_verify_split ON" : "rig_set_verify_split OFF"));
-			srvc_reqs.push(xcvr_split);
+			serviceXCVR(xcvr_split);
 		}
 		for (int i = 0; i < 50; i++) {
 			if (progStatus.split == state) return;
@@ -1894,14 +1851,11 @@ public:
 		}
 		int state = int(params[0]);
 		{
-			guard_lock lock(&mutex_srvc_reqs, "xml rig_set_verify_split");
-			guard_lock serial_lock(&mutex_serial, "xml rig_set_verify_split");
-
 			VFOQUEUE xcvr_split;
 			if (state) xcvr_split.change = sON;
 			else       xcvr_split.change = sOFF;
 			xml_trace(1, (state ? "rig_set_verify_split ON" : "rig_set_verify_split OFF"));
-			srvc_reqs.push(xcvr_split);
+			serviceXCVR(xcvr_split);
 		}
 		for (int i = 0; i < 50; i++) {
 			if (progStatus.split == state) return;
@@ -2771,7 +2725,6 @@ public:
 		}
 		int bw = (int)params[0];
 
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_set_bandwidth");
 		guard_lock serial_lock(&mutex_serial, "xml rig_set_bandwidth");
 
 //		XCVR_STATE nuvals;
@@ -2827,7 +2780,6 @@ public:
 		}
 		int bw = int(params[0]);
 
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_set_verify_bandwidth");
 		guard_lock serial_lock(&mutex_serial, "xml rig_set_verify_bandwidth");
 
 		XCVR_STATE nuvals;
@@ -2896,7 +2848,6 @@ public:
 			}
 		}
 
-		guard_lock que_lock ( &mutex_srvc_reqs, "xml rig_set_bw" );
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_bw");
 
 		nuvals.iBW = bw;
@@ -2946,7 +2897,6 @@ public:
 			}
 		}
 
-		guard_lock que_lock ( &mutex_srvc_reqs, "xml rig_set_verify_bw" );
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_bw");
 
 		int retbw;
@@ -2999,7 +2949,6 @@ public:
 			}
 		}
 
-		guard_lock que_lock ( &mutex_srvc_reqs, "xml rig_set_BW" );
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_BW");
 		if (selrig->inuse == onB) {
 		nuvals.freq = vfoB.freq;
@@ -3049,7 +2998,6 @@ public:
 			}
 		}
 
-		guard_lock que_lock ( &mutex_srvc_reqs, "xml rig_set_BW" );
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_BW");
 		int retbw;
 		nuvals.iBW = bw;
@@ -3085,7 +3033,6 @@ public:
 		XCVR_STATE nuvals;
 		int bwch = (int)params[0];
 
-		guard_lock lock(&mutex_srvc_reqs, "xml rig_mod_bandwidth");
 		guard_lock serial_lock(&mutex_serial, "xml rig_mod_bandwidth");
 
 		if (selrig->inuse == onB) {
@@ -3117,7 +3064,6 @@ public:
 
 			nuvals.iBW = i;
 		} catch (const std::exception& e) {
-//			std::cout << e.what() << '\n';
 		}
 
 		if (selrig->inuse == onB) {
@@ -3150,8 +3096,6 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_pbt_controls) return;
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_");
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_");
 
 		char inner[10];
@@ -3183,8 +3127,7 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_pbt_controls) return;
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_");
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_");
 
 		char inner[10];
@@ -3213,8 +3156,7 @@ public:
 
 		if (!xcvr_online || disable_xmlrpc->value() || !selrig->has_pbt_controls) return;
 
-		wait();
-		guard_lock service_lock(&mutex_srvc_reqs, "xml rig_get_");
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_");
 
 		char outer[10];
@@ -3342,7 +3284,6 @@ public:
 		guard_lock serial_lock(&mutex_serial, "rig_client_string");
 
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
-		std::cout << "readResponse: " << readResponse();
 }
 
 		xml_trace(2, "xmlrpc command:", command.c_str());
@@ -3384,9 +3325,8 @@ public:
 			}
 		} else
 			cmd = command;
-// lock out polling loops until done
+
 		{
-			guard_lock lock1(&mutex_srvc_reqs);
 			guard_lock lock2(&mutex_serial, "xml 39");
 
 			if (progStatus.use_tcpip) 
@@ -3436,7 +3376,6 @@ public:
 		} else
 			cmd = command;
 
-		guard_lock lock1(&mutex_srvc_reqs);
 		guard_lock lock2(&mutex_serial, "xml 40");
 
 		RigSerial->WriteBuffer(cmd.c_str(), cmd.length());
@@ -3652,7 +3591,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_agc_label");
 
@@ -3691,7 +3630,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_agc_labels");
 
 		xml_trace(1, "rig_get_agc_labels");
@@ -3731,7 +3670,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_att_label");
 
@@ -3770,7 +3709,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_att_labels");
 
 		xml_trace(1, "rig_get_att_labels");
@@ -3810,7 +3749,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_pre_label");
 
@@ -3849,7 +3788,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_pre_labels");
 
 		xml_trace(1, "rig_get_pre_labels");
@@ -3889,7 +3828,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_nb_label");
 
@@ -3928,7 +3867,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_nb_labels");
 
 		xml_trace(1, "rig_get_nb_labels");
@@ -3968,7 +3907,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_nr_label");
 
@@ -4007,7 +3946,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_nr_labels");
 
 		xml_trace(1, "rig_get_nr_labels");
@@ -4047,7 +3986,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_bk_label");
 
@@ -4086,7 +4025,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_bk_labels");
 
 		xml_trace(1, "rig_get_bk_labels");
@@ -4126,7 +4065,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_60M_label");
 
@@ -4165,7 +4104,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_60M_labels");
 
 		xml_trace(1, "rig_get_60M_labels");
@@ -4205,7 +4144,7 @@ public:
 		}
 
 		std::string str_val;
-		wait();
+
 		try {
 			guard_lock serial_lock(&mutex_serial, "xml rig_get_an_label");
 
@@ -4244,7 +4183,7 @@ public :
 			return;
 		}
 
-		wait();
+
 		guard_lock serial_lock(&mutex_serial, "xml rig_get_an_labels");
 
 		xml_trace(1, "rig_get_an_labels");

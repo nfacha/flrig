@@ -31,12 +31,9 @@
 
 extern pthread_mutex_t mutex_replystr;
 extern pthread_mutex_t command_mutex;
-extern pthread_mutex_t mutex_vfoque;
 extern pthread_mutex_t mutex_serial;
 extern pthread_mutex_t debug_mutex;
 extern pthread_mutex_t mutex_rcv_socket;
-extern pthread_mutex_t mutex_ptt;
-extern pthread_mutex_t mutex_srvc_reqs;
 extern pthread_mutex_t mutex_trace;
 
 // Change to 1 to observe guard lock/unlock processing on stdout
@@ -87,11 +84,9 @@ const char * guard_lock::name(pthread_mutex_t *m) {
 	if (m == &mutex_replystr) return "mutex_replystr";
 	if (m == &command_mutex) return "command_mutex";
 	if (m == &mutex_replystr) return "mutex_replystr";
-	if (m == &mutex_vfoque) return "mutex_vfoque";
 	if (m == &mutex_serial) return "mutex_serial";
 	if (m == &debug_mutex) return "debug_mutex";
 	if (m == &mutex_rcv_socket) return "mutex_rcv_socket";
-	if (m == &mutex_ptt) return "mutex_ptt";
 	if (m == &mutex_srvc_reqs) return "mutex_service_requests";
 	if (m == &mutex_trace) return "mutex_trace";
 	return "";

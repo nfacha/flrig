@@ -42,8 +42,13 @@
 
 #include <FL/names.h>
 
+//Fl_Browser2::Fl_Browser2(int x, int y, int w, int h, const char* l)
+//: Fl_Browser(x, y, w, h, l)
+//{
+//}
+
 Fl_Browser2::Fl_Browser2(int x, int y, int w, int h, const char* l)
-: Fl_Browser(x, y, w, h, l)
+: Fl_Hold_Browser(x, y, w, h, l)
 {
 }
 
@@ -58,6 +63,6 @@ int Fl_Browser2::handle(int event)
 		do_callback();
 		return 1;
 	}
-	return Fl_Browser::handle(event);
+	return Fl_Hold_Browser::handle(event);
 }
 
