@@ -82,6 +82,7 @@ static inline int mingw_unlink(const char *pathname)
  */
 
 unsigned int sleep (unsigned int seconds);
+
 char *mingw_getcwd(char *pointer, int len);
 #define getcwd mingw_getcwd
 char *mingw_getenv(const char *name);
@@ -99,7 +100,6 @@ int mingw_rename(const char*, const char*);
 #  define SHUT_RDWR SD_BOTH
 #endif
 
-int nanosleep (const struct timespec *req, struct timespec *rem);
 int socketpair(int family, int type, int protocol, int *sv);
 
 /* uname */

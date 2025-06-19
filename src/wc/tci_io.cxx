@@ -34,7 +34,7 @@
 #include <stdio.h>
 
 //#define TCI_DEBUG
-
+/*
 #if 0
 #include <time.h>
 #include <pthread.h>
@@ -48,7 +48,7 @@ void MilliSleep(long msecs)
 	struct timespec tv;
 	tv.tv_sec = msecs / 1000;
 	tv.tv_nsec = (msecs - tv.tv_sec * 1000) * 1000000L;
-	nanosleep(&tv, NULL);
+	nano_sleep(&tv, NULL);
 }
 
 class guard_lock
@@ -68,12 +68,13 @@ private:
 //----------------------------------------------------------------------
 
 #else
-
+*/
 #include "util.h"
 #include "trace.h"
 #include "threads.h"
-
+/*
 #endif
+*/
 
 TCI_VALS slice_0, slice_1;
 

@@ -47,6 +47,10 @@
 #include "support.h"
 #include "status.h"
 
+#ifdef __WIN32__
+#include "mingw.h"
+#endif
+
 #define CWIO_DEBUG
 
 Cserial *cwio_serial = 0;
@@ -90,14 +94,14 @@ int cw_sleep (double sleep_time)
 
 #ifdef __WIN32__
 	timeBeginPeriod(1);
-	nanosleep (&tv1, NULL);
+	nano_sleep (&tv1, NULL);
 	while ((lasterr = end_at - monotonic_seconds()) > 0)
-		nanosleep(&tv2, NULL);
+		nano_sleep(&tv2, NULL);
 	timeEndPeriod(1);
 #else
-	nanosleep (&tv1, NULL);
+	nano_sleep (&tv1, NULL);
 	while (((lasterr = end_at - monotonic_seconds()) > 0))
-		nanosleep(&tv2, NULL);
+		nano_sleep(&tv2, NULL);
 #endif
 
 #ifdef CWIO_DEBUG
@@ -546,11 +550,8 @@ void stop_cwio_thread()
 	cwio_process = END;
 	btn_cwioSEND->value(0);
 
-	cw_sleep( 4.8 / progStatus.cwioWPM);
-
 	cwio_process = TERMINATE;
 	pthread_cond_signal(&cwio_cond);
-	cw_sleep(0.050);
 
 	pthread_join(cwio_pthread, NULL);
 

@@ -145,4 +145,6 @@ struct cpreamble
 };
 #define PREAMBLE cpreamble _cpreamble(__func__);
 
+int nano_sleep(const struct timespec *req, struct timespec *rem);
+
 #endif // !THREADS_H_

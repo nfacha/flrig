@@ -239,21 +239,6 @@ int socketpair(int family, int type, int protocol, SOCKET *sv)
 }
 
 /******************************************************************************/
-
-int nanosleep(const struct timespec *req, struct timespec *rem)
-{
-	if (unlikely(req->tv_nsec < 0 || req->tv_nsec < 0L || req->tv_nsec > 999999999L)) {
-		errno = EINVAL;
-		return -1;
-	}
-	Sleep(req->tv_sec * 1000 + req->tv_nsec / 1000000L);
-	if (unlikely(rem)) {
-		rem->tv_sec = 0;
-		rem->tv_nsec = 0L;
-	}
-	return 0;
-}
-
 /*
 BOOL GetOsInfo(LPSTR OsName, LPSTR Release, LPSTR Version);
 BOOL GetMachInfo(LPSTR MachineName, LPSTR ProcessorName);

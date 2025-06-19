@@ -96,3 +96,28 @@ const char * guard_lock::name(pthread_mutex_t *m) {
 	if (m == &mutex_trace) return "mutex_trace";
 	return "";
 }
+
+#ifndef __WIN_32_
+
+int nano_sleep(const struct timespec *req, struct timespec *rem)
+{
+	return nanosleep(req, rem);
+}
+
+#else
+
+int nano_sleep(const struct timespec *req, struct timespec *rem)
+{
+	if (unlikely(req->tv_nsec < 0 || req->tv_nsec < 0L || req->tv_nsec > 999999999L)) {
+		errno = EINVAL;
+		return -1;
+	}
+	Sleep(req->tv_sec * 1000 + req->tv_nsec / 1000000L);
+	if (unlikely(rem)) {
+		rem->tv_sec = 0;
+		rem->tv_nsec = 0L;
+	}
+	return 0;
+}
+
+#endif

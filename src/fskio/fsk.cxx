@@ -256,7 +256,7 @@ int FSK::sleep (double sleep_time)
 	end_at -= 0.0005;
 #endif
 	while (1) {
-		rval = nanosleep (&tv, &tv);
+		rval = nano_sleep (&tv, &tv);
 		if (rval == 0)
 			break;
 		else if (errno == EINTR)
