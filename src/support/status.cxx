@@ -37,9 +37,10 @@
 #include "config.h"
 #include "rigpanel.h"
 #include "ui.h"
+#include "rigbase.h"
 #include "debug.h"
 
-std::string xcvr_name = rig_null.name_;
+std::string xcvr_name = szNORIG;
 
 int current_ui_size = -1;
 
