@@ -549,11 +549,14 @@ int vl_;
 	virtual int  get_volume_control() {return vl_;}
 	virtual void get_vol_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_vol_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; }
 
 int ptt_;
 int tune_;
 	virtual void set_PTT_control(int val) {ptt_ = val;}
 	virtual int  get_PTT() {return ptt_;}
+	virtual void tune_rig() {}
 	virtual void tune_rig(int how) {}
 	virtual int  get_tune() { return tune_; }
 
@@ -591,12 +594,16 @@ int no_, noval_;
 	virtual bool get_notch(int &val) {val = noval_; return no_;}
 	virtual void get_notch_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_notch_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; }
 
 	virtual void set_noise(bool on) {nb_state = on;}
 	virtual int  get_noise(){return nb_state;}
 	virtual void set_nb_level(int val) {nb_level = val;}
 	virtual int  get_nb_level() { return nb_level; }
 	virtual void get_nb_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 1; }
+	virtual void get_nb_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; }
 
 int nr_, nrval_;
@@ -605,6 +612,8 @@ int nr_, nrval_;
 	virtual void set_noise_reduction_val(int val) {nrval_ = val;}
 	virtual int  get_noise_reduction_val() {return nrval_;}
 	virtual void get_nr_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 1; }
+	virtual void get_nr_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; }
 
 	virtual void set_pbt_inner(int val) {}
@@ -618,6 +627,9 @@ int mcval_;
 	virtual int  get_mic_gain() {return mcval_;}
 	virtual void get_mic_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_mic_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; }
+
 	virtual void set_mic_line(int val) {}
 
 int sqval_;
@@ -625,12 +637,16 @@ int sqval_;
 	virtual int  get_squelch() {return sqval_;}
 	virtual void get_squelch_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_squelch_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; }
 
 int rfg_;
 	virtual void set_rf_gain(int val) {rfg_ = val;}
 	virtual int  get_rf_gain() {return rfg_;}
 	virtual void get_rf_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_rf_min_max_step(double &min, double &max, double &step) {
+		min = 0.0; max = 100.0; step = 1.0; }
 
 	virtual const char * get_modename_(int n){
 		try {
@@ -657,10 +673,14 @@ int ritval_;
 	virtual int  getRit() {return ritval_;}
 	virtual void get_RIT_min_max_step(int &min, int &max, int &step) {
 		min = -100; max = 100; step = 1; }
+	virtual void get_RIT_min_max_step(double &min, double &max, double &step) {
+		min = -100; max = 100; step = 1; }
 
 	virtual void setXit(int v) { XitFreq = v;}
 	virtual int  getXit() {return XitFreq;}
 	virtual void get_XIT_min_max_step(int &min, int &max, int &step) {
+		min = -100; max = 100; step = 1; }
+	virtual void get_XIT_min_max_step(double &min, double &max, double &step) {
 		min = -100; max = 100; step = 1; }
 
 int bfo_;
@@ -678,6 +698,7 @@ double vfo_;
 	virtual void set_line_out() {}
 	virtual int  get_line_out() { return 100; }
 	virtual void set_agc_level() {}
+	virtual void set_agc_level(int) {}
 
 	virtual void set_cw_weight() {}
 	virtual int  get_cw_weight() {return progStatus.cw_weight;}
@@ -703,6 +724,8 @@ double vfo_;
 	virtual int  get_cw_vol() { return progStatus.cw_vol; }
 	virtual void get_cw_vol_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; } // default for FT950/FT450D
+	virtual void get_cw_vol_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; } // default for FT950/FT450D
 
 	virtual void set_spot_onoff() {}
 	virtual bool set_cw_spot() {return false;}
@@ -710,18 +733,27 @@ double vfo_;
 	virtual int  get_cw_spot_tone() { return progStatus.cw_spot_tone; }
 	virtual void get_cw_spot_tone_min_max_step(int &min, int &max, int &step) {
 		min = 300; max = 1050; step = 50; } // default for FT950/FT450D
+	virtual void get_cw_spot_tone_min_max_step(double &min, double &max, double &step) {
+		min = 300; max = 1050; step = 50; } // default for FT950/FT450D
 
 	virtual void set_vox_onoff() {}
 	virtual void set_vox_gain() {}
 
 	virtual void get_vox_gain_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; } // default for FT950/FT450D
+	virtual void get_vox_gain_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; } // default for FT950/FT450D
 	virtual void set_vox_anti() {}
 	virtual void get_vox_anti_min_max_step(int &min, int &max, int &step) {
+		min = 0; max = 100; step = 1; } // default for FT950/FT450D
+	virtual void get_vox_anti_min_max_step(double &min, double &max, double &step) {
 		min = 0; max = 100; step = 1; } // default for FT950/FT450D
 	virtual void set_vox_hang() {}
 	virtual void get_vox_hang_min_max_step(int &min, int &max, int &step) {
 		min = 30; max = 3000; step = 10; } // default for FT950/FT450D
+	virtual void get_vox_hang_min_max_step(double &min, double &max, double &step) {
+		min = 30; max = 3000; step = 10; } // default for FT950/FT450D
+
 	virtual void set_vox_on_dataport() {}
 	virtual void set_mon_vol() {}
 	virtual void set_squelch_level() {}
@@ -729,6 +761,9 @@ double vfo_;
 	virtual void get_compression(int &on, int &val) { on = 0; val = 0; }
 	virtual void get_comp_min_max_step(int &min, int &max, int &step) {
 		min = 0; max = 100; step = 1; }
+	virtual void get_comp_min_max_step(double &min, double &max, double &step) {
+		min = 0; max = 100; step = 1; }
+
 	virtual void set_auto_notch(int v) {}
 	virtual int  get_auto_notch() {return 0;}
 	virtual void tuner_bypass() {}

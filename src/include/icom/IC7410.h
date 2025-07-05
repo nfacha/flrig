@@ -88,7 +88,7 @@ public:
 	void set_PTT_control(int val);
 	int  get_PTT();
 
-	const char *FILT(int &val);
+	const char *FILT(int val);
 	const char *nextFILT();
 
 	std::vector<std::string>& bwtable(int m);

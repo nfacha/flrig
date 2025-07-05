@@ -84,7 +84,7 @@ public:
 	int  get_pbt_inner();
 	int  get_pbt_outer();
 
-	const char *FILT(int &val);
+	const char *FILT(int val);
 	const char *nextFILT();
 
 	void set_squelch(int val);

@@ -62,7 +62,7 @@ public:
 
 	int  get_smeter();
 
-	void tune_rig();
+	void tune_rig(int);
 
 	void set_bwA(int val);
 	int  get_bwA();

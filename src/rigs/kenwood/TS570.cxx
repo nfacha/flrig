@@ -453,7 +453,7 @@ void RIG_TS570::set_volume_control(int val)
 	sendCommand(cmd);
 }
 
-void RIG_TS570::tune_rig()
+void RIG_TS570::tune_rig(int dummy)
 {
 	cmd = "AC 11;";
 	sendCommand(cmd);

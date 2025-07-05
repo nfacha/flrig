@@ -122,7 +122,7 @@ private:
 	bool  split_on;
 /*
 	int  get_swr();
-	void tune_rig();
+	void tune_rig(int);
 */
 };
 

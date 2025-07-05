@@ -1050,7 +1050,7 @@ int RIG_FDMDUO::get_volume_control()
 	return val;
 }
 
-void RIG_FDMDUO::tune_rig()
+void RIG_FDMDUO::tune_rig(int dummy)
 {
 	cmd = "TX2;";
 	set_trace(1, "set TUNE");

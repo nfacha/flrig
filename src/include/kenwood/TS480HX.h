@@ -67,7 +67,7 @@ public:
 	int  get_swr();
 	int  get_alc();
 	int  get_power_out();
-	void tune_rig();
+	void tune_rig(int);
 
 	void set_bwA(int val);
 	int  get_bwA();

@@ -572,7 +572,7 @@ void RIG_TS870S::set_PTT_control(int val)
 
 //----------------------------------------------------------------------
 // Play with the autotuner		// disabled for now wbx
-void RIG_TS870S::tune_rig()
+void RIG_TS870S::tune_rig(int dummy)
 {
 //	cmd = "AC111;";
 //	sendCommand(cmd);

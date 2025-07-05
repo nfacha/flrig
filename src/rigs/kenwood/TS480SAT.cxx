@@ -1271,7 +1271,7 @@ int RIG_TS480SAT::get_volume_control()
 	return val;
 }
 
-void RIG_TS480SAT::tune_rig()
+void RIG_TS480SAT::tune_rig(int dummy)
 {
 	cmd = "AC111;";
 	LOG_WARN("%s", cmd.c_str());

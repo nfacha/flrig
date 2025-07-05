@@ -76,7 +76,7 @@ public:
 //	double get_power_control();
 //	void set_power_control(double val);
 	void set_PTT_control(int val);
-//	void tune_rig();
+//	void tune_rig(int);
 //	void set_preamp(int val);
 //	int  get_preamp();
 //	void set_notch(bool on, int val);

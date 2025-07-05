@@ -158,7 +158,7 @@ static int tci_def_drm = 0;
 
 void tci_adjust_widths()
 {
-	char szpairs[20];
+	char szpairs[30];
 	int  width;
 	int  lo, hi;
 	int  tci_freq;
@@ -702,7 +702,7 @@ int RIG_TCI_SDR::adjust_bandwidth(int val)
 
 void RIG_TCI_SDR::set_pbt(int inner, int outer)
 {
-	char cmdstr[50];
+	char cmdstr[80];
 	snprintf(cmdstr, sizeof(cmdstr), "rx_filter_band:%c,%d,%d;",
 		(inuse == onA) ? '0' : '1', inner, outer);
 	tci_send(cmdstr);
@@ -797,7 +797,7 @@ int RIG_TCI_SDR::get_noise()
 void RIG_TCI_SDR::set_PTT_control(int val)
 {
 	std::string tcicmd;
-	char cmd[30];
+	char cmd[40];
 	snprintf(cmd, sizeof(cmd), "TRX:%d,%s;",
 		slice, val ? "TRUE" : "FALSE");
 	tci_send(cmd);
@@ -831,7 +831,7 @@ void RIG_TCI_SDR::get_rf_min_max_step(int &min, int &max, int &step)
 void RIG_TCI_SDR::selectA()
 {
 	inuse = onA;
-	char cmd[30];
+	char cmd[40];
 	snprintf(cmd, sizeof(cmd), "RX_CHANNEL_ENABLE:%d,1,FALSE;", slice);
 	tci_send(cmd);
 }
@@ -839,7 +839,7 @@ void RIG_TCI_SDR::selectA()
 void RIG_TCI_SDR::selectB()
 {
 	inuse = onB;
-	char cmd[30];
+	char cmd[40];
 	snprintf(cmd, sizeof(cmd), "RX_CHANNEL_ENABLE:%d,1,TRUE;", slice);
 	tci_send(cmd);
 }
@@ -862,7 +862,7 @@ int  RIG_TCI_SDR::get_slice()
 
 void RIG_TCI_SDR::set_split(bool val)
 {
-	char cmd[30];
+	char cmd[40];
 	snprintf(cmd, sizeof(cmd), "split_enable:%d,%s;",
 		slice, val ? "true;" : "false;");
 	tci_send(cmd);
@@ -891,7 +891,7 @@ void RIG_TCI_SDR::set_vfoA (unsigned long long freq)
 		slice_1.A.freq = freq;
 	else
 		slice_0.A.freq = freq;
-	char vfostr[20];
+	char vfostr[40];
 	snprintf(vfostr, sizeof(vfostr), "vfo:%d,0,%llu;", slice, freq);
 	tci_send(vfostr);
 }
@@ -909,7 +909,7 @@ void RIG_TCI_SDR::set_vfoB (unsigned long long freq)
 		slice_1.B.freq = freq;
 	else
 		slice_0.B.freq = freq;
-	char vfostr[30];
+	char vfostr[40];
 	snprintf(vfostr, sizeof(vfostr), "vfo:%d,1,%llu;", slice, freq);
 	tci_send(vfostr);
 }
@@ -964,7 +964,7 @@ void RIG_TCI_SDR::set_volume_min_max_step(double &min, double &max, double &step
 
 void RIG_TCI_SDR::set_volume_control(int val)
 {
-	char szcmd[20];
+	char szcmd[30];
 	val = ((val * 60)/100) - 60;
 	snprintf(szcmd, sizeof(szcmd), "volume:%d;", val);
 	tci_send(szcmd);
@@ -991,7 +991,7 @@ void RIG_TCI_SDR::get_pc_min_max_step(double &min, double &max, double &step)
 
 void RIG_TCI_SDR::set_power_control(double val)
 {
-	char szcmd[20];
+	char szcmd[30];
 	if (sdrtype == PRO)
 		val *= 5;
 	snprintf(szcmd, sizeof(szcmd), "drive:%d;", (int)(val));
@@ -1010,10 +1010,10 @@ double RIG_TCI_SDR::get_power_control()
 }
 
 static bool tune_on = false;
-void RIG_TCI_SDR::tune_rig()
+void RIG_TCI_SDR::tune_rig(int dummy)
 {
 	tune_on = !tune_on;
-	char szcmd[20];
+	char szcmd[30];
 	snprintf(szcmd, sizeof(szcmd), "tune:%d,%s;", slice,
 		(tune_on ? "true" : "false"));
 	tci_send(szcmd);

@@ -74,7 +74,7 @@ enum TS590SGMODES { LSB, USB, CW, FM, AM, FSK, CWR, FSKR, LSBD, USBD, FMD, AMD }
 //	int  get_volume_control();
 	void set_power_control(double val);
 
-//	void tune_rig();
+//	void tune_rig(int);
 	void set_attenuator(int val);
 	int  get_attenuator();
 	void set_preamp(int val);

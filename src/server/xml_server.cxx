@@ -3051,7 +3051,7 @@ public:
 			bw = atol(widths.at(nuvals.iBW).c_str()) + bwch;
 
 			size_t i = 0;
-			int bwval;
+			int bwval = 0;
 			for (i = 0; i < widths.size(); i++) {
 				if ((bwval = atol(widths.at(i).c_str())) >= bw)
 					break;

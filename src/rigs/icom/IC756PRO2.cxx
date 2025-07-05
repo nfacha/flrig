@@ -1141,14 +1141,14 @@ int RIG_IC756PRO2::get_preamp()
 	return preamp_state;
 }
 
-const char *RIG_IC756PRO2::FILT(int &val)
+const char *RIG_IC756PRO2::FILT(int val)
 {
 	if (inuse == onB) {
-		val = filB;
+		filB = val;
 		return(szfilter[filB - 1]);
 	}
 	else {
-		val = filA;
+		filA = val;
 		return (szfilter[filA - 1]);
 	}
 }

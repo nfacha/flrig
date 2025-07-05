@@ -1303,7 +1303,7 @@ int RIG_TS480HX::get_volume_control()
 	return val;
 }
 
-void RIG_TS480HX::tune_rig()
+void RIG_TS480HX::tune_rig(int dummy)
 {
 	cmd = "AC111;";
 	LOG_WARN("%s", cmd.c_str());

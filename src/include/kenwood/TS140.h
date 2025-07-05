@@ -53,7 +53,7 @@ public:
 //	void set_power_control(double val);
 	void set_PTT_control(int val);
 	int  get_PTT();
-//	void tune_rig();
+//	void tune_rig(int);
 //	void set_bwA(int val);
 
 };

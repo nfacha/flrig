@@ -98,7 +98,7 @@ public:
 		min = 0; max = 100; step = 1; } 
 
 	void set_PTT_control(int val);
-	void tune_rig();
+	void tune_rig(int);
 
 	int  next_attenuator();
 	void set_attenuator(int val);

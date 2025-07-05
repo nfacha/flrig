@@ -94,7 +94,7 @@ enum TX500MODES { LSB, USB, CW, FM, AM, DIG, CWR };
 //	void select_alc();
 //	void set_volume_control(int val);
 //	int  get_volume_control();
-//	void tune_rig();
+//	void tune_rig(int);
 
 //	void set_if_shift(int val);
 //	bool get_if_shift(int &val);

@@ -702,18 +702,16 @@ int RIG_IC7410::get_pbt_outer()
 	return val;
 }
 
-const char *RIG_IC7410::FILT(int &val)
+const char *RIG_IC7410::FILT(int val)
 {
 	if (inuse == onB) {
 		if (filB < 0) filB = 0;
 		if (filB > 3) filB = 3;
-		val = filB;
 		return(szfilter[filB - 1]);
 	}
 	else {
 		if (filA < 0) filA = 0;
 		if (filA > 3) filA = 3;
-		val = filA;
 		return (szfilter[filA - 1]);
 	}
 }

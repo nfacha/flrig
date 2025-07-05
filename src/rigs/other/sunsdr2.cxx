@@ -1055,7 +1055,7 @@ int RIG_SDR2_PRO::get_volume_control()
 	return val;
 }
 
-void RIG_SDR2_PRO::tune_rig()
+void RIG_SDR2_PRO::tune_rig(int dummy)
 {
 	cmd = "AC111;";
 	LOG_WARN("%s", cmd.c_str());

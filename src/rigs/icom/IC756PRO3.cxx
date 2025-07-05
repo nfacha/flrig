@@ -1197,14 +1197,14 @@ int RIG_IC756PRO3::get_auto_notch()
 	return progStatus.auto_notch;
 }
 
-const char *RIG_IC756PRO3::FILT(int &val)
+const char *RIG_IC756PRO3::FILT(int val)
 {
 	if (inuse == onB) {
-		val = filB;
+		filB = val;
 		return(szfilter[filB - 1]);
 	}
 	else {
-		val = filA;
+		filA = val;
 		return (szfilter[filA - 1]);
 	}
 }

@@ -96,7 +96,7 @@ public:
 	int  get_smeter();
 	int  get_swr();
 	int  get_power_out();
-	void tune_rig();
+	void tune_rig(int);
 
 	void set_volume_control(int val);
 	int  get_volume_control();
