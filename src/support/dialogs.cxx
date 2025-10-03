@@ -1632,15 +1632,28 @@ void show_controls()
 
 					grpTABS->resize(tabs_dialog->x(), tabs_dialog->y(), tabs_dialog->w(), tabs_dialog->h());
 					mainwindow->resize(mainwindow->x(), mainwindow->y(), W, H);
+
+					int sW, sH;
+					sW = mainwindow->w();
+					sH = mainwindow->h();
+					mainwindow->size_range( sW, sH, sW, sH);
+
 					progStatus.show_tabs = false;
 				} else if (!progStatus.show_tabs && !progStatus.first_use) {
 					X = mainwindow->x();
 					Y = mainwindow->y();
 					W = mainwindow->w();
 					H = mainwindow->h();
-					mainwindow->resize(X, Y, W, H + grpTABS->h());
+
 					grpTABS->resize(0, H, W, grpTABS->h());
 					mainwindow->add(grpTABS);
+
+					mainwindow->resize(X, Y, W, grpTABS->y() + grpTABS->h() + 2);
+
+					int sW, sH;
+					sW = mainwindow->w();
+					sH = mainwindow->h();
+					mainwindow->size_range( sW, sH, sW, sH);
 
 					grpTABS->show();
 					progStatus.show_tabs = true;
@@ -1651,7 +1664,12 @@ void show_controls()
 					W = mainwindow->w();
 					H = mainwindow->h();
 
-					mainwindow->resize(X, Y, W, H + grpTABS->h());
+					mainwindow->resize(X, Y, W, grpTABS->y() + grpTABS->h() + 2);
+					int sW, sH;
+					sW = mainwindow->w();
+					sH = mainwindow->h();
+					mainwindow->size_range( sW, sH, sW, sH);
+
 					grpTABS->resize(0, H, W, grpTABS->h());
 					mainwindow->add(grpTABS);
 
@@ -1665,11 +1683,13 @@ void show_controls()
 					tabs_dialog->hide();
 
 					progStatus.show_tabs = false;
+
 				} else if ((!progStatus.show_tabs && !progStatus.first_use) || (progStatus.show_tabs && progStatus.first_use)) {
-					static int X, Y, W, dH;
+					static int X, Y, W, H, dH;
 					X = mainwindow->x(); //progStatus.mainX;
 					Y = mainwindow->y(); //progStatus.mainY;
 					W = mainwindow->w(); //progStatus.mainW;
+					H = mainwindow->h();
 					dH = mainwindow->decorated_h();
 
 					tabs_dialog->resize( X, Y + dH, W, tabs_dialog->h() );
@@ -1679,6 +1699,11 @@ void show_controls()
 					tabs_dialog->show();
 					tabs_dialog->redraw();
 					progStatus.show_tabs = true;
+					mainwindow->resize(X, Y, W, H);
+					int sW, sH;
+					sW = mainwindow->w();
+					sH = mainwindow->h();
+					mainwindow->size_range( sW, sH, sW, sH);
 				}
 			}
 			break;

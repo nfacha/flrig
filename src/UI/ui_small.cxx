@@ -749,8 +749,6 @@ CTRL  click: FreqB -> FreqA\
 	return g;
 }
 
-static Fl_Box *filler = (Fl_Box *)0;
-
 Fl_Double_Window *tabs_window()
 {
 	int gph = 70 + 22;
@@ -1959,10 +1957,11 @@ Fl_Double_Window *tabs_window()
 }
 
 Fl_Double_Window* Small_rig_window() {
+
 	Fl_Double_Window* w = new Fl_Double_Window(small_mainW, small_mainH, _("Flrig"));
 	w->align(Fl_Align(FL_ALIGN_CLIP|FL_ALIGN_INSIDE));
 
-	grp_menu = new Fl_Group(0,0,small_mainW,small_menuH);
+	grp_menu = new Fl_Group(0, 0, small_mainW, small_menuH);
 
 		small_menu = new Fl_Menu_Bar(0, 0, small_mainW - 64, small_menuH);
 		small_menu->textsize(12);
@@ -1998,10 +1997,10 @@ Fl_Double_Window* Small_rig_window() {
 			tcpip_box = new Fl_Group(small_mainW-62, 2, 60, 18);
 			tcpip_box->box(FL_FLAT_BOX);
 
-				tcpip_menu_box = new Fl_Box(small_mainH - 62, 3, 16, 16);
+				tcpip_menu_box = new Fl_Box(small_mainW - 62, 3, 16, 16);
 				tcpip_menu_box->box(FL_DIAMOND_BOX);
 				tcpip_menu_box->color(FL_GREEN);
-				Fl_Box *tcpip_menu_label = new Fl_Box(small_mainH - 62 + 18, 3, 64 - 22, 16, _("tcpip"));
+				Fl_Box *tcpip_menu_label = new Fl_Box(small_mainW - 62 + 18, 3, 64 - 22, 16, _("tcpip"));
 				tcpip_menu_label->box(FL_FLAT_BOX);
 				tcpip_menu_label->align(FL_ALIGN_CENTER);
 				tcpip_menu_label->tooltip(_("lit when connected to remote tcpip"));
@@ -2023,33 +2022,30 @@ Fl_Double_Window* Small_rig_window() {
 		0, small_menuH,
 		small_mainW, small_mainH - small_menuH);
 
-	grpInitializing = new Fl_Group(
-		0, 0, small_mainW, small_mainH);
+		grpInitializing = new Fl_Group(
+			0, 0,
+			small_mainW, small_mainH);
 
-		grpInitializing->box(FL_FLAT_BOX);
-		grpInitializing->color(FL_LIGHT2);
+			grpInitializing->box(FL_FLAT_BOX);
+			grpInitializing->color(FL_LIGHT2);
 
-		progress = new Fl_Progress(
-			small_mainW / 4, small_mainH / 2,
-			small_mainW / 2, 20, "Initializing");
-		progress->maximum(100);
-		progress->minimum(0);
-		progress->labelcolor(FL_DARK_RED);
-		progress->labelsize(12);
-		progress->align(Fl_Align(FL_ALIGN_TOP));
-		progress->selection_color(FL_GREEN);
-
-		filler = new Fl_Box(
-			0, small_mainH - 4,
-			small_mainW, 4);
-		filler->box(FL_FLAT_BOX);
-		filler->color(FL_GREEN);
+			progress = new Fl_Progress(
+				small_mainW / 4, (small_mainH -20) / 2,
+				small_mainW / 2, 20, "Initializing");
+			progress->maximum(100);
+			progress->minimum(0);
+			progress->labelcolor(FL_DARK_RED);
+			progress->labelsize(12);
+			progress->align(Fl_Align(FL_ALIGN_TOP));
+			progress->selection_color(FL_GREEN);
 
 		grpInitializing->end();
-	grpInitializing->resizable(filler);
+
+	main_group->end();
 
 	grpInitializing->show();
 
 	w->end();
+
 	return w;
 }

@@ -45,7 +45,7 @@ void TRACED(adjust_small_ui)
 
 	int y = 0;
 
-	mainwindow->resize( mainwindow->x(), mainwindow->y(), SMALL_MAINW, SMALL_MAINH);
+//	mainwindow->resize( mainwindow->x(), mainwindow->y(), SMALL_MAINW, SMALL_MAINH);
 
 	btnVol->hide();
 	sldrVOLUME->hide();
@@ -275,11 +275,7 @@ void TRACED(adjust_small_ui)
 	btn_show_controls->label("@-22->");
 	btn_show_controls->redraw_label();
 
-	y += 20;
-
 	btn_show_controls->show();
-	mainwindow->init_sizes();
-	mainwindow->size( mainwindow->w(), y);
 
 	if (progStatus.tooltips) {
 		Fl_Tooltip::enable(1);
@@ -305,9 +301,18 @@ void TRACED(adjust_small_ui)
 		else mnuEmbedTabs->clear();
 	}
 
-	mainwindow->damage();
+	mainwindow->size( mainwindow->w(), btn_show_controls->y() + btn_show_controls->h() + 2);
+
+	int sW, sH;
+	sW = mainwindow->w();
+	sH = mainwindow->h();
+	mainwindow->size_range( sW, sH, sW, sH);
+
+	mainwindow->init_sizes();
 	mainwindow->redraw();
-}
+
+}  // adjust_small_ui
+
 
 void TRACED(adjust_xig_wide)
 
@@ -2442,7 +2447,7 @@ void TRACED(initRig)
 
 	main_group->hide();
 
-	grpInitializing->size(mainwindow->w(), mainwindow->h() - grpInitializing->y());
+	grpInitializing->size(mainwindow->w(), mainwindow->h());
 	grpInitializing->show();
 	grpInitializing->redraw();
 	mainwindow->damage();

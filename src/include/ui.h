@@ -31,7 +31,7 @@
 
 #define SMALL_MENUH 22
 #define SMALL_MAINW 425
-#define SMALL_MAINH 360
+#define SMALL_MAINH 320
 
 #endif
 

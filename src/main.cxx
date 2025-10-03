@@ -615,23 +615,16 @@ int main (int argc, char *argv[])
 
 	switch (progStatus.UIsize) {
 		case small_ui :
-			mainwindow->resize(
-				progStatus.mainX, progStatus.mainY,
-				mainwindow->w(), 150);//mainwindow->h());
-				grpInitializing->size(mainwindow->w(), mainwindow->h() - grpInitializing->y());
-				grpInitializing->redraw();
-				progress->position(progress->x(), grpInitializing->y() + grpInitializing->h()/2);
-				progress->redraw();
+			mainwindow->position(
+				progStatus.mainX, progStatus.mainY );
 			break;
 		case wide_ui :
 			mainwindow->resize(
-				progStatus.mainX, progStatus.mainY,
-				progStatus.mainW, btnVol->y() + btnVol->h() + 2);
+				progStatus.mainX, progStatus.mainY, progStatus.mainW, btnVol->y() + btnVol->h() + 2);
 			break;
 		case touch_ui :
 			mainwindow->resize(
-				progStatus.mainX, progStatus.mainY,
-				progStatus.mainW, TOUCH_MAINH);
+				progStatus.mainX, progStatus.mainY, progStatus.mainW, TOUCH_MAINH);
 		default :
 			break;
 	}
@@ -799,7 +792,7 @@ int parse_args(int argc, char **argv, int& idx)
 		idx++;
 		return 1;
 	}
-	if (strcasecmp("--config-dir", argv[idx]) == 0) {
+	if ((strcasecmp("--config-dir", argv[idx]) == 0) || (strcasecmp("-cd", argv[idx]) == 0)) {
 		RigHomeDir = argv[idx + 1];
 		if (RigHomeDir[RigHomeDir.length()-1] != '/')
 			RigHomeDir += '/';
