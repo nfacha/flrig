@@ -1,6 +1,20 @@
-2025-06-15  dave-w1hkj  <w1hkj@bellsouth.net>
+2025-10-05  dave-w1hkj  <w1hkj25@gmail.com>
 
-	d63c827a: Version 2.0.07
+	a26ce8a6: Version 2.0.09
+	888514f6: Reject xmlrpc mode change
+	7be04136: Windows small UI
+	461deace: gcc warnings
+	2d9aa65c: Version 2.0.8
+
+2025-07-02  for KT6D  <w1hkj@bellsouth.net>
+
+	73b7ff84: gcc 15 initialization
+
+2025-06-19  dave-w1hkj  <w1hkj@bellsouth.net>
+
+	fdc3debb: nanosleep redefinition
+	69516ea6: Service Request Processing
+	1e6b014f: Version 2.0.07
 
 2025-06-12  Arkadiusz Miśkiewicz  <arekm@maven.pl>
 

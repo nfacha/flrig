@@ -145,6 +145,21 @@ data from the computer to the transceiver is always from FLRIG.
 Flrig can service multiple xmlrpc clients.  Changes either at the transceiver, flrig,
 or one of the clients will quickly be reflected at the other entities.
 
+\section Disable Mode Changes
+
+There are times when you do not want an external application to command transceiver mode
+changes.  An example would be when operating RTTY and an external cluster client sends
+correct frequency change data but erroneously sends a mode change to USB or USB-D.  That
+might occur when the external application wronly assumes that the combination fo fldigi
+and flrig are NOT operating FSK.  The current version of LOG4OM might do that if it's
+band plan is incorrectly configured for digital/TTY.
+
+\image latex server.png "" width=5in
+\image html  server.png ""
+
+Enable the "Ignore xmlrpc mode changes" to insure that LOG4OM or any other xmlrpc client
+does not change the transceiver when that is not desired.
+
 \ref contents "Return to Contents"
 
 */
