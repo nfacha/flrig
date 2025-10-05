@@ -441,6 +441,8 @@ struct status {
 	std::string xmlrig_port;
 	bool	xmlrpc_rig;
 
+	bool	reject_xmlrpc_mode;
+
 	std::string	tcpip_port;
 	std::string	tcpip_addr;
 	int		tcpip_ping_delay;

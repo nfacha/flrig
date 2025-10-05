@@ -2469,6 +2469,10 @@ public:
 
 		std::string numode = (std::string)params[0];
 
+		if ( selrig->modes_.at(vfo->imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
+
 		try {
 			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
 				if (numode == selrig->modes_.at(imode))  {
@@ -2509,6 +2513,10 @@ public:
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
 		}
+
+		if ( selrig->modes_.at(vfo->imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
 
 		std::string numode = (std::string)params[0];
 		try {
@@ -2559,6 +2567,10 @@ public:
 			return;
 		}
 
+		if ( selrig->modes_.at(vfoA.imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
+
 		std::string numode = (std::string)params[0];
 		try {
 			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
@@ -2594,6 +2606,10 @@ public:
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
 		}
+
+		if ( selrig->modes_.at(vfoA.imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
 
 		std::string numode = (std::string)params[0];
 		try {
@@ -2634,6 +2650,10 @@ public:
 			return;
 		}
 
+		if ( selrig->modes_.at(vfoB.imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
+
 		std::string numode = (std::string)params[0];
 		try {
 			for (size_t imode = 0; imode < selrig->modes_.size(); imode++) {
@@ -2667,6 +2687,10 @@ public:
 		if (!xcvr_online || disable_xmlrpc->value()) {
 			return;
 		}
+
+		if ( selrig->modes_.at(vfoB.imode).find("RTTY") != std::string::npos)
+			if (progStatus.reject_xmlrpc_mode)
+				return;
 
 		std::string numode = (std::string)params[0];
 		try {

@@ -454,6 +454,8 @@ status progStatus = {
 	"12345",	// std::string xmlrig_port;
 	false,		// bool	xmlrpg_rig;
 
+	false,		// bool	reject_xmlrpc_mode;
+
 	"4001",		// std::string tcpip_port
 	"127.0.0.1",// std::string tcpip_address
 	50,			// int tcpip_ping_delay
@@ -1382,6 +1384,8 @@ void status::saveLastState()
 	spref.set("xmlrig_port", xmlrig_port.c_str());
 	spref.set("xmlrig_addr", xmlrig_addr.c_str());
 
+	spref.set("reject_xmlrpc_mode", reject_xmlrpc_mode);
+
 	spref.set("tcpip_port", tcpip_port.c_str());
 	spref.set("tcpip_addr", tcpip_addr.c_str());
 	spref.set("tcpip_ping_delay", tcpip_ping_delay);
@@ -2139,6 +2143,8 @@ bool status::loadXcvrState(std::string xcvr)
 		xmlrig_port = defbuffer;
 		spref.get("xmlrig_addr", defbuffer, "127.0.0.1", MAX_DEFBUFFER_SIZE);
 		xmlrig_addr = defbuffer;
+
+		if (spref.get("reject_xmlrpc_mode", i,i)) reject_xmlrpc_mode = i;
 
 		spref.get("tcpip_port", defbuffer, "4001", MAX_DEFBUFFER_SIZE);
 		tcpip_port = defbuffer;

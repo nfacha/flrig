@@ -101,6 +101,7 @@ Fl_Group *tabSERVER = (Fl_Group *)0;
 	Fl_Box *server_text = (Fl_Box *)0;
 	Fl_Input2 *inp_serverport = (Fl_Input2 *)0;
 	Fl_Box *box_fldigi_connect = (Fl_Box *)0;
+	Fl_Check_Button *btn_reject_xmlrpc_mode = (Fl_Check_Button *)0;
 
 Fl_Group *tabPOLLING = (Fl_Group *)0;
 	Fl_Check_Button *poll_smeter = (Fl_Check_Button *)0;
@@ -642,6 +643,10 @@ static void cb_server_port(Fl_Input2* o, void*) {
 	progStatus.xmlport = o->value();
 	::xmlport = atoi(progStatus.xmlport.c_str());
 	set_server_port(::xmlport);
+}
+
+static void cb_reject_xmlrpc_mode(Fl_Check_Button *btn, void *) {
+	progStatus.reject_xmlrpc_mode = btn->value();
 }
 
 static void cb_client_addr(Fl_Input2* o, void*) {
@@ -1753,6 +1758,11 @@ fldigi configuration item for xmlrpc server port."));
 	box_fldigi_connect->box(FL_DIAMOND_DOWN_BOX);
 	box_fldigi_connect->color(FL_LIGHT1);
 	box_fldigi_connect->align(Fl_Align(FL_ALIGN_RIGHT));
+
+	btn_reject_xmlrpc_mode = new Fl_Check_Button( X + 25, Y + 190, 18, 18, _("Ignore xmlrpc mode change"));
+	btn_reject_xmlrpc_mode->tooltip(_("Enable to ignore external mode changes\nsuch as LOG4OM changing mode from FSK to USB"));
+	btn_reject_xmlrpc_mode->callback((Fl_Callback*)cb_reject_xmlrpc_mode);
+	btn_reject_xmlrpc_mode->value(progStatus.reject_xmlrpc_mode);
 
 	tabSERVER->end();
 
