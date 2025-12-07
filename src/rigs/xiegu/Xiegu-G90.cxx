@@ -40,20 +40,20 @@ const char Xiegu_G90name_[] = "Xiegu-G90";
 // these are only defined in this file
 // undef'd at end of file
 
-#define NUM_MODES  5
+#define NUM_MODES  7
 
-//static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1};
-//static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1};
+//static int mode_bwA[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1};
+//static int mode_bwB[NUM_MODES] = {-1,-1,-1,-1,-1,-1,-1};
 
 enum {
-	LSB_g90, USB_g90, AM_g90, CW_g90, CWR_g90 };
+	LSB_g90, USB_g90, AM_g90, CW_g90, CWR_g90, UD_g90, LD_g90 };
 
 static std::vector<std::string>Xiegu_G90modes_;
 static const char *vXiegu_G90modes_[] = {
-"LSB", "USB", "AM", "CW", "CW-R"};
+"LSB", "USB", "AM", "CW", "CW-R", "U-D", "L-D"};
 
 static char Xiegu_G90_mode_type[] = {
-	'L', 'U', 'U', 'L', 'U', 'L' };
+	'L', 'U', 'U', 'L', 'U', 'U', 'L' };
 
 static const char Xiegu_G90_mode_nbr[] = {
 	0x00, // Select the LSB mode
@@ -61,6 +61,8 @@ static const char Xiegu_G90_mode_nbr[] = {
 	0x02, // Select the AM mode
 	0x03, // Select the CW mode
 	0x07, // Select the CW-R mode
+	0x04, // Select the U-D mode (special command)
+	0x05, // Select the L-D mode (special command)
 };
 
 static std::vector<std::string>Xiegu_G90_ssb_bws;
@@ -406,6 +408,48 @@ int RIG_Xiegu_G90::get_PTT()
 void RIG_Xiegu_G90::set_modeA(int val)
 {
 	A.imode = val;
+	// U-D and L-D modes use special command \x26
+	if (val == UD_g90) {
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd.append( post );
+		set_trace(1, "set mode A U-D");
+		waitFB("set mode A U-D");
+		isett("");
+		return;
+	}
+	if (val == LD_g90) {
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd.append( post );
+		set_trace(1, "set mode A L-D");
+		waitFB("set mode A L-D");
+		isett("");
+		return;
+	}
+	// If switching to regular USB/LSB, always disable data mode first to ensure it's off
+	if (val == USB_g90 || val == LSB_g90) {
+		// Always disable data mode when setting to regular USB/LSB
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd.append( post );
+		set_trace(1, "disable data mode A");
+		waitFB("disable data mode A");
+		isett("");
+	}
+	// Set the regular mode
 	cmd = pre_to;
 	cmd += '\x06';
 	cmd += Xiegu_G90_mode_nbr[val];
@@ -448,6 +492,37 @@ int RIG_Xiegu_G90::get_modeA()
 		return A.imode;
 	}
 
+	// Check if U-D or L-D mode is active
+	// Only check if we're in USB or LSB mode
+	if (md == USB_g90 || md == LSB_g90) {
+		// Query \x26 status to detect U-D/L-D modes
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd.append(post);
+		resp = pre_fm;
+		resp += '\x26';
+		resp += '\x00';
+		
+		get_trace(1, "get U-D/L-D status");
+		if (waitFOR(9, "get U-D/L-D status")) {
+			igett("");
+			p = replystr.rfind(resp);
+			if (p != std::string::npos && p + 8 < replystr.length()) {
+				// Check the response bytes that indicate U-D/L-D status
+				// Byte at p+6 should be 0x01 for U-D, 0x00 for L-D
+				// Also check that bytes p+7 and p+8 are 0x01 to confirm data mode is active
+				if (md == USB_g90 && replystr[p+6] == 0x01 && 
+				    replystr[p+7] == 0x01 && replystr[p+8] == 0x01) {
+					md = UD_g90;
+				} else if (md == LSB_g90 && replystr[p+6] == 0x00 && 
+				           replystr[p+7] == 0x01 && replystr[p+8] == 0x01) {
+					md = LD_g90;
+				}
+			}
+		}
+	}
+
 	A.imode = md;
 
 	return A.imode;
@@ -456,6 +531,48 @@ int RIG_Xiegu_G90::get_modeA()
 void RIG_Xiegu_G90::set_modeB(int val)
 {
 	B.imode = val;
+	// U-D and L-D modes use special command \x26
+	if (val == UD_g90) {
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd.append( post );
+		set_trace(1, "set mode B U-D");
+		waitFB("set mode B U-D");
+		isett("");
+		return;
+	}
+	if (val == LD_g90) {
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x01';
+		cmd += '\x01';
+		cmd.append( post );
+		set_trace(1, "set mode B L-D");
+		waitFB("set mode B L-D");
+		isett("");
+		return;
+	}
+	// If switching to regular USB/LSB, always disable data mode first to ensure it's off
+	if (val == USB_g90 || val == LSB_g90) {
+		// Always disable data mode when setting to regular USB/LSB
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd += '\x00';
+		cmd.append( post );
+		set_trace(1, "disable data mode B");
+		waitFB("disable data mode B");
+		isett("");
+	}
+	// Set the regular mode
 	cmd = pre_to;
 	cmd += '\x06';
 	cmd += Xiegu_G90_mode_nbr[val];
@@ -499,6 +616,39 @@ int RIG_Xiegu_G90::get_modeB()
 		checkresponse();
 		return B.imode;
 	}
+
+	// Check if U-D or L-D mode is active
+	// Only check if we're in USB or LSB mode
+	if (md == USB_g90 || md == LSB_g90) {
+		// Query \x26 status to detect U-D/L-D modes
+		cmd = pre_to;
+		cmd += '\x26';
+		cmd += '\x00';
+		cmd.append(post);
+		resp = pre_fm;
+		resp += '\x26';
+		resp += '\x00';
+		
+		get_trace(1, "get U-D/L-D status");
+		if (waitFOR(9, "get U-D/L-D status")) {
+			igett("");
+			p = replystr.rfind(resp);
+			if (p != std::string::npos && p + 8 < replystr.length()) {
+				// Check the response bytes that indicate U-D/L-D status
+				// Byte at p+6 should be 0x01 for U-D, 0x00 for L-D
+				// Also check that bytes p+7 and p+8 are 0x01 to confirm data mode is active
+				if (md == USB_g90 && replystr[p+6] == 0x01 && 
+				    replystr[p+7] == 0x01 && replystr[p+8] == 0x01) {
+					md = UD_g90;
+				} else if (md == LSB_g90 && replystr[p+6] == 0x00 && 
+				           replystr[p+7] == 0x01 && replystr[p+8] == 0x01) {
+					md = LD_g90;
+				}
+			}
+		}
+	}
+
+	B.imode = md;
 
 	return B.imode;
 }
